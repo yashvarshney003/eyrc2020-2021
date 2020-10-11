@@ -1,0 +1,4 @@
+### steps 
+1. Click the link and login through team id(nb_2139 and password :Eyrc@2020-2021)
+2. Solve the question till all cases are pass
+3.Then take ss and  program file and submit both with name Task0_img<question no> and Task0_program<question no>.extension
