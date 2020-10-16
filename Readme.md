@@ -1,10 +1,10 @@
 # Eyrc 2020-2021
 # Task 0:
 10 questions on code chef platform consist 5 question in <b> PYTHON </b> and 5 in <b> LUA</b>
-Completed on 16/10/2020
+Completed on 16/10/2020<br>
 Aman Tyagi : 4 question<br>
 Anurag Saxena : 2 question<br>
-Yash Varshney : 3   Question<br>
+Yash Varshney : 4 Question<br>
 
 
 
