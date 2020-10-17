@@ -26,10 +26,31 @@ def click_event(event, x, y, flags, params):
 if __name__=="__main__": 
   
     # reading the image 
-    img = cv2.imread('maze01.jpg', 1) 
+    img = cv2.imread('maze02.jpg', 1) 
   
     # displaying the image 
     cv2.imshow('image', img) 
+    img9 = cv2.imread('maze09.jpg', 1) 
+  
+    # displaying the image 
+    cv2.imshow('image2', img9)
+    img1 = cv2.imread('maze01.jpg', 1) 
+  
+    # displaying the image 
+    cv2.imshow('image2', img1)
+    img3 = cv2.imread('maze03.jpg', 1) 
+  
+    # displaying the image 
+    cv2.imshow('image3', img3)
+    img4 = cv2.imread('maze04.jpg', 1) 
+  
+    # displaying the image 
+    cv2.imshow('image2', img4)
+    img5 = cv2.imread('maze05.jpg', 1) 
+  
+    # displaying the image 
+    cv2.imshow('image5', img5) 
+
   
     # setting mouse hadler for the image 
     # and calling the click_event() function 

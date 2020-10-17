@@ -32,6 +32,7 @@ while True:
 	ret0,thresh0 = cv.threshold(img0,min1,max1,cv.THRESH_BINARY)
 	titles = ['img9','img8','img7','img6','img5','img4','img3','img2','img1','img0']
 	images = [thresh9,thresh8,thresh7,thresh6,thresh5,thresh4,thresh3,thresh2,thresh1,thresh0]
+	print("so this is the value",thresh1[100,200])
 
 	for i in range(10):
 		plt.subplot(5,2,i+1),plt.imshow(images[i],'gray')
@@ -45,10 +46,5 @@ while True:
    
  
  
-	if cv.waitKey(1) == 27:
- 
-	 break
- 
-cv2.destroyAllWindows()
 	
 
