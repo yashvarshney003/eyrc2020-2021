@@ -62,7 +62,7 @@ image = imutils.resize(image, height = 500)
 # convert the image to grayscale, blur it, and find edges
 # in the image
 gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-gray = cv.GaussianBlur(gray, (5, 5), 0)
+gray = cv.GaussianBlur(gray, (3, 3), 0)
 edged = cv.Canny(gray, 75, 200)
 # show the original image and the edge detected image
 print("STEP 1: Edge Detection")
@@ -88,6 +88,7 @@ cv.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
 warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
 warped = cv.cvtColor(warped, cv.COLOR_BGR2GRAY)
 cv.imshow("warped", warped)
+cv.imwrite("getPerspectiveTransform.jpg",warped)
 T = threshold_local(warped, 11, offset = 10, method = "gaussian")
 warped = (warped > T).astype("uint8") * 255
 # show the original and scanned images
