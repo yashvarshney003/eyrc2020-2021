@@ -26,15 +26,15 @@ def click_event(event, x, y, flags, params):
 if __name__=="__main__": 
   
     # reading the image 
-    img = cv.imread('getPerspectiveTransformbinaryborder.jpg', 1) 
+    img = cv.imread('borderjupyert.jpg', 1) 
   
     # displaying the image 
     cv.imshow('image', img) 
 
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    gray = cv.GaussianBlur(gray, (9, 9), 0)
-    ret2,thresh2 = cv.threshold(gray,109,255,cv.THRESH_BINARY_INV)
-    cv.imwrite("getPerspectiveTransformbinary.jpg",thresh2)
+    
+    ret2,thresh2 = cv.threshold(gray,109,255,cv.THRESH_BINARY)
+    #cv.imwrite("getPerspectiveTransformbinary.jpg",thresh2)
     
   
     # setting mouse hadler for the image 

@@ -7,7 +7,7 @@ def make_border(img):
 	
   
 # Using cv2.copyMakeBorder() method 
-	image = cv.copyMakeBorder(img, 5,5, 5, 5, cv.BORDER_CONSTANT,value=[255,255,255]) 
+	image = cv.copyMakeBorder(img, 10,10,10,10, cv.BORDER_CONSTANT,value=[0,0,0]) 
 	cv.imshow("borde",image)
 	cv.imwrite("getPerspectiveTransformbinaryborder.jpg",image)
 	return image
@@ -16,8 +16,10 @@ if __name__ == '__main__':
 	
 	thresh2 = make_border(thresh2)
 	thresh1 = thresh2
+	cv.imshow("thresh2",thresh2)
 	kernel = np.ones((5,5),np.uint8)
 	erosion = cv.erode(thresh2,kernel,iterations = 1)
+	cv.imwrite("getPerspectiveTransformbinaryborderirosion.jpg",erosion)
 	cv.imshow("erosion",erosion)
 	
 	cv.imshow("dddddd",thresh1)
@@ -27,20 +29,20 @@ if __name__ == '__main__':
 	y = 50
 
 	label = 0 
-	'''
-	for i in range(0,400,40):
+	
+	for i in range(0,erosion.size[0],40):
 		if(label==0):
 			label+=1
-			img_temp = thresh2[0:45,i:i+45]
+			img_temp = erosion[5:50,10:i+40]
 			cv.imshow("ddcccc",img_temp)
-			cv.imshow("dddddd",thresh1)
+			cv.imshow("dddddd",erosion)
 		else:
-			img_temp = thresh2[0:45,i-5:i+45]
+			img_temp = thresh2[5:50,i:i+40]
 			cv.imshow("ddcccc",img_temp)
-			cv.imshow("dddddd",thresh1)
+			cv.imshow("dddddd",erosion)
 	
 		cv.waitKey(10000//2)
-		cv.destroyAllWindows()'''
+		cv.destroyAllWindows()
 			
 
 
