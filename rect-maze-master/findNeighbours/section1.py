@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-np.set_printoptions(threshold=np.nan)
+np.set_printoptions(threshold=127)
 ## The readImage function takes a file path as argument and returns image in binary form.
 def readImage(filePath):
     #############  Add your Code here   ###############

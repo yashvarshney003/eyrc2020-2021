@@ -2,7 +2,8 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import imutils
-from skimage.filters import threshold_adaptive
+from skimage.filters import threshold_local
+def order_points(pts):
 	# initialzie a list of coordinates that will be ordered
 	# such that the first entry in the list is the top-left,
 	# the second entry is the top-right, the third is the
@@ -38,6 +39,7 @@ def four_point_transform(image, pts):
 	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
 	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
 	maxHeight = max(int(heightA), int(heightB))
+	print(f"max width{maxWidth} and max height = {maxHeight}")
 	# now that we have the dimensions of the new image, construct
 	# the set of destination points to obtain a "birds eye view",
 	# (i.e. top-down view) of the image, again specifying points
@@ -53,44 +55,47 @@ def four_point_transform(image, pts):
 	warped = cv.warpPerspective(image, M, (maxWidth, maxHeight))
 	# return the warped image
 	return warped
-image = cv.imread('maze00.jpg')
-ratio = image.shape[0] / 500.0
-orig = image.copy()
-image = imutils.resize(image, height = 500)
-# convert the image to grayscale, blur it, and find edges
-# in the image
-gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-gray = cv.GaussianBlur(gray, (5, 5), 0)
-edged = cv.Canny(gray, 75, 200)
-# show the original image and the edge detected image
-print("STEP 1: Edge Detection")
-cv.imshow("Image", image)
-cv.imshow("Edged", edged)
-cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
-cnts = imutils.grab_contours(cnts)
-cnts = sorted(cnts, key = cv.contourArea, reverse = True)[:5]
-# loop over the contours
-for c in cnts:
-	# approximate the contour
-	peri = cv.arcLength(c, True)
-	approx = cv.approxPolyDP(c, 0.02 * peri, True)
-	# if our approximated contour has four points, then we
-	# can assume that we have found our screen
-	if len(approx) == 4:
-		screenCnt = approx
-		break
-# show the contour (outline) of the piece of paper
-print("STEP 2: Find contours of paper")
-cv.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
-cv.imshow("Outline", image)
-warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
-warped = cv.cvtColor(warped, cv.COLOR_BGR2GRAY)
-cv.imshow("warped", warped)
-T = threshold_adaptive(warped, 11, offset = 10, method = "gaussian")
-warped = (warped > T).astype("uint8") * 255
-# show the original and scanned images
-print("STEP 3: Apply perspective transform")
-cv.imshow("Original", imutils.resize(orig, height = 510))
-cv.imshow("Scanned", imutils.resize(warped, height = 510))
-cv.waitKey(0)
-cv.destroyAllWindows()
+if __name__ == '__main__':
+
+	image = cv.imread('maze09.jpg')
+	ratio = image.shape[0] / 500.0
+	orig = image.copy()
+	image = imutils.resize(image, height = 500)
+	# convert the image to grayscale, blur it, and find edges
+	# in the image
+	gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+	gray = cv.GaussianBlur(gray, (3, 3), 0)
+	edged = cv.Canny(gray, 75, 200)
+	# show the original image and the edge detected image
+	print("STEP 1: Edge Detection")
+	cv.imshow("Image", image)
+	cv.imshow("Edged", edged)
+	cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+	cnts = imutils.grab_contours(cnts)
+	cnts = sorted(cnts, key = cv.contourArea, reverse = True)[:5]
+	# loop over the contours
+	for c in cnts:
+		# approximate the contour
+		peri = cv.arcLength(c, True)
+		approx = cv.approxPolyDP(c, 0.02 * peri, True)
+		# if our approximated contour has four points, then we
+		# can assume that we have found our screen
+		if len(approx) == 4:
+			screenCnt = approx
+			break
+	# show the contour (outline) of the piece of paper
+	print("STEP 2: Find contours of paper")
+	cv.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
+	#cv.imshow("Outline", image)
+	warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
+	warped = cv.cvtColor(warped, cv.COLOR_BGR2GRAY)
+	cv.imshow("warped", warped)
+	cv.imwrite("getPerspectiveTransform.jpg",warped)
+	T = threshold_local(warped, 11, offset = 10, method = "gaussian")
+	warped = (warped > T).astype("uint8") * 255
+	# show the original and scanned images
+	print("STEP 3: Apply perspective transform")
+	#cv.imshow("Original", imutils.resize(orig, height = 510))
+	#cv.imshow("Scanned", imutils.resize(warped, height = 510))
+	cv.waitKey(0)
+	cv.destroyAllWindows()

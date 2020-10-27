@@ -16,7 +16,7 @@ def click_event(event, x, y, flags, params):
         font = cv.FONT_HERSHEY_SIMPLEX 
         cv.putText(img, str(x) + ',' +
                     str(y), (x-50,y), font, 
-                    1, (255, 0, 0), 2) 
+                    1, (255,0, 0), 2) 
         cv.imshow('image', img) 
   
     # checking for right mouse clicks      
@@ -26,7 +26,7 @@ def click_event(event, x, y, flags, params):
 if __name__=="__main__": 
   
     # reading the image 
-    img = cv.imread('Shape01.png', 1) 
+    img = cv.imread('Sample7.png', 1) 
   
     # displaying the image 
     cv.imshow('image', img) 
