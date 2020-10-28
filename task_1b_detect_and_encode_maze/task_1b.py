@@ -88,7 +88,7 @@ def applyPerspectiveTransform(input_img):
 	for c in cnts:
 		peri = cv.arcLength(c, True)
 		approx = cv.approxPolyDP(c, 0.02 * peri, True)
-		print(len(approx))
+		
 
 		if len(approx) == 4:
 			screenCnt = approx
@@ -168,7 +168,7 @@ def detectMaze(warped_img):
 		if(i==0):
 			iiicrement = 44
 		else:
-			iiicrement = 40
+			iiicrement = 43
 		for j in range(0,resized_image.shape[1],jincrement):
 				
 				if(j==0):
