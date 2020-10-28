@@ -76,7 +76,48 @@ def applyPerspectiveTransform(input_img):
 	warped_img = None
 
 	##############	ADD YOUR CODE HERE	##############
+	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+	gray = cv.GaussianBlur(gray, (3,3), 2)
+	edged = cv.Canny(gray, 50, 200)
+	cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)	
+	if len(cnts) == 2:
+		cnts = cnts[0]
+	elif len(cnts) == 3:
+		cnts = cnts[1]
+	cnts = sorted(cnts, key = cv.contourArea, reverse = True)
+	for c in cnts:
+		peri = cv.arcLength(c, True)
+		approx = cv.approxPolyDP(c, 0.02 * peri, True)
+		print(len(approx))
+
+		if len(approx) == 4:
+			screenCnt = approx
+			break
+	pts = screenCnt.reshape(4, 2)
 	
+	rect = np.zeros((4, 2), dtype = "float32")
+
+	s = pts.sum(axis = 1)
+	rect[0] = pts[np.argmin(s)]
+	rect[2] = pts[np.argmax(s)]
+
+	diff = np.diff(pts, axis = 1)
+	rect[1] = pts[np.argmin(diff)]
+	rect[3] = pts[np.argmax(diff)]
+	(tl, tr, br, bl) = rect
+
+	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+	maxWidth = max(int(widthA), int(widthB))
+
+	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+	maxHeight = max(int(heightA), int(heightB))
+	#print(f"max width{maxWidth} and max height = {maxHeight}")
+
+	dst = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
+	M = cv.getPerspectiveTransform(rect, dst)
+	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
 	
 
 	##################################################
@@ -109,12 +150,112 @@ def detectMaze(warped_img):
 	maze_array = []
 
 	##############	ADD YOUR CODE HERE	##############
+	warped_img_gray = cv.cvtColor(warped_img, cv.COLOR_BGR2GRAY)
+	warped_img_gray = cv.GaussianBlur(warped_img_gray,(5,5),0)
+	thresh = cv.copyMakeBorder(warped_img_gray,5,5,5,5, cv.BORDER_CONSTANT,value=[0,0,0]) 
+	ret,thresh = cv.threshold(warped_img_gray,145,255,cv.THRESH_BINARY)
+	
+	resized_image = cv.resize(thresh, (400, 400)) 
+	jincrement = resized_image.shape[0]//10
+	iincrement = resized_image.shape[1]//10
+	i=0 
+	array = []
+	ret2,resized_image = cv.threshold(resized_image,100,255,cv.THRESH_BINARY_INV)
+	
+	for i in range(0,resized_image.shape[0],iincrement):
+		
+		array.append([])
+		if(i==0):
+			iiicrement = 44
+		else:
+			iiicrement = 40
+		for j in range(0,resized_image.shape[1],jincrement):
+				
+				if(j==0):
+					
+					img_temp = resized_image[i:i+iiicrement,j:j+44]
+				else:
+					img_temp = resized_image[i:i+iiicrement,j-5:j+44]
+					
+				north = 0
+				west = 0
+				east = 0
+				south = 0
+				x_center = img_temp.shape[1]//2
+				y_center = img_temp.shape[0]//2
+				
+				
+				
+				north_dir = 0
+				while(y_center - north_dir >= 0):
+					if(img_temp[y_center-north_dir, x_center] == 255):
+						
+						north = 2
+						break
+					north_dir +=1
+					
+					
+				south_dir = 0
+				while(y_center + south_dir  < img_temp.shape[0]):
+					if(img_temp[y_center+south_dir,x_center] == 255):
+						south = 8
+						
+						break
+					south_dir+=1
+					
+					
+				east_dir = 0
+				while(x_center + east_dir <  img_temp.shape[1] ):
+					if(img_temp[y_center,x_center+east_dir] == 255  or img_temp[15,x_center+east_dir]):
+						east = 4
+						break
+					east_dir+=1
+					
+				west_dir =0
+				while(x_center-west_dir >= 0):
+					if(img_temp[y_center,x_center-west_dir] == 255):
+								west =1
+								break
+					west_dir +=1
+				
+				
+
+				
+
+
+				
+
+
+
+				array[i//40].append(north + south + east + west)
+				
+
+
+				
+				
+				
+
+
+		
+
+	
+				
+				
+
+
+
+
+
+
+
+
+
 	
 	
 	
 	##################################################
 
-	return maze_array
+	return array
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
@@ -171,7 +312,7 @@ if __name__ == "__main__":
 	csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 	
 	# read the 'maze00.jpg' image file
-	input_img = cv2.imread(img_file_path)
+	input_img = cv.imread(img_file_path)
 
 	# get the resultant warped maze image after applying Perspective Transform
 	warped_img = applyPerspectiveTransform(input_img)
@@ -189,9 +330,9 @@ if __name__ == "__main__":
 			# writes the encoded maze array to the csv file
 			writeToCsv(csv_file_path, maze_array)
 
-			cv2.imshow('warped_img_0' + str(file_num), warped_img)
-			cv2.waitKey(0)
-			cv2.destroyAllWindows()
+			cv.imshow('warped_img_0' + str(file_num), warped_img)
+			cv.waitKey(0)
+			cv.destroyAllWindows()
 		
 		else:
 
@@ -219,7 +360,7 @@ if __name__ == "__main__":
 			csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 			
 			# read the image file
-			input_img = cv2.imread(img_file_path)
+			input_img = cv.imread(img_file_path)
 
 			# get the resultant warped maze image after applying Perspective Transform
 			warped_img = applyPerspectiveTransform(input_img)
@@ -237,9 +378,9 @@ if __name__ == "__main__":
 					# writes the encoded maze array to the csv file
 					writeToCsv(csv_file_path, maze_array)
 
-					cv2.imshow('warped_img_0' + str(file_num), warped_img)
-					cv2.waitKey(0)
-					cv2.destroyAllWindows()
+					cv.imshow('warped_img_0' + str(file_num), warped_img)
+					cv.waitKey(0)
+					cv.destroyAllWindows()
 				
 				else:
 
