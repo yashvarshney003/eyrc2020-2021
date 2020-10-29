@@ -40,5 +40,5 @@ except ImportError:
 if __name__ == '__main__':
 	task_1b_cardinal.main()
 
-	cardinal.main()
+	
 

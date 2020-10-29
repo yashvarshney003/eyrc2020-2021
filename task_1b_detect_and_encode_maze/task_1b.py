@@ -77,7 +77,8 @@ def applyPerspectiveTransform(input_img):
 
 	##############	ADD YOUR CODE HERE	##############
 	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
-	gray = cv.GaussianBlur(gray, (3,3), 2)
+	gray = cv.GaussianBlur(gray, (9,9), 2)
+	#(3,3)
 	edged = cv.Canny(gray, 50, 200)
 	cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)	
 	if len(cnts) == 2:
@@ -87,7 +88,8 @@ def applyPerspectiveTransform(input_img):
 	cnts = sorted(cnts, key = cv.contourArea, reverse = True)
 	for c in cnts:
 		peri = cv.arcLength(c, True)
-		approx = cv.approxPolyDP(c, 0.02 * peri, True)
+		approx = cv.approxPolyDP(c, 0.05 * peri, True)
+		#0.02
 		
 
 		if len(approx) == 4:
@@ -118,6 +120,7 @@ def applyPerspectiveTransform(input_img):
 	dst = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
 	M = cv.getPerspectiveTransform(rect, dst)
 	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
+	cv.imshow("warped",warped_img)
 	
 
 	##################################################
@@ -166,16 +169,18 @@ def detectMaze(warped_img):
 		
 		array.append([])
 		if(i==0):
+			y = i
 			iiicrement = 44
 		else:
+			y = i-1
 			iiicrement = 43
 		for j in range(0,resized_image.shape[1],jincrement):
 				
 				if(j==0):
 					
-					img_temp = resized_image[i:i+iiicrement,j:j+44]
+					img_temp = resized_image[y:y+iiicrement,j:j+44]
 				else:
-					img_temp = resized_image[i:i+iiicrement,j-5:j+44]
+					img_temp = resized_image[y:y+iiicrement,j-5:j+44]
 					
 				north = 0
 				west = 0

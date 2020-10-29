@@ -159,6 +159,10 @@ maze09_ideal = [
   5, 5, 13, 5, 9, 12, 5, 5, 5, 5], [5, 9, 6, 9, 6, 3, 12, 5, 5, 5],
  [
   5, 7, 9, 6, 5, 9, 10, 12, 5, 5], [9, 8, 14, 9, 8, 10, 10, 10, 12, 13]]
+
+
+
+  
 local_vars = locals()
 
 def random_string(length=10, char=string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation):
