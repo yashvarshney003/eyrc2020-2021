@@ -17,6 +17,11 @@
 *****************************************************************************************
 '''
 
+def show(name, image):
+    cv2.imshow(name, image)
+    cv2.waitKey(0)
+    if cv2.waitKey(0) & 0xFF==ord(' '):
+        cv2.destroyAllWindows()
 # Team ID:          NB_2139
 # Author List:      Aman Tyagi, Yash Varshney
 # Filename:         task_1a_part1.py
@@ -73,6 +78,7 @@ def line_intersect(Ax1, Ay1, Ax2, Ay2, Bx1, By1, Bx2, By2):
 def rect(c):
     perimeter = cv2.arcLength(c,True)
     approx = cv2.approxPolyDP(c,0.01*perimeter,True)
+    print(f"approx{approx}")
     if(len(approx)== 4):
         pts = approx.reshape(4, 2)
 
@@ -92,18 +98,18 @@ def rect(c):
         third_side = round(np.sqrt((x3 - x4)**2 + (y3 - y4)**2))
         fourth_side = round(np.sqrt((x4 - x1)**2 + (y4 - y1)**2))
         op_side_eq= (-2.0<=round(abs(first_side-third_side),1)<=2.0 and -2.0<=round(abs(second_side-fourth_side),1)<=2.0)
-        all_sides_cong=-1.0<=((abs(first_side-second_side)-abs(third_side-fourth_side))<=1.0)
-        
+        all_sides_cong=((abs(first_side+third_side)-abs(second_side+fourth_side)) in np.arange(-5,5))
+
         #If aspect ratio is 1 or not. Useful to distinguish between Square and Rhombus
-        ar = (0.90<=round(abs(second_side/first_side),1) <=1.00 and 0.90<=round(abs(fourth_side/third_side),1) <=1.00)
-        
+#         ar= op_side_eq and all_sides_cong
         #To check if diagonals are congruent by checking distance of four vertices from the intersection point
         int_point=line_intersect(x1,y1,x3,y3,x2,y2,x4,y4)
         first_diag_1 = round(np.sqrt((int_point[0] - x1)**2 + (int_point[1] - y1)**2))
         first_diag_2 = round(np.sqrt((int_point[0] - x3)**2 + (int_point[1] - y3)**2))
         second_diag_1 = round(np.sqrt((int_point[0] - x2)**2 + (int_point[1] - y2)**2))
         second_diag_2 = round(np.sqrt((int_point[0] - x4)**2 + (int_point[1] - y4)**2))
-        cong_diag=(-2<=abs(first_diag_1-first_diag_2)<=2  and -2<=abs(second_diag_1-second_diag_2)<=2)
+#       Keeping an error of +-5 pixels in calculation and detection
+        cong_diag=(-5<=abs(first_diag_1-first_diag_2)<=5  and -5<=abs(second_diag_1-second_diag_2)<=5)
         
         #To find if opposite angles are equal
         line_1 = (abs(x2-x1), abs(y2-y1))
@@ -118,13 +124,14 @@ def rect(c):
         angle2 = round(np.degrees(np.arccos(dot_product_2)))
         angle3 = round(180-np.degrees(np.arccos(dot_product_3)))
         angle4 = round(np.degrees(np.arccos(dot_product_4)))
+        
         op_angle = -1.0<=(abs(angle3-angle1)-abs(angle4-angle2))<=1.0
         
         #To find if all angles are 90 degree
         angle=(abs(angle1)==abs(angle2)==abs(angle3)==abs(angle4)==90)
         
         #return list containing bool values of required properties
-        ret_value =  [angle, op_angle, cong_diag,ar,op_side_eq, all_sides_cong]
+        ret_value =  [angle, op_angle, cong_diag,op_side_eq, all_sides_cong]
         return ret_value
     
 '''         Name: detect
@@ -136,13 +143,14 @@ def detect(c):
         
         # initialize the shape name and approximate the contour
         peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.009 * peri, True)
-        M = cv2.moments(approx)
+        approx = cv2.approxPolyDP(c, 0.001 * peri, True)
+        M = cv2.moments(c)
         cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
         cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
         shape = "unidentified" #Initialize a variable of string type
     
-        area = cv2.contourArea(c)
+        area = cv2.contourArea(approx)
+        #print(f" length of approx {approx}")
         
         
         #Triangle if it shape has three sides
@@ -151,21 +159,22 @@ def detect(c):
         
         elif len(approx) == 4:
             #Call rect() to detect the shape
-            angle,op_angle, cong_diag,ar,op_side_eq,all_sides_cong = rect(c)
+            angle,op_angle,cong_diag,op_side_eq,all_sides_cong = rect(c)
+
             #If opposite angles and sides are equal and diagonals are congruent, it must be a parallelogram
             if op_angle and op_side_eq and cong_diag:
                 #If all angles and sides are equal, aspect ratio is 1 and diagonals are congruent, it must be a square
-                if angle and ar and cong_diag and all_sides_cong:
+                if angle and cong_diag and all_sides_cong:
                     shape='Square'
-                elif ar and not(angle) or not(cong_diag) and all_sides_cong:
+                elif not(angle) or not(cong_diag) and all_sides_cong:
                     #If aspect ratio is not 1 and angles are not 90, it must be a rhombus
                     shape = 'Rhombus'
                 #Otherwise, its a parallelogram
-                elif not(ar):
+                else:
                     shape = 'Parallelogram'
             #If diagonals are not congruent, aspect ratio is not 1, opposite angles are not equal and
             #all angles are not 90 degrees, it is a trapezium
-            elif not(cong_diag) and not(ar) and not(angle) or not(op_angle):
+            elif not(cong_diag) and not(angle) or not(op_angle):
                 shape='Trapezium'
             #Otherwise, it is a quadrilateral
             else: shape='Quadrilateral'
@@ -188,38 +197,51 @@ def detect(c):
         detect shapes in the image and writes the required output in the shapes dictionary'''
 
 def process(imageFrame):
-    #Convert BGR image to HSv
+    #Convert BGR image to HSV
+    imageFrame = cv2.GaussianBlur(imageFrame,(5,5),cv2.BORDER_TRANSPARENT)
     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
     
     #To create a mask for red colour
     red_lower = np.array([0, 50, 50]) 
     red_upper = np.array([10, 255, 255]) 
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
-    kernal = np.ones((5, 5), "uint8")
-    red_mask = cv2.dilate(red_mask, kernal) 
-#     res_red = cv2.bitwise_and(imageFrame, imageFrame,  mask = red_mask)
+    kernal = np.ones((5, 5))
+#     red_mask = cv2.dilate(red_mask, kernal)
+#     show('red mask',red_mask)
+#     print(red_mask.ndim, 'ndim')
+#     print('len', len(red_mask))
+    red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
+
+    
+    gray_blur= cv2.Canny(red_gray,100,255)
+#     show('redgray', red_gray)
+#     show('gray_blur', gray_blur)
     #Create a mask for green colour
     green_lower = np.array([25, 52, 72], np.uint8) 
     green_upper = np.array([102, 255, 255], np.uint8) 
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
-    kernal = np.ones((5, 5), "uint8")
-    green_mask = cv2.dilate(green_mask, kernal) 
-#     res_green = cv2.bitwise_and(imageFrame, imageFrame, mask = green_mask)
+    kernal = np.ones((5, 5))
+    green_mask = cv2.dilate(green_mask, kernal)
+    green_gray=cv2.threshold(green_mask, 250,255, cv2.THRESH_BINARY)[1]
+    gray_blur_green = cv2.Canny(green_gray,100,255)
+    
+#     show('greengray', green_gray)
+#     show('gray_blur_green', gray_blur_green)
     
     #Create a mask for blue colour
-    blue_lower = np.array([94, 80, 20], np.uint8) 
-    blue_upper = np.array([120, 255, 255], np.uint8) 
+    blue_lower = np.array([94, 20, 0], np.uint8) 
+    blue_upper = np.array([140,255 ,255], np.uint8) 
     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-    kernal = np.ones((5, 5), "uint8")  
-    blue_mask = cv2.dilate(blue_mask, kernal) 
-    cv2.imshow("bluemask",blue_mask)
-    cv2.waitKey(0)
-    if cv2.waitKey(0) & 0xFF==ord('q'):
-                cv2.destroyAllWindows()
-#     res_blue = cv2.bitwise_and(imageFrame, imageFrame, mask = blue_mask)
+    kernal = np.ones((5, 5))  
+    blue_mask = cv2.dilate(blue_mask, kernal)
+    blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
+    gray_blur_blue= cv2.Canny(blue_gray,100,255)
+    
+#     show('bluegray', blue_gray)
+#     show('gray_blur_blue', gray_blur_blue)
     
     #Find red contours in the image
-    cnts= cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    cnts= cv2.findContours(gray_blur , cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
       
     #If red contours found
     if type(cnts[-1]) !=type(None) :
@@ -232,10 +254,10 @@ def process(imageFrame):
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs to the dictionary
-            shapes[ret_values[0]]=['red',ret_values[1], ret_values[2], ret_values[3]]
+            shapes[ret_values[0]]=['red', ret_values[1], ret_values[2], ret_values[3]]
     
     #Find green contours n the image
-    cnts = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     #If green contours found
     if type(cnts[-1]) !=type(None) :
@@ -251,7 +273,7 @@ def process(imageFrame):
 
 
     #Find blue contours in the image
-    cnts= cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     #If blue contours found
     if type(cnts[-1]) !=type(None) :
@@ -319,7 +341,7 @@ if __name__ == '__main__':
     
     print('\n============================================')
     
-#     scan_image(img_file_path)
+    scan_image(img_file_path)
 
     try:
         print('\nRunning scan_image function with ' + img_file_path + ' as an argument')
@@ -343,7 +365,7 @@ if __name__ == '__main__':
 
     if choice == 'y':
 
-        file_count = 3
+        file_count = 2
         
         for file_num in range(file_count):
 
