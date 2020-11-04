@@ -26,7 +26,7 @@ def click_event(event, x, y, flags, params):
 if __name__=="__main__": 
   
     # reading the image 
-    img = cv.imread('Shape01.png', 1) 
+    img = cv.imread('borderjupyert.jpg', 1) 
   
     # displaying the image 
     cv.imshow('image', img) 

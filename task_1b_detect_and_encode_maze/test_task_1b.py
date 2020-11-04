@@ -27,6 +27,7 @@
 
 # Import test module
 try:
+	import cardinal
 	import task_1b_cardinal
 
 except ImportError:
@@ -37,6 +38,7 @@ except ImportError:
 
 # Main function
 if __name__ == '__main__':
-
 	task_1b_cardinal.main()
+
+	
 
