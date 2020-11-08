@@ -23,6 +23,16 @@ Store the details of the these detected shapes in a dictionary in the same order
 
 1c> Use OpenCV techniques to detect the maze in the above given image and convert it into a 2D maze array with appropriate Cell Numbers
 
+# Task2 :
+(1) Task 2A
+This task is based on Image Processing using Vision Sensors in CoppeliaSim.<br>
+Teams should apply the concepts learnt in Task 1A and 1B and build a Python Remote API file to find the correct Shape, Color, Centroid X and Centroid Y of the ball(s) in the dynamic CoppeliaSim scene using a Vision Sensor.<br>
+
+
+(2) Task 2B<br>
+This task is based on maze generation in CoppeliaSim using the output of Task 1B.<br>
+Teams should use python remote API to transmit the encoded maze array (output of task 1b) to a Lua script in CoppeliaSim scene to generate walls of the maze.<br>
+
 
 
 
