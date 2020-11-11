@@ -295,17 +295,20 @@ def scan_image(img_file_path):
     shapes={}
 
     #Read the image
-    image = cv2.imread(img_file_path)
-    
-    #Call the process function to detect shapes and other required outputs
-    process(image)
-#     cv2.imshow("Image", resized)
-#     cv2.waitKey(0)
-#     if cv2.waitKey(0) & 0xFF == ord('q'):
-#         cv2.destroyAllWindows()
-    #Sort the dictionary in descending order of area of the shape
-    shapes=dict(sorted(shapes.items(), key=lambda x:x[1][1],reverse=True))
-    return shapes
+    if type(img_file_path) == type(str):
+        img_file_path = cv2.imread(img_file_path)
+    else:
+        
+        
+        #Call the process function to detect shapes and other required outputs
+        process(img_file_path)
+    #     cv2.imshow("Image", resized)
+    #     cv2.waitKey(0)
+    #     if cv2.waitKey(0) & 0xFF == ord('q'):
+    #         cv2.destroyAllWindows()
+        #Sort the dictionary in descending order of area of the shape
+        shapes=dict(sorted(shapes.items(), key=lambda x:x[1][1],reverse=True))
+        return shapes
 
 
 # NOTE: YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION

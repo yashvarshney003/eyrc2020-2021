@@ -18,7 +18,7 @@
 '''
 
 # Team ID:          [2139]
-# Author List:      [ Yash Varshney]
+# Author List:      [ Yash Varshney,Aman Tyagi]
 # Filename:         task_2a.py
 # Functions:        init_remote_api_server, start_simulation, get_vision_sensor_image, transform_vision_sensor_image,
 # 					stop_simulation, exit_remote_api_server
@@ -210,6 +210,7 @@ def get_vision_sensor_image():
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
+	from task_1a_part1 import scan_image
 
 	"""
 	Purpose:
@@ -245,11 +246,16 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	#print(vision_sensor_image)
 
 	##############	ADD YOUR CODE HERE	##############
+	# print(type(vision_sensor_image))
 	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
-	print(vision_sensor_image)
-	vision_sensor_image = np.reshape(1,1,3)
-	print(vision_sensor_image)
-	
+
+	# print(type(vision_sensor_image))
+	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024,3))
+	# print(vision_sensor_image.shape)
+	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
+	transformed_image = cv2.flip(transformed_image, 0)
+	sha = scan_image(transformed_image)	
+	print(sha)
 
 	
 	
