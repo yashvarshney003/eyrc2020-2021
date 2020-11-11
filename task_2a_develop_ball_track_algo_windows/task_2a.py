@@ -36,6 +36,7 @@ import numpy as np
 import cv2
 import os, sys
 import traceback
+import time
 ##############################################################
 
 
@@ -142,6 +143,9 @@ def start_simulation():
 
 	##############	ADD YOUR CODE HERE	##############
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
+
+	print(f"cmd time {return_code}")
+	
 	
 
 	##################################################
@@ -185,9 +189,20 @@ def get_vision_sensor_image():
 
 	##############	ADD YOUR CODE HERE	##############
 	
-	return_code,handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handle,0,sim.simx_opmode_buffer)
-	print(f"{image_resolution} and {return_code}")
+	return_code,handel = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
+	print(f"{return_code} and {handel}")
+
+	
+	
+	
+
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
+	
+	
+	
+	
+	
+	
 
 	##################################################
 
@@ -227,8 +242,15 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	"""
 
 	transformed_image = None
+	#print(vision_sensor_image)
 
 	##############	ADD YOUR CODE HERE	##############
+	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
+	print(vision_sensor_image)
+	vision_sensor_image = np.reshape(1,1,3)
+	print(vision_sensor_image)
+	
+
 	
 	
 
