@@ -38,7 +38,7 @@ import os, sys
 import traceback
 import time
 #Remove this
-import matplotlib.pyplot as plt
+
 ##############################################################
 
 
@@ -146,7 +146,7 @@ def start_simulation():
 	##############	ADD YOUR CODE HERE	##############
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
 
-	print(f"cmd time {return_code}")
+	#print(f"cmd time {return_code}")
 	
 	
 
@@ -192,8 +192,7 @@ def get_vision_sensor_image():
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code,handel = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
-	print(f"{return_code} and {handel}")
-
+	
 	
 	
 	
@@ -212,7 +211,7 @@ def get_vision_sensor_image():
 
 
 def transform_vision_sensor_image(vision_sensor_image, image_resolution):
-	from task_1a_part1 import scan_image
+	
 
 	"""
 	Purpose:

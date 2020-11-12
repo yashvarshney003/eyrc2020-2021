@@ -82,9 +82,7 @@ def applyPerspectiveTransform(input_img):
 	ret,thresh1 = cv.threshold(gray,230,255,cv.THRESH_BINARY_INV)
 	#Applying Canny Edge Detection
 	edged = cv.Canny(gray, 50, 200)
-	cv.imshow('transformed image', edged)
-	cv.waitKey(0)
-	cv.destroyAllWindows()
+	
 
 					
 
