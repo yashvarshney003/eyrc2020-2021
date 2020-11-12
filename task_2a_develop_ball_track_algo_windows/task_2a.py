@@ -37,6 +37,8 @@ import cv2
 import os, sys
 import traceback
 import time
+#Remove this
+import matplotlib.pyplot as plt
 ##############################################################
 
 
@@ -254,8 +256,9 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	# print(vision_sensor_image.shape)
 	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
 	transformed_image = cv2.flip(transformed_image, 0)
-	sha = scan_image(transformed_image)	
-	print(sha)
+	#task_1a_part1.show("name",transformed_image)
+
+	
 
 	
 	
@@ -297,7 +300,7 @@ def stop_simulation():
 
 	##############	ADD YOUR CODE HERE	##############
 	
-	
+	return_code = sim.simxStopSimulation(client_id,sim.simx_opmode_oneshot)
 
 	##################################################
 
@@ -331,7 +334,7 @@ def exit_remote_api_server():
 	global client_id
 
 	##############	ADD YOUR CODE HERE	##############
-	
+	sim.simxFinish(client_id)
 	
 
 	##################################################

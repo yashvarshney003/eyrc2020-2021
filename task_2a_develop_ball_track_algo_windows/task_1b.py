@@ -79,11 +79,15 @@ def applyPerspectiveTransform(input_img):
 	#Conversion into GrayScale
 	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
 
-	#Applying Gaussian Blur 
-	gray = cv.GaussianBlur(gray, (9,9), 2)
-
+	ret,thresh1 = cv.threshold(gray,230,255,cv.THRESH_BINARY_INV)
 	#Applying Canny Edge Detection
 	edged = cv.Canny(gray, 50, 200)
+	cv.imshow('transformed image', edged)
+	cv.waitKey(0)
+	cv.destroyAllWindows()
+
+					
+
 
 
 	#Finding Contours 
@@ -125,17 +129,15 @@ def applyPerspectiveTransform(input_img):
 
 	#Finding Maximum width
 
-	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-	maxWidth = max(int(widthA), int(widthB))
+	
+	maxWidth = 1280
 
 
 
 	#Findinf Maximum height
 
-	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-	maxHeight = max(int(heightA), int(heightB))
+	
+	maxHeight = 1280
 
 	#Destination Array of ROI
 	
