@@ -149,7 +149,7 @@ def detect(c):
         cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
         shape = "unidentified" #Initialize a variable of string type
     
-        area = cv2.contourArea(approx)
+        #area = cv2.contourArea(approx)
         #print(f" length of approx {approx}")
         
         
@@ -188,7 +188,7 @@ def detect(c):
         else:
             shape = "Circle"
         #return area rounded off to 1 decimal place
-        return shape, float(round(int(area),1)), cX, cY
+        return shape,cX, cY
     
 '''     Name: Process
         Inputs: Input image
@@ -254,7 +254,7 @@ def process(imageFrame):
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs to the dictionary
-            shapes[ret_values[0]]=['red', ret_values[1], ret_values[2], ret_values[3]]
+            shapes[ret_values[0]]=['red',ret_values[1], ret_values[2]]
     
     #Find green contours n the image
     cnts = cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -269,7 +269,7 @@ def process(imageFrame):
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs in the dictionary
-            shapes[ret_values[0]]=['green',ret_values[1], ret_values[2], ret_values[3]]
+            shapes[ret_values[0]]=['green', ret_values[1], ret_values[2]]
 
 
     #Find blue contours in the image
@@ -284,7 +284,7 @@ def process(imageFrame):
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs in the dictionary
-            shapes[ret_values[0]]=['blue',ret_values[1], ret_values[2], ret_values[3]]
+            shapes[ret_values[0]]=['blue',ret_values[1], ret_values[2]]
 
 
 ##############################################################
@@ -308,6 +308,8 @@ def scan_image(img_file_path):
     #         cv2.destroyAllWindows()
         #Sort the dictionary in descending order of area of the shape
         shapes=dict(sorted(shapes.items(), key=lambda x:x[1][1],reverse=True))
+        shapes ={}
+        print(shapes)
         return shapes
 
 

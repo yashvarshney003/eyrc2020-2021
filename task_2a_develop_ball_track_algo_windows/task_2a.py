@@ -56,6 +56,7 @@ except Exception:
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
+iteration = 1
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -144,9 +145,14 @@ def start_simulation():
 	return_code = 0
 
 	##############	ADD YOUR CODE HERE	##############
+	
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
+	'''return_code,pingtime = sim.simxGetPingTime(client_id)
+	print(return_code,pingtime)'''
+	
 
 	#print(f"cmd time {return_code}")
+	print(return_code)
 	
 	
 
@@ -184,20 +190,32 @@ def get_vision_sensor_image():
 	"""
 
 	global client_id
+	global iteration
 
 	vision_sensor_image = []
 	image_resolution = []
 	return_code = 0
+	print("called")
+	print(f"iteration{iteration}")
+	iteration+=1
 
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code,handel = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
+	time.sleep(2)
 	
 	
-	
-	
-
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
+	# Now retrieve streaming data (i.e. in a non-blocking fashion):
+	startTime = time.time()
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming)# Initialize streaming
+	while time.time()-startTime < 5:
+		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming) # Try to retrieve the streamed data
+		if return_code == sim.simx_return_ok : # After initialization of streaming, it will take a few ms before the first value arrives, so check the return code
+			print ('resolution: ',image_resolution)
+			#print(vision_sensor_image)
+			break 
+		time.sleep(0.005)
+		
 	
 	
 	
@@ -255,6 +273,10 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	# print(vision_sensor_image.shape)
 	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
 	transformed_image = cv2.flip(transformed_image, 0)
+	'''cv2.imshow('transformed image', transformed_image)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+'''
 	#task_1a_part1.show("name",transformed_image)
 
 	
@@ -398,6 +420,8 @@ if __name__ == "__main__":
 	print('\nConnection to CoppeliaSim Remote API Server initiated.')
 	print('Trying to connect to Remote API Server...')
 
+	i = 0 
+
 	try:
 		client_id = init_remote_api_server()
 
@@ -458,7 +482,13 @@ if __name__ == "__main__":
 
 					# Get the resultant warped transformed vision sensor image after applying Perspective Transform
 					try:
+
 						warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+						
+						cv2.imshow('warped_img',warped_img)
+						cv2.waitKey(0)
+						cv2.destroyAllWindows()
+						#cv.imwrite("Result\f"{i}",)
 						
 						if (type(warped_img) is np.ndarray):
 
