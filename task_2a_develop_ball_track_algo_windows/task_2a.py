@@ -147,9 +147,7 @@ def start_simulation():
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
-	'''return_code,pingtime = sim.simxGetPingTime(client_id)
-	print(return_code,pingtime)'''
-	
+	sim.simxGetPingTime(client_id)
 
 	#print(f"cmd time {return_code}")
 	print(return_code)
@@ -322,6 +320,11 @@ def stop_simulation():
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code = sim.simxStopSimulation(client_id,sim.simx_opmode_oneshot)
+	sim.simxGetPingTime(client_id)
+	if ((return_code == sim.simx_return_novalue_flag) or (return_code == sim.simx_return_ok)):
+											print('\nSimulation stopped correctly.')
+										
+	
 
 	##################################################
 

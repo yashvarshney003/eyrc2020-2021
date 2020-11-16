@@ -1,0 +1,4 @@
+simxGetLastCmdTime
+simxGetPingTime
+simxstart
+simxStartSimulation

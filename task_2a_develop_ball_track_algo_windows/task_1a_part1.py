@@ -197,7 +197,9 @@ def detect(c):
         detect shapes in the image and writes the required output in the shapes dictionary'''
 
 def process(imageFrame):
+    shapes = {}
     #Convert BGR image to HSV
+    
     imageFrame = cv2.GaussianBlur(imageFrame,(5,5),cv2.BORDER_TRANSPARENT)
     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
     
@@ -253,8 +255,19 @@ def process(imageFrame):
             cnts = cnts[1]
         for i in cnts:
             ret_values=detect(i)
+            if( not shapes ):
             #Add detected shape and corresponding outputs to the dictionary
-            shapes[ret_values[0]]=['red',ret_values[1], ret_values[2]]
+                shapes['Circle']=['red',ret_values[1], ret_values[2]]
+            else:
+                list1 = shapes['Circle']
+                shapes ={}
+                shapes['Circle'] = []
+                shapes['Circle'].append(list1)
+                
+                shapes['Circle'].append(['red',ret_values[1], ret_values[2]])
+
+
+
     
     #Find green contours n the image
     cnts = cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -269,7 +282,7 @@ def process(imageFrame):
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs in the dictionary
-            shapes[ret_values[0]]=['green', ret_values[1], ret_values[2]]
+            shapes['Circle']=['green', ret_values[1], ret_values[2]]
 
 
     #Find blue contours in the image
@@ -284,33 +297,33 @@ def process(imageFrame):
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs in the dictionary
-            shapes[ret_values[0]]=['blue',ret_values[1], ret_values[2]]
-
-
+            if( not shapes ):
+            #Add detected shape and corresponding outputs to the dictionary
+                shapes['Circle']=['blue',ret_values[1], ret_values[2]]
+            else:
+                list1 = shapes['Circle']
+                shapes ={}
+                shapes['Circle'] = []
+                shapes['Circle'].append(['blue',ret_values[1], ret_values[2]])
+                shapes['Circle'].append(list1)
 ##############################################################
+    return shapes
 
 
 def scan_image(img_file_path):
     global shapes
     shapes={}
 
-    #Read the image
-    if type(img_file_path) == type(str):
-        img_file_path = cv2.imread(img_file_path)
-    else:
+    
         
         
-        #Call the process function to detect shapes and other required outputs
-        process(img_file_path)
-    #     cv2.imshow("Image", resized)
-    #     cv2.waitKey(0)
-    #     if cv2.waitKey(0) & 0xFF == ord('q'):
-    #         cv2.destroyAllWindows()
-        #Sort the dictionary in descending order of area of the shape
-        shapes=dict(sorted(shapes.items(), key=lambda x:x[1][1],reverse=True))
-        shapes ={}
-        print(shapes)
-        return shapes
+        
+    shapes = process(img_file_path)
+    
+    
+        
+    print(shapes)
+    return shapes
 
 
 # NOTE: YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
