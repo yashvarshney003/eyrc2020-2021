@@ -488,10 +488,10 @@ if __name__ == "__main__":
 
 						warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 						
-						cv2.imshow('warped_img',warped_img)
+						'''cv2.imshow('warped_img',warped_img)
 						cv2.waitKey(0)
 						cv2.destroyAllWindows()
-						#cv.imwrite("Result\f"{i}",)
+						#cv.imwrite("Result\f"{i}",)'''
 						
 						if (type(warped_img) is np.ndarray):
 

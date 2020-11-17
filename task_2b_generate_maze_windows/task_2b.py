@@ -24,7 +24,7 @@
 # 					transform_vision_sensor_image, send_data
 # 					[ Comma separated list of functions in this file ]
 # Global variables:	client_id
-# 					[ List of global variables defined in this file ]
+# 					[ List of global variables defined in this file ] 
 
 
 ####################### IMPORT MODULES #######################
@@ -103,6 +103,8 @@ def init_remote_api_server():
 	global client_id
 
 	##############	ADD YOUR CODE HERE	##############
+	sim.simxFinish(-1) # just in case, close all opened connections
+	client_id = sim.simxStart('127.0.0.1',19997,True,True,5000,5) 
 	
 	
 
@@ -146,6 +148,26 @@ def get_vision_sensor_image():
 	return_code = 0
 
 	##############	ADD YOUR CODE HERE	##############
+	
+	print("called")
+	
+	##############	ADD YOUR CODE HERE	##############
+	
+	return_code,handel = sim.simxGetObjectHandle(client_id,"Vision_sensor",sim.simx_opmode_blocking)
+	time.sleep(2)
+	
+	
+	# Now retrieve streaming data (i.e. in a non-blocking fashion):
+	startTime = time.time()
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming)# Initialize streaming
+	while time.time()-startTime < 5:
+		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming) # Try to retrieve the streamed data
+		if return_code == sim.simx_return_ok : # After initialization of streaming, it will take a few ms before the first value arrives, so check the return code
+			print ('resolution: ',image_resolution)
+			#print(vision_sensor_image)
+			break 
+		time.sleep(0.005)
+		
 	
 	
 
@@ -193,6 +215,13 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	transformed_image = None
 
 	##############	ADD YOUR CODE HERE	##############
+	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
+
+	# print(type(vision_sensor_image))
+	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024,3))
+	# print(vision_sensor_image.shape)
+	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
+	transformed_image = cv2.flip(transformed_image, 0)
 	
 	
 
@@ -229,11 +258,17 @@ def send_data(maze_array):
 	global client_id
 
 	return_code = -1
+	maze_array1 = []
 
 	##############	ADD YOUR CODE HERE	##############
-	
-	
-
+	for i in range(len(maze_array)):
+		for j in range(len(maze_array[0])):
+			maze_array1.append(maze_array[i][j])
+	print("function called")
+	emptybuffer = bytearray()
+	return_code,ints,floats,strings,buffera = sim.simxCallScriptFunction(client_id,'Base',sim.sim_scripttype_customizationscript,'receiveData',maze_array1,[],[],emptybuffer,sim.simx_opmode_blocking)
+	print("sssssssss")
+	print(return_code)
 	##################################################
 
 	return return_code
@@ -266,7 +301,7 @@ def exit_remote_api_server():
 	global client_id
 
 	##############	ADD YOUR CODE HERE	##############
-	
+	sim.simxFinish(client_id)
 	
 
 	##################################################

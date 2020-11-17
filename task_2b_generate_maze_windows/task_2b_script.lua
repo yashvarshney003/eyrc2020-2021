@@ -340,7 +340,8 @@ end
 function receiveData(inInts,inFloats,inStrings,inBuffer)
 
     --*******************************************************
-    --               ADD YOUR CODE HERE
+	--               ADD YOUR CODE HERE
+maze_array = inInts
     
     
 

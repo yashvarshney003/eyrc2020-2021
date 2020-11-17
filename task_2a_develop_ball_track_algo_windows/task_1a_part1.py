@@ -253,11 +253,14 @@ def process(imageFrame):
 
         elif len(cnts) == 3:
             cnts = cnts[1]
+        cnts = cnts[0]
         for i in cnts:
             ret_values=detect(i)
+            print(ret_values)
             if( not shapes ):
             #Add detected shape and corresponding outputs to the dictionary
                 shapes['Circle']=['red',ret_values[1], ret_values[2]]
+                print("yes1")
             else:
                 list1 = shapes['Circle']
                 shapes ={}
@@ -265,6 +268,7 @@ def process(imageFrame):
                 shapes['Circle'].append(list1)
                 
                 shapes['Circle'].append(['red',ret_values[1], ret_values[2]])
+                print("yes2")
 
 
 
@@ -294,14 +298,18 @@ def process(imageFrame):
             cnts = cnts[0]
         elif len(cnts) == 3:
             cnts = cnts[1]
+        cnts= cnts[0]
         for i in cnts:
             ret_values=detect(i)
             #Add detected shape and corresponding outputs in the dictionary
             if( not shapes ):
             #Add detected shape and corresponding outputs to the dictionary
                 shapes['Circle']=['blue',ret_values[1], ret_values[2]]
+                print("yed1")
             else:
+                
                 list1 = shapes['Circle']
+                print("hdudh")
                 shapes ={}
                 shapes['Circle'] = []
                 shapes['Circle'].append(['blue',ret_values[1], ret_values[2]])
