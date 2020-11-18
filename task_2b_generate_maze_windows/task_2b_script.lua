@@ -19,7 +19,7 @@
 
 
 --[[
-# Team ID:			[2139 ]
+# Team ID:			[ Team-ID ]
 # Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
 # Filename:			task_2b
 # Functions:        createWall, saveTexture, retrieveTexture, reapplyTexture, receiveData, generateHorizontalWalls, 
@@ -242,18 +242,20 @@ end
 ]]--
 function generateHorizontalWalls()
     x = -0.45
-    y = -0.5
+    y = 0.5
     z = 0.08
-    for i=1,11 do
-        for j=1,10 do
+    for i=1,11 do --11
+        for j=1,10 do --10
             position = {x,y,z}
             orientation = {0,0,0}
             wallObjectHandle = createWall()
+            wall_name = "h" .. (i-1) .. (j-1)
+            sim.setObjectName(wallObjectHandle,wall_name)       -- use 	sim.setObjectParent(number objectHandle,number parentObjectHandle,boolean keepInPlace) to make a prent child relationship
             sim.setObjectPosition(wallObjectHandle,-1,position)
             sim.setObjectOrientation(wallObjectHandle,-1,orientation)
             x = x + 0.1
         end
-        y = y + 0.1
+        y = y - 0.1
         x = -0.45
     end
     --return nil
@@ -288,6 +290,23 @@ end
 **************************************************************	
 ]]--
 function generateVerticalWalls()
+    x = -0.5
+    y = 0.45
+    z = 0.08
+    for i=1,11 do --11
+        for j=1,10 do --10
+            position = {x,y,z}
+            orientation = {0,0,1.571}
+            wallObjectHandle = createWall()
+            wall_name = "v" .. (j-1) .. (i-1)
+            sim.setObjectName(wallObjectHandle,wall_name)
+            sim.setObjectPosition(wallObjectHandle,-1,position)
+            sim.setObjectOrientation(wallObjectHandle,-1,orientation)
+            y = y - 0.1
+        end
+        x = x + 0.1
+        y = 0.45
+    end
 
     --*******************************************************
     --               ADD YOUR CODE HERE
@@ -320,24 +339,26 @@ end
 **************************************************************	
 ]]--
 function deleteWalls()
-    handle_number = 0
-    handle_name = "Cuboid"
-    objectName = handle_name 
-    for i=0,100 do
-        sim.addStatusbarMessage("************************")
-        
-        objectHandle=sim.getObjectHandle(objectName)
-        sim.addStatusbarMessage(object_name)
-        sim.addStatusbarMessage(type(objectHandle))
-        sim.addStatusbarMessage(objectHandle)
-        sim.removeObject(objectHandle)
-        sim.addStatusbarMessage("Object deleted")
-       objectName = handle_name .. handle_number
-        sim.addStatusbarMessage("************************")
-        sim.addStatusbarMessage(type(objectName))
-        sim.addStatusbarMessage(objectName)
-        handle_number = handle_number +1
+    for i=1,11 do
+        for j=1,10 do
+            objectName_horizontal = "h" .. (i-1) .. (j-1)
+            objectHandle_horizontal = 1
+            objectName_vertical = "v" .. (j-1) .. (i-1)
+            objectHandle_vertical = 1
+            local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+            sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+            objectHandle_horizontal = sim.getObjectHandle(objectName_horizontal)
+            objectHandle_vertical = sim.getObjectHandle(objectName_vertical)
+            sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+            if objectHandle_horizontal > 0 then
+                sim.removeObject(objectHandle_horizontal)
+            end
+            if objectHandle_vertical > 0 then
+                sim.removeObject(objectHandle_vertical)
+            end
+        end
     end
+
         
     --*******************************************************
     --               ADD YOUR CODE HERE
