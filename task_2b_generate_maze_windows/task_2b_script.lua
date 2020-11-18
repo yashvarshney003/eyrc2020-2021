@@ -19,7 +19,7 @@
 
 
 --[[
-# Team ID:			[ Team-ID ]
+# Team ID:			[2139 ]
 # Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
 # Filename:			task_2b
 # Functions:        createWall, saveTexture, retrieveTexture, reapplyTexture, receiveData, generateHorizontalWalls, 
@@ -322,16 +322,17 @@ end
 function deleteWalls()
     handle_number = 0
     handle_name = "Cuboid"
-    objectName = handle_name
+    objectName = handle_name 
     for i=0,100 do
         sim.addStatusbarMessage("************************")
-        objectHandle=sim.getObjectHandle("Cuboid0")
+        
+        objectHandle=sim.getObjectHandle(objectName)
         sim.addStatusbarMessage(object_name)
         sim.addStatusbarMessage(type(objectHandle))
         sim.addStatusbarMessage(objectHandle)
         sim.removeObject(objectHandle)
         sim.addStatusbarMessage("Object deleted")
-        objectName = handle_name .. handle_number
+       objectName = handle_name .. handle_number
         sim.addStatusbarMessage("************************")
         sim.addStatusbarMessage(type(objectName))
         sim.addStatusbarMessage(objectName)
