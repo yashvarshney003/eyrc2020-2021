@@ -18,19 +18,9 @@
 ]]--
 
 
-
-
-
-
-
-
-
-
-
-
 --[[
-# Team ID:			[2139 ]
-# Author List:		[Yash Varshney ]
+# Team ID:			[ Team-ID ]
+# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
 # Filename:			task_2b
 # Functions:        createWall, saveTexture, retrieveTexture, reapplyTexture, receiveData, generateHorizontalWalls, 
 #                   generateVerticalWalls, deleteWalls, createMaze, sysCall_init, sysCall_beforeSimulation
@@ -40,9 +30,6 @@
 # 					[ List of global variables defined in this file ]
 ]]--
 
-
-
-
 --[[
 ##################### GLOBAL VARIABLES #######################
 ## You can add global variables in this section according   ##
@@ -51,69 +38,20 @@
 ##############################################################
 ]]--
 
-
-
-
-
-
-
-
-
-
-
-
-
 maze_array = {}
 baseHandle = -1       --Do not change or delete this variable
 textureID = -1        --Do not change or delete this variable
 textureData = -1       --Do not change or delete this variable
 --############################################################
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --[[
-
-
-
 ##################### HELPER FUNCTIONS #######################
 ## You can add helper functions in this section according   ##
 ## to your requirement.                                     ##
 ## DO NOT MODIFY OR CHANGE THE ALREADY DEFINED HELPER       ##
 ## FUNCTIONS                                                ##
 ##############################################################
-
-
-
-
 ]]--
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 --[[
 **************************************************************
@@ -147,26 +85,6 @@ function createWall()
     return wallObjectHandle
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --[[
 **************************************************************
   YOU ARE NOT ALLOWED TO MODIFY OR CALL THIS HELPER FUNCTION
@@ -196,25 +114,6 @@ function saveTexture()
     textureData=sim.readTexture(textureID ,0,0,0,0,0)
     sim.saveImage(textureData, {512,512}, 0, "models/other/base_template.png", -1)
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --[[
 **************************************************************
   YOU ARE NOT ALLOWED TO MODIFY OR CALL THIS HELPER FUNCTION
@@ -240,20 +139,6 @@ end
 function retrieveTexture()
     textureData, resolution = sim.loadImage(0, "models/other/base_template.png") 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 --[[
 **************************************************************
@@ -283,21 +168,6 @@ function reapplyTexture()
     sim.setShapeTexture(baseHandle, textureID, sim.texturemap_plane, 0, {1.01, 1.01},nil,nil)
     sim.removeObject(plane)
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 --############################################################
 
@@ -340,8 +210,7 @@ end
 function receiveData(inInts,inFloats,inStrings,inBuffer)
 
     --*******************************************************
-	--               ADD YOUR CODE HERE
-maze_array = inInts
+    --               ADD YOUR CODE HERE
     
     
 
@@ -350,22 +219,6 @@ maze_array = inInts
     --*******************************************************
     return inInts, inFloats, inStrings, inBuffer
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 --[[
 **************************************************************
@@ -388,7 +241,22 @@ end
 **************************************************************	
 ]]--
 function generateHorizontalWalls()
-
+    x = -0.45
+    y = -0.5
+    z = 0.08
+    for i=1,11 do
+        for j=1,10 do
+            position = {x,y,z}
+            orientation = {0,0,0}
+            wallObjectHandle = createWall()
+            sim.setObjectPosition(wallObjectHandle,-1,position)
+            sim.setObjectOrientation(wallObjectHandle,-1,orientation)
+            x = x + 0.1
+        end
+        y = y + 0.1
+        x = -0.45
+    end
+    --return nil
     --*******************************************************
     --               ADD YOUR CODE HERE
     
@@ -398,19 +266,6 @@ function generateHorizontalWalls()
         
     --*******************************************************
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 --[[
 **************************************************************
@@ -444,20 +299,6 @@ function generateVerticalWalls()
     --*******************************************************
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --[[
 **************************************************************
 	Function Name : deleteWalls()
@@ -479,7 +320,24 @@ end
 **************************************************************	
 ]]--
 function deleteWalls()
-
+    handle_number = 0
+    handle_name = "Cuboid"
+    objectName = handle_name
+    for i=0,100 do
+        sim.addStatusbarMessage("************************")
+        objectHandle=sim.getObjectHandle("Cuboid0")
+        sim.addStatusbarMessage(object_name)
+        sim.addStatusbarMessage(type(objectHandle))
+        sim.addStatusbarMessage(objectHandle)
+        sim.removeObject(objectHandle)
+        sim.addStatusbarMessage("Object deleted")
+        objectName = handle_name .. handle_number
+        sim.addStatusbarMessage("************************")
+        sim.addStatusbarMessage(type(objectName))
+        sim.addStatusbarMessage(objectName)
+        handle_number = handle_number +1
+    end
+        
     --*******************************************************
     --               ADD YOUR CODE HERE
     
@@ -489,17 +347,6 @@ function deleteWalls()
         
     --*******************************************************
 end
-
-
-
-
-
-
-
-
-
-
-
 
 
 --[[
@@ -540,20 +387,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --[[
 **************************************************************
 	Function Name : sysCall_init()
@@ -584,16 +417,6 @@ function sysCall_init()
         reapplyTexture()
     end     
 end
-
-
-
-
-
-
-
-
-
-
 
 --[[
 **************************************************************
@@ -626,25 +449,6 @@ function sysCall_beforeSimulation()
     createMaze()
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --[[
 **************************************************************
         YOU ARE NOT ALLOWED TO MODIFY THIS FUNCTION. 
@@ -667,7 +471,7 @@ end
 	N/A
 **************************************************************	
 ]]--
-function sysCall_afterSimulation()	
+function sysCall_afterSimulation()
     -- is executed after a simulation ends
     deleteWalls()
     reapplyTexture() -- Do not delete or modify this line
