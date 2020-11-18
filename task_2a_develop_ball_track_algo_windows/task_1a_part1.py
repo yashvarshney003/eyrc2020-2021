@@ -53,20 +53,7 @@ shapes = {}
                 point is helpful in finding the congruency of the two diagonals which is one of the
                 distinct properties of the parallelograms.'''
 
-def line_intersect(Ax1, Ay1, Ax2, Ay2, Bx1, By1, Bx2, By2):
-    """ returns a (x, y) tuple or None if there is no intersection """
-    d = (By2 - By1) * (Ax2 - Ax1) - (Bx2 - Bx1) * (Ay2 - Ay1)
-    if d:
-        uA = ((Bx2 - Bx1) * (Ay1 - By1) - (By2 - By1) * (Ax1 - Bx1)) / d
-        uB = ((Ax2 - Ax1) * (Ay1 - By1) - (Ay2 - Ay1) * (Ax1 - Bx1)) / d
-    else:
-        return
-    if not(0 <= uA <= 1 and 0 <= uB <= 1):
-        return
-    x = Ax1 + uA * (Ax2 - Ax1)
-    y = Ay1 + uA * (Ay2 - Ay1)
- 
-    return int(x), int(y)
+
 
 '''        Name: rect
            Inputs: contours
@@ -139,56 +126,15 @@ def rect(c):
             Outputs: Image shape, area, centroid co-ordinates
             Purpose: This functions takes contours, calculates area and outputs the
             image shape.'''
-def detect(c):
+def detect(color,c):
         
         # initialize the shape name and approximate the contour
-        peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.001 * peri, True)
+        
         M = cv2.moments(c)
         cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
         cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
-        shape = "unidentified" #Initialize a variable of string type
-    
-        #area = cv2.contourArea(approx)
-        #print(f" length of approx {approx}")
-        
-        
-        #Triangle if it shape has three sides
-        if len(approx) == 3:
-            shape = "Triangle"
-        
-        elif len(approx) == 4:
-            #Call rect() to detect the shape
-            angle,op_angle,cong_diag,op_side_eq,all_sides_cong = rect(c)
-
-            #If opposite angles and sides are equal and diagonals are congruent, it must be a parallelogram
-            if op_angle and op_side_eq and cong_diag:
-                #If all angles and sides are equal, aspect ratio is 1 and diagonals are congruent, it must be a square
-                if angle and cong_diag and all_sides_cong:
-                    shape='Square'
-                elif not(angle) or not(cong_diag) and all_sides_cong:
-                    #If aspect ratio is not 1 and angles are not 90, it must be a rhombus
-                    shape = 'Rhombus'
-                #Otherwise, its a parallelogram
-                else:
-                    shape = 'Parallelogram'
-            #If diagonals are not congruent, aspect ratio is not 1, opposite angles are not equal and
-            #all angles are not 90 degrees, it is a trapezium
-            elif not(cong_diag) and not(angle) or not(op_angle):
-                shape='Trapezium'
-            #Otherwise, it is a quadrilateral
-            else: shape='Quadrilateral'
-        #Pentagon if shape has 5 sides
-        elif len(approx) == 5:
-            shape = "Pentagon"
-        #Hexagon if shape has 6 sides
-        elif len(approx) == 6:
-            shape = "Hexagon"
-        # otherwise, we assume the shape is a circle
-        else:
-            shape = "Circle"
-        #return area rounded off to 1 decimal place
-        return shape,cX, cY
+       
+        return [color,cX, cY]
     
 '''     Name: Process
         Inputs: Input image
@@ -197,9 +143,9 @@ def detect(c):
         detect shapes in the image and writes the required output in the shapes dictionary'''
 
 def process(imageFrame):
-    shapes = {}
-    #Convert BGR image to HSV
+    colo= []
     
+    #Convert BGR image to HSV
     imageFrame = cv2.GaussianBlur(imageFrame,(5,5),cv2.BORDER_TRANSPARENT)
     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
     
@@ -215,17 +161,10 @@ def process(imageFrame):
     red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
 
     
-    gray_blur= cv2.Canny(red_gray,100,255)
+    gray_blur_red= cv2.Canny(red_gray,100,255)
 #     show('redgray', red_gray)
-#     show('gray_blur', gray_blur)
+    # show('gray_blur', gray_blur)
     #Create a mask for green colour
-    green_lower = np.array([25, 52, 72], np.uint8) 
-    green_upper = np.array([102, 255, 255], np.uint8) 
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
-    kernal = np.ones((5, 5))
-    green_mask = cv2.dilate(green_mask, kernal)
-    green_gray=cv2.threshold(green_mask, 250,255, cv2.THRESH_BINARY)[1]
-    gray_blur_green = cv2.Canny(green_gray,100,255)
     
 #     show('greengray', green_gray)
 #     show('gray_blur_green', gray_blur_green)
@@ -238,12 +177,30 @@ def process(imageFrame):
     blue_mask = cv2.dilate(blue_mask, kernal)
     blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
     gray_blur_blue= cv2.Canny(blue_gray,100,255)
+    cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    ret1 = None
+    
+    #If blue contours found
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        for i in cnts:
+             ret1 = detect('blue',i)
+    if(ret1):
+
+        colo.append(ret1)
+            # blue_ret_values.add(('blue', *detect(i)))
+           
+    
     
 #     show('bluegray', blue_gray)
-#     show('gray_blur_blue', gray_blur_blue)
-    
+    # show('gray_blur_blue', gray_blur_blue)
+    # 
     #Find red contours in the image
-    cnts= cv2.findContours(gray_blur , cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    
       
     #If red contours found
     if type(cnts[-1]) !=type(None) :
@@ -253,84 +210,59 @@ def process(imageFrame):
 
         elif len(cnts) == 3:
             cnts = cnts[1]
-        cnts = cnts[0]
         for i in cnts:
-            ret_values=detect(i)
-            print(ret_values)
-            if( not shapes ):
+            ret = detect('red',i)
+    colo.append(ret)
+            
+            
             #Add detected shape and corresponding outputs to the dictionary
-                shapes['Circle']=['red',ret_values[1], ret_values[2]]
-                print("yes1")
-            else:
-                list1 = shapes['Circle']
-                shapes ={}
-                shapes['Circle'] = []
-                shapes['Circle'].append(list1)
-                
-                shapes['Circle'].append(['red',ret_values[1], ret_values[2]])
-                print("yes2")
-
-
-
-    
+            # shapes[ret_values[0]]=[[set(i) for i in shapes.get(ret_values[0])] , ['red',ret_values[1], ret_values[2]]]
+            # print('tuple', set((*tuple(shapes.get('Circle')))))
+    print('red_ret_values',ret)  
+    return(colo)        
     #Find green contours n the image
-    cnts = cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
-    #If green contours found
-    if type(cnts[-1]) !=type(None) :
-        if len(cnts) == 2:
-            cnts = cnts[0]
-        elif len(cnts) == 3:
-            cnts = cnts[1]
-        
-        for i in cnts:
-            ret_values=detect(i)
-            #Add detected shape and corresponding outputs in the dictionary
-            shapes['Circle']=['green', ret_values[1], ret_values[2]]
-
-
     #Find blue contours in the image
-    cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
-    #If blue contours found
-    if type(cnts[-1]) !=type(None) :
-        if len(cnts) == 2:
-            cnts = cnts[0]
-        elif len(cnts) == 3:
-            cnts = cnts[1]
-        cnts= cnts[0]
-        for i in cnts:
-            ret_values=detect(i)
-            #Add detected shape and corresponding outputs in the dictionary
-            if( not shapes ):
-            #Add detected shape and corresponding outputs to the dictionary
-                shapes['Circle']=['blue',ret_values[1], ret_values[2]]
-                print("yed1")
-            else:
-                
-                list1 = shapes['Circle']
-                print("hdudh")
-                shapes ={}
-                shapes['Circle'] = []
-                shapes['Circle'].append(['blue',ret_values[1], ret_values[2]])
-                shapes['Circle'].append(list1)
+    
+    # return (list(*red_ret_values), list(*green_ret_values), list(*blue_ret_values))
+
+
 ##############################################################
-    return shapes
 
 
 def scan_image(img_file_path):
     global shapes
     shapes={}
 
-    
+    #Read the image
+    print(type(img_file_path))
+    if type(img_file_path) == type(str()):
+        img_file_path = cv2.imread(img_file_path)
+    else:
+        img_file_path= img_file_path
         
-        
-        
-    shapes = process(img_file_path)
-    
-    
-        
+        #Call the process function to detect shapes and other required outputs
+    outputs = process(img_file_path)
+    if(len(outputs)==1):
+        shapes['Circle'] = outputs[0]
+
+    else:
+        shapes['Circle'] = []
+        for  i in outputs:
+            shapes['Circle'].append(i)
     print(shapes)
+
+
+    
+    
+
+#     cv2.imshow("Image", resized)
+#     cv2.waitKey(0)
+#     if cv2.waitKey(0) & 0xFF == ord('q'):
+#         cv2.destroyAllWindows()
+    #Sort the dictionary in descending order of area of the shape
+   
     return shapes
 
 
@@ -349,21 +281,23 @@ if __name__ == '__main__':
     print('Currently working in '+ curr_dir_path)
 
     # path directory of images in 'Samples' folder
-    img_dir_path = curr_dir_path + '/Samples/'
+    img_dir_path = curr_dir_path+'\\'
     
     # path to 'Sample1.png' image file
     file_num = 1
-    img_file_path = img_dir_path + 'Sample' + str(file_num) + '.png'
+    img_file_path = img_dir_path + 'red_blue.png' #+ str(file_num) + '.png'
+    print(img_file_path)
+    print(type(img_file_path))
+    print(type(str()))
+    # print('\n============================================')
+    # print('\nLooking for Sample' + str(file_num) + '.png')
 
-    print('\n============================================')
-    print('\nLooking for Sample' + str(file_num) + '.png')
-
-    if os.path.exists('Samples/Sample' + str(file_num) + '.png'):
-        print('\nFound Sample' + str(file_num) + '.png')
+    # if os.path.exists('Samples/Sample' + str(file_num) + '.png'):
+    #     print('\nFound Sample' + str(file_num) + '.png')
     
-    else:
-        print('\n[ERROR] Sample' + str(file_num) + '.png not found. Make sure "Samples" folder has the selected file.')
-        exit()
+    # else:
+    #     print('\n[ERROR] Sample' + str(file_num) + '.png not found. Make sure "Samples" folder has the selected file.')
+    #     exit()
     
     print('\n============================================')
     
