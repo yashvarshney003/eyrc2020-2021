@@ -59,7 +59,6 @@ textureData = -1       --Do not change or delete this variable
     Purpose:
 	---
 	Creates a black-colored wall of dimensions 90cm x 10cm x 10cm
-
 	Input Arguments:
 	---
 	None
@@ -94,7 +93,6 @@ end
 	---
 	Reads and initializes the applied texture to Base object
     and saves it to a file.
-
 	Input Arguments:
 	---
 	None
@@ -122,7 +120,6 @@ end
     Purpose:
 	---
 	Loads texture from file.
-
 	Input Arguments:
 	---
 	None
@@ -148,7 +145,6 @@ end
     Purpose:
 	---
 	Re-applies texture to Base object
-
 	Input Arguments:
 	---
 	None
@@ -178,7 +174,6 @@ end
 	---
 	Receives data via Remote API. This function is called by 
     simx.callScriptFunction() in the python code (task_2b.py)
-
 	Input Arguments:
 	---
 	inInts : Table of Ints
@@ -212,6 +207,19 @@ function receiveData(inInts,inFloats,inStrings,inBuffer)
     --*******************************************************
     --               ADD YOUR CODE HERE
     
+    maze_array = {}
+    x = 1
+    for i=0,9 do
+        maze_array[i] = {}
+        for j=0,9 do
+            maze_array[i][j] = inInts[x]
+            x = x+1
+        end
+    end
+    print("number of elements recieved in recieveData function :", (x-1))
+    
+    --[[
+    --yash code to recieve and store data in maze_array
     for i = 1, 10 do
         maze_array[i] = {}
     end
@@ -228,6 +236,7 @@ function receiveData(inInts,inFloats,inStrings,inBuffer)
         end
     end
     
+    ]]--
            
             
             
@@ -253,7 +262,6 @@ end
     Purpose:
 	---
 	Generates all the Horizontal Walls in the scene.
-
 	Input Arguments:
 	---
 	None
@@ -276,7 +284,7 @@ function generateHorizontalWalls()
             position = {x,y,z}
             orientation = {0,0,0}
             wallObjectHandle = createWall()
-            wall_name = "h" .. (i) .. (j)
+            wall_name = "h" .. (i-1) .. (j-1)
             sim.setObjectName(wallObjectHandle,wall_name)       -- use 	sim.setObjectParent(number objectHandle,number parentObjectHandle,boolean keepInPlace) to make a prent child relationship
             sim.setObjectPosition(wallObjectHandle,-1,position)
             sim.setObjectOrientation(wallObjectHandle,-1,orientation)
@@ -302,7 +310,6 @@ end
     Purpose:
 	---
 	Generates all the Vertical Walls in the scene.
-
 	Input Arguments:
 	---
 	None
@@ -324,12 +331,16 @@ function generateVerticalWalls()
         for j=1,10 do --10
             position = {x,y,z}
             orientation = {0,0,1.571}
+            print("Creating vertical wall")
             wallObjectHandle = createWall()
-            wall_name = "v" .. (j) .. (i)
+            print((j-1),(i-1))
+            print("vertical wall created",(j-1),(i-1)," at position",position," handle:",wallObjectHandle)
+            wall_name = "v" .. (j-1) .. (i-1)
             sim.setObjectName(wallObjectHandle,wall_name)
             sim.setObjectPosition(wallObjectHandle,-1,position)
             sim.setObjectOrientation(wallObjectHandle,-1,orientation)
             y = y - 0.1
+            
         end
         x = x + 0.1
         y = 0.45
@@ -351,7 +362,6 @@ end
     Purpose:
 	---
 	Deletes all the walls in the given scene
-
 	Input Arguments:
 	---
 	None
@@ -368,9 +378,9 @@ end
 function deleteWalls()
     for i=1,11 do
         for j=1,10 do
-            objectName_horizontal = "h" .. (i) .. (j)
+            objectName_horizontal = "h" .. (i-1) .. (j-1)
             objectHandle_horizontal = 1
-            objectName_vertical = "v" .. (j) .. (i)
+            objectName_vertical = "v" .. (j-1) .. (i-1)
             objectHandle_vertical = 1
             local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
             sim.setInt32Parameter(sim.intparam_error_report_mode,0)
@@ -408,7 +418,6 @@ end
 	---
 	Creates the maze in the given scene by deleting specific 
     horizontal and vertical walls
-
 	Input Arguments:
 	---
 	None
@@ -423,102 +432,89 @@ end
 **************************************************************	
 ]]--
 function createMaze()
-    
-    --*******************************************************
-   for x =1,10 do
-        for y =1,10 do
-        
-            
-           
-        n = maze_array[x][y]
-        print(n)
-        binary=""
-        if (n==0) then
-            binary="0000"
-        else
-            if (n==1) then
-                binary="0001"
+
+    for x=0,9 do
+        for y=0,9 do
+            n = maze_array[x][y]
+            number = n
+            binary=""
+            if (n==0) then
+                binary="0000"
             else
-                for i=1,4 do
-                    if (n==1) then
-                        binary=binary .. 1
-                        n=n-1
-                    elseif (n==0) then
-                        binary=binary .. 0
-                    else
-                        if (n%2==1) then
-                            binary=binary .. (n%2)
+                if (n==1) then
+                    binary="0001"
+                else
+                    for i=1,4 do
+                        if (n==1) then
+                            binary=binary .. 1
                             n=n-1
-                            n=n/2
-                        elseif (n%2==0) then
-                            binary=binary .. (n%2)
-                            n=n/2
+                        elseif (n==0) then
+                            binary=binary .. 0
                         else
-                            print("*** Unexpected ERROR ***")
+                            if (n%2==1) then
+                                binary=binary .. (n%2)
+                                n=n-1
+                                n=n/2
+                            elseif (n%2==0) then
+                                binary=binary .. (n%2)
+                                n=n/2
+                            else
+                                print("*** Unexpected ERROR ***")
+                            end
                         end
                     end
+                    binary=string.reverse(binary)
                 end
-                binary=string.reverse(binary)
+            end
+            print(number,"-->",binary, type(binary))
+            
+            for i=1,4 do
+              num=binary:sub(i,i)
+              num=tonumber(num)
+              print(type(num),num)
+              --SENW
+              --cell number(x,y)
+              wall_Handle = -1
+              print("wall_Handle :",wall_Handle)
+              
+              local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+              sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+              if (i==1 and num ==0) then
+                --print("delete SOUTH wall (h(x+1)y)")
+                wall_Name = "h" .. (x+1) .. y
+                wall_Handle=sim.getObjectHandle(wall_Name)
+                print("wall deleted :",wall_Name," $ wall_Handle :",wall_Handle)
+              elseif (i==2 and num ==0) then
+                --print("delete EAST wall (vx(y+1))")
+                wall_Name = "v" .. x .. (y+1)
+                wall_Handle=sim.getObjectHandle(wall_Name)
+                print("wall deleted",wall_Name," $ wall_Handle :",wall_Handle)
+              elseif (i==3 and num ==0) then
+                --print("delete NORTH wall (hxy)")
+                wall_Name = "h" .. x .. y
+                wall_Handle=sim.getObjectHandle(wall_Name)
+                print("wall deleted",wall_Name," $ wall_Handle :",wall_Handle)
+              elseif (i==4 and num ==0) then
+                --print("delete WEST wall (vxy)")
+                wall_Name = "v" .. x .. y
+                wall_Handle=sim.getObjectHandle(wall_Name)
+                print("wall deleted",wall_Name," $ wall_Handle :",wall_Handle)
+              else
+                print("No wall deleted")
+              end
+              sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+              if (wall_Handle > 0) then
+                objectName=sim.getObjectName(wall_Handle)
+                --print("wall_Handle :",wall_Handle)
+                sim.removeObject(wall_Handle)
+                print("wall deleted here :",objectName)
+              end
             end
         end
-        --print(number,"-->",binary, type(binary))
-    --end
-    for i=1,4 do
-      num=binary:sub(i,i)
-      num=tonumber(num)
-      --print(type(num),num)
-      --SENW
-      --cell number(x,y)
-      
-      wall_Handle = -1
-     
-      if (i==1 and num ==0) then
-        --print("delete SOUTH wall (h(x+1)y)")
-        wall_Name = "h" .. (x+1) .. y
-        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
-        wall_Handle=sim.getObjectHandle(wall_Name)
-        print("wall handle number",wall_Handle)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
-        print("wall deleted",wall_Name)
-      elseif (i==2 and num ==0) then
-        --print("delete EAST wall (vx(y+1))")
-        wall_Name = "v" .. x .. (y+1)
-        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
-        wall_Handle=sim.getObjectHandle(wall_Name)
-        print("wall handle number",wall_Handle)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
-        print("wall deleted",wall_Name)
-      elseif (i==3 and num ==0) then
-        --print("delete NORTH wall (hxy)")
-        wall_Name = "h" .. x .. y
-        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
-        wall_Handle=sim.getObjectHandle(wall_name)
-        print("wall handle number",wall_Handle,wall_Name)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
-        print("wall deleted",wall_Name)
-      elseif (i==4 and num ==0) then
-        print("delete WEST wall (vxy)")
-        wall_Name = "v" .. x .. y
-        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
-        wall_Handle=sim.getObjectHandle(wall_Name)
-        print("wall handle number",wall_Handle,wall_Name)
-        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
-        print("wall deleted",wall_Name)
-      else
-        print("No delete")
-      end
-      if (wall_Handle > 0) then
-        objectName=sim.getObjectName(wall_Handle)
-        sim.removeObject(wall_Handle)
-        print("wall deleted here :",objectName)
-      end
     end
-    end
-    end
+    --*******************************************************
+    --               ADD YOUR CODE HERE
+    
     
 
 
@@ -623,7 +619,4 @@ function sysCall_cleanup()
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
-
-
-
 
