@@ -212,6 +212,33 @@ function receiveData(inInts,inFloats,inStrings,inBuffer)
     --*******************************************************
     --               ADD YOUR CODE HERE
     
+    for i = 1, 10 do
+        maze_array[i] = {}
+    end
+   
+    
+    
+    x = 1
+    for i =1,10 do
+        for j =1,10 do
+        
+            maze_array[i][j] = inInts[x]
+            
+            x = x+1
+        end
+    end
+    
+           
+            
+            
+    print("checking")
+    
+
+    
+
+
+   
+    
     
 
 
@@ -249,7 +276,7 @@ function generateHorizontalWalls()
             position = {x,y,z}
             orientation = {0,0,0}
             wallObjectHandle = createWall()
-            wall_name = "h" .. (i-1) .. (j-1)
+            wall_name = "h" .. (i) .. (j)
             sim.setObjectName(wallObjectHandle,wall_name)       -- use 	sim.setObjectParent(number objectHandle,number parentObjectHandle,boolean keepInPlace) to make a prent child relationship
             sim.setObjectPosition(wallObjectHandle,-1,position)
             sim.setObjectOrientation(wallObjectHandle,-1,orientation)
@@ -298,7 +325,7 @@ function generateVerticalWalls()
             position = {x,y,z}
             orientation = {0,0,1.571}
             wallObjectHandle = createWall()
-            wall_name = "v" .. (j-1) .. (i-1)
+            wall_name = "v" .. (j) .. (i)
             sim.setObjectName(wallObjectHandle,wall_name)
             sim.setObjectPosition(wallObjectHandle,-1,position)
             sim.setObjectOrientation(wallObjectHandle,-1,orientation)
@@ -341,9 +368,9 @@ end
 function deleteWalls()
     for i=1,11 do
         for j=1,10 do
-            objectName_horizontal = "h" .. (i-1) .. (j-1)
+            objectName_horizontal = "h" .. (i) .. (j)
             objectHandle_horizontal = 1
-            objectName_vertical = "v" .. (j-1) .. (i-1)
+            objectName_vertical = "v" .. (j) .. (i)
             objectHandle_vertical = 1
             local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
             sim.setInt32Parameter(sim.intparam_error_report_mode,0)
@@ -398,8 +425,100 @@ end
 function createMaze()
     
     --*******************************************************
-    --               ADD YOUR CODE HERE
-    
+   for i =1,10 do
+        for j =1,10 do
+        
+            
+           
+        n = maze_array[i][j] 
+        binary=""
+        if (n==0) then
+            binary="0000"
+        else
+            if (n==1) then
+                binary="0001"
+            else
+                for i=1,4 do
+                    if (n==1) then
+                        binary=binary .. 1
+                        n=n-1
+                    elseif (n==0) then
+                        binary=binary .. 0
+                    else
+                        if (n%2==1) then
+                            binary=binary .. (n%2)
+                            n=n-1
+                            n=n/2
+                        elseif (n%2==0) then
+                            binary=binary .. (n%2)
+                            n=n/2
+                        else
+                            print("*** Unexpected ERROR ***")
+                        end
+                    end
+                end
+                binary=string.reverse(binary)
+            end
+        end
+        --print(number,"-->",binary, type(binary))
+    --end
+    for i=1,4 do
+      num=binary:sub(i,i)
+      num=tonumber(num)
+      --print(type(num),num)
+      --SENW
+      --cell number(x,y)
+      x=3
+      y=4
+      wall_Handle = -1
+     
+      if (i==1 and num ==0) then
+        --print("delete SOUTH wall (h(x+1)y)")
+        wall_Name = "h" .. (x+1) .. y
+        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+        wall_Handle=sim.getObjectHandle(wall_Name)
+        print("wall handle number",wall_Handle)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+        print("wall deleted",wall_Name)
+      elseif (i==2 and num ==0) then
+        --print("delete EAST wall (vx(y+1))")
+        wall_Name = "v" .. x .. (y+1)
+        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+        wall_Handle=sim.getObjectHandle(wall_Name)
+        print("wall handle number",wall_Handle)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+        print("wall deleted",wall_Name)
+      elseif (i==3 and num ==0) then
+        --print("delete NORTH wall (hxy)")
+        wall_Name = "h" .. x .. y
+        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+        wall_Handle=sim.getObjectHandle(wall_name)
+        print("wall handle number",wall_Handle,wall_Name)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+        print("wall deleted",wall_Name)
+      elseif (i==4 and num ==0) then
+        print("delete WEST wall (vxy)")
+        wall_Name = "v" .. x .. y
+        local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+        wall_Handle=sim.getObjectHandle(wall_Name)
+        print("wall handle number",wall_Handle,wall_Name)
+        sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+        print("wall deleted",wall_Name)
+      else
+        print("No delete")
+      end
+      if (wall_Handle > 0) then
+        objectName=sim.getObjectName(wall_Handle)
+        sim.removeObject(wall_Handle)
+        print("wall deleted here :",objectName)
+      end
+    end
+    end
+    end
     
 
 

@@ -263,7 +263,9 @@ def send_data(maze_array):
 	##############	ADD YOUR CODE HERE	##############
 	for i in range(len(maze_array)):
 		for j in range(len(maze_array[0])):
+			#print(f" {i} and  {j}")
 			maze_array1.append(maze_array[i][j])
+	print(*maze_array1)
 	print("function called")
 	emptybuffer = bytearray()
 	return_code,ints,floats,strings,buffera = sim.simxCallScriptFunction(client_id,'Base',sim.sim_scripttype_customizationscript,'receiveData',maze_array1,[],[],emptybuffer,sim.simx_opmode_blocking)
