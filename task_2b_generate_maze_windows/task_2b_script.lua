@@ -425,12 +425,13 @@ end
 function createMaze()
     
     --*******************************************************
-   for i =1,10 do
-        for j =1,10 do
+   for x =1,10 do
+        for y =1,10 do
         
             
            
-        n = maze_array[i][j] 
+        n = maze_array[x][y]
+        print(n)
         binary=""
         if (n==0) then
             binary="0000"
@@ -468,8 +469,7 @@ function createMaze()
       --print(type(num),num)
       --SENW
       --cell number(x,y)
-      x=3
-      y=4
+      
       wall_Handle = -1
      
       if (i==1 and num ==0) then
