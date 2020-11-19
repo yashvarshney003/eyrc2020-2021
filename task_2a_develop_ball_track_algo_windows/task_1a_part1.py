@@ -17,11 +17,6 @@
 *****************************************************************************************
 '''
 
-def show(name, image):
-    cv2.imshow(name, image)
-    cv2.waitKey(0)
-    if cv2.waitKey(0) & 0xFF==ord(' '):
-        cv2.destroyAllWindows()
 # Team ID:          NB_2139
 # Author List:      Aman Tyagi, Yash Varshney
 # Filename:         task_1a_part1.py
@@ -143,6 +138,7 @@ def detect(color,c):
         detect shapes in the image and writes the required output in the shapes dictionary'''
 
 def process(imageFrame):
+    #initialize a list for keeping records of detected shapes and co-ordinates
     colo= []
     
     #Convert BGR image to HSV
@@ -154,20 +150,9 @@ def process(imageFrame):
     red_upper = np.array([10, 255, 255]) 
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
     kernal = np.ones((5, 5))
-#     red_mask = cv2.dilate(red_mask, kernal)
-#     show('red mask',red_mask)
-#     print(red_mask.ndim, 'ndim')
-#     print('len', len(red_mask))
     red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
-
-    
     gray_blur_red= cv2.Canny(red_gray,100,255)
-#     show('redgray', red_gray)
-    # show('gray_blur', gray_blur)
-    #Create a mask for green colour
-    
-#     show('greengray', green_gray)
-#     show('gray_blur_green', gray_blur_green)
+
     
     #Create a mask for blue colour
     blue_lower = np.array([94, 20, 0], np.uint8) 
@@ -177,8 +162,10 @@ def process(imageFrame):
     blue_mask = cv2.dilate(blue_mask, kernal)
     blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
     gray_blur_blue= cv2.Canny(blue_gray,100,255)
+    
+    #find contours on blue mask
     cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    ret1 = None
+    ret1 =None
     
     #If blue contours found
     if type(cnts[-1]) !=type(None) :
@@ -191,17 +178,10 @@ def process(imageFrame):
     if(ret1):
 
         colo.append(ret1)
-            # blue_ret_values.add(('blue', *detect(i)))
            
-    
-    
-#     show('bluegray', blue_gray)
-    # show('gray_blur_blue', gray_blur_blue)
-    # 
     #Find red contours in the image
     cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
     
-      
     #If red contours found
     if type(cnts[-1]) !=type(None) :
             
@@ -213,19 +193,9 @@ def process(imageFrame):
         for i in cnts:
             ret = detect('red',i)
     colo.append(ret)
-            
-            
-            #Add detected shape and corresponding outputs to the dictionary
-            # shapes[ret_values[0]]=[[set(i) for i in shapes.get(ret_values[0])] , ['red',ret_values[1], ret_values[2]]]
-            # print('tuple', set((*tuple(shapes.get('Circle')))))
-    print('red_ret_values',ret)  
+    
+    #return the list containing all detected values
     return(colo)        
-    #Find green contours n the image
-    
-    #Find blue contours in the image
-    
-    
-    # return (list(*red_ret_values), list(*green_ret_values), list(*blue_ret_values))
 
 
 ##############################################################
@@ -244,25 +214,18 @@ def scan_image(img_file_path):
         
         #Call the process function to detect shapes and other required outputs
     outputs = process(img_file_path)
+    #if only one circle is detected, add its details to the list in the dictionary
     if(len(outputs)==1):
         shapes['Circle'] = outputs[0]
 
     else:
+        #First, empty the list
         shapes['Circle'] = []
+        #append all the detected values in the list
         for  i in outputs:
             shapes['Circle'].append(i)
-    print(shapes)
-
-
-    
-    
-
-#     cv2.imshow("Image", resized)
-#     cv2.waitKey(0)
-#     if cv2.waitKey(0) & 0xFF == ord('q'):
-#         cv2.destroyAllWindows()
-    #Sort the dictionary in descending order of area of the shape
-   
+ 
+  #return the updated dictionary
     return shapes
 
 
