@@ -433,6 +433,9 @@ end
 ]]--
 function createMaze()
 
+    
+    --*******************************************************
+    --   ADD YOUR CODE HERE
     for x=0,9 do
         for y=0,9 do
             n = maze_array[x][y]
@@ -512,8 +515,6 @@ function createMaze()
             end
         end
     end
-    --*******************************************************
-    --               ADD YOUR CODE HERE
     
     
 

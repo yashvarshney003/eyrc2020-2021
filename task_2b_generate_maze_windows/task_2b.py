@@ -147,28 +147,30 @@ def get_vision_sensor_image():
 	image_resolution = []
 	return_code = 0
 
+	
+	
+	
+	
 	##############	ADD YOUR CODE HERE	##############
 	
-	print("called")
 	
-	##############	ADD YOUR CODE HERE	##############
 	
 	return_code,handel = sim.simxGetObjectHandle(client_id,"Vision_sensor",sim.simx_opmode_blocking)
-	time.sleep(2)
+	
 	
 	
 	# Now retrieve streaming data (i.e. in a non-blocking fashion):
-	startTime = time.time()
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming)# Initialize streaming
-	while time.time()-startTime < 5:
-		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming) # Try to retrieve the streamed data
-		if return_code == sim.simx_return_ok : # After initialization of streaming, it will take a few ms before the first value arrives, so check the return code
-			print ('resolution: ',image_resolution)
-			#print(vision_sensor_image)
-			break 
-		time.sleep(0.005)
-		
 	
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
+	print(return_code,len(image_resolution),len(vision_sensor_image))
+	# Initialize streaming
+	while(len(vision_sensor_image) == 0  ):
+		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_buffer)
+
+	# Initialize streaming
+	
+		
+	 
 	
 
 	##################################################
@@ -263,14 +265,12 @@ def send_data(maze_array):
 	##############	ADD YOUR CODE HERE	##############
 	for i in range(len(maze_array)):
 		for j in range(len(maze_array[0])):
-			#print(f" {i} and  {j}")
+			
 			maze_array1.append(maze_array[i][j])
-	print(*maze_array1)
-	print("function called")
+
 	emptybuffer = bytearray()
 	return_code,ints,floats,strings,buffera = sim.simxCallScriptFunction(client_id,'Base',sim.sim_scripttype_customizationscript,'receiveData',maze_array1,[],[],emptybuffer,sim.simx_opmode_blocking)
-	print("sssssssss")
-	print(return_code)
+	
 	##################################################
 
 	return return_code

@@ -200,20 +200,18 @@ def get_vision_sensor_image():
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code,handel = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
-	time.sleep(2)
+	
 	
 	
 	# Now retrieve streaming data (i.e. in a non-blocking fashion):
-	startTime = time.time()
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming)# Initialize streaming
-	while time.time()-startTime < 5:
-		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_streaming) # Try to retrieve the streamed data
-		if return_code == sim.simx_return_ok : # After initialization of streaming, it will take a few ms before the first value arrives, so check the return code
-			print ('resolution: ',image_resolution)
-			#print(vision_sensor_image)
-			break 
-		time.sleep(0.005)
-		
+	
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
+	# Initialize streaming
+	while(vision_sensor_image[1024] == 0  ):
+		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_buffer)
+
+
+
 	
 	
 	
