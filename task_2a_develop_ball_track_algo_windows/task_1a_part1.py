@@ -226,7 +226,7 @@ def scan_image(img_file_path):
             shapes['Circle'].append(i)
  
   #return the updated dictionary
-    print(shapes)
+    
     return shapes
 
 

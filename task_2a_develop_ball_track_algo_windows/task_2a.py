@@ -36,8 +36,7 @@ import numpy as np
 import cv2
 import os, sys
 import traceback
-import time
-#Remove this
+
 
 ##############################################################
 
@@ -149,8 +148,7 @@ def start_simulation():
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
 	sim.simxGetPingTime(client_id)
 
-	#print(f"cmd time {return_code}")
-	print(return_code)
+	
 	
 	
 
@@ -188,25 +186,18 @@ def get_vision_sensor_image():
 	"""
 
 	global client_id
-	global iteration
+	
 
 	vision_sensor_image = []
 	image_resolution = []
 	return_code = 0
-	print("called")
-	print(f"iteration{iteration}")
-	iteration+=1
+	
 
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code,handel = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
-	
-	
-	
-	# Now retrieve streaming data (i.e. in a non-blocking fashion):
-	
 	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
-	# Initialize streaming
+	
 	while(vision_sensor_image[1024] == 0  ):
 		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_buffer)
 
@@ -258,22 +249,18 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	"""
 
 	transformed_image = None
-	#print(vision_sensor_image)
+
 
 	##############	ADD YOUR CODE HERE	##############
-	# print(type(vision_sensor_image))
+	
 	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
 
-	# print(type(vision_sensor_image))
+	
 	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024,3))
-	# print(vision_sensor_image.shape)
+	
 	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
 	transformed_image = cv2.flip(transformed_image, 0)
-	'''cv2.imshow('transformed image', transformed_image)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
-'''
-	#task_1a_part1.show("name",transformed_image)
+	
 
 	
 
@@ -319,8 +306,8 @@ def stop_simulation():
 	
 	return_code = sim.simxStopSimulation(client_id,sim.simx_opmode_oneshot)
 	sim.simxGetPingTime(client_id)
-	if ((return_code == sim.simx_return_novalue_flag) or (return_code == sim.simx_return_ok)):
-											print('\nSimulation stopped correctly.')
+	
+										
 										
 	
 
@@ -486,10 +473,7 @@ if __name__ == "__main__":
 
 						warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 						
-						'''cv2.imshow('warped_img',warped_img)
-						cv2.waitKey(0)
-						cv2.destroyAllWindows()
-						#cv.imwrite("Result\f"{i}",)'''
+						
 						
 						if (type(warped_img) is np.ndarray):
 

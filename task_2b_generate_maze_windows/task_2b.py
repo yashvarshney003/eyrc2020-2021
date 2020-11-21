@@ -152,26 +152,12 @@ def get_vision_sensor_image():
 	
 	
 	##############	ADD YOUR CODE HERE	##############
-	
-	
-	
+
 	return_code,handel = sim.simxGetObjectHandle(client_id,"Vision_sensor",sim.simx_opmode_blocking)
-	
-	
-	
-	# Now retrieve streaming data (i.e. in a non-blocking fashion):
-	
 	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
-	print(return_code,len(image_resolution),len(vision_sensor_image))
-	# Initialize streaming
+	
 	while(len(vision_sensor_image) == 0  ):
 		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_buffer)
-
-	# Initialize streaming
-	
-		
-	 
-	
 
 	##################################################
 
@@ -219,9 +205,8 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	##############	ADD YOUR CODE HERE	##############
 	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
 
-	# print(type(vision_sensor_image))
+
 	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024,3))
-	# print(vision_sensor_image.shape)
 	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
 	transformed_image = cv2.flip(transformed_image, 0)
 	

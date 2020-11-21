@@ -148,8 +148,7 @@ def applyPerspectiveTransform(input_img):
 
 	# Finally the warped image 
 	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
-	print(f"wapred_image shape{warped_img.shape}")
-	cv.imwrite("wapredimage.png",warped_img)
+	
 	
 	
 
