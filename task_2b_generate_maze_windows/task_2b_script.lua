@@ -1,9 +1,9 @@
 --[[
 *****************************************************************************************
 *
-*        		===============================================
-*           		Nirikshak Bot (NB) Theme (eYRC 2020-21)
-*        		===============================================
+*               ===============================================
+*                   Nirikshak Bot (NB) Theme (eYRC 2020-21)
+*               ===============================================
 *
 *  This Lua script is to implement Task 2B of Nirikshak Bot (NB) Theme (eYRC 2020-21).
 *  
@@ -19,15 +19,15 @@
 
 
 --[[
-# Team ID:			[ Team-ID ]
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
-# Filename:			task_2b
+# Team ID:          NB_2139
+# Author List:      Anurag Saxena, Yash Varshney
+# Filename:         task_2b
 # Functions:        createWall, saveTexture, retrieveTexture, reapplyTexture, receiveData, generateHorizontalWalls, 
 #                   generateVerticalWalls, deleteWalls, createMaze, sysCall_init, sysCall_beforeSimulation
 #                   sysCall_afterSimulation, sysCall_cleanup
-# 					[ Comma separated list of functions in this file ]
-# Global variables:	
-# 					[ List of global variables defined in this file ]
+#                   [ Comma separated list of functions in this file ]
+# Global variables: 
+#                   [ List of global variables defined in this file ]
 ]]--
 
 --[[
@@ -55,24 +55,24 @@ textureData = -1       --Do not change or delete this variable
 
 --[[
 **************************************************************
-	Function Name : createWall()
+    Function Name : createWall()
     Purpose:
-	---
-	Creates a black-colored wall of dimensions 90cm x 10cm x 10cm
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
-	wallObjectHandle : number
+    ---
+    Creates a black-colored wall of dimensions 90cm x 10cm x 10cm
+    Input Arguments:
+    ---
+    None
+    
+    Returns:
+    ---
+    wallObjectHandle : number
     
     returns the object handle of the created wall
-	
-	Example call:
-	---
-	wallObjectHandle = createWall()
-**************************************************************	
+    
+    Example call:
+    ---
+    wallObjectHandle = createWall()
+**************************************************************  
 ]]--
 function createWall()
     wallObjectHandle = sim.createPureShape(0, 26, {0.09, 0.01, 0.1}, 0, nil)
@@ -88,23 +88,23 @@ end
 **************************************************************
   YOU ARE NOT ALLOWED TO MODIFY OR CALL THIS HELPER FUNCTION
 **************************************************************
-	Function Name : saveTexture()
+    Function Name : saveTexture()
     Purpose:
-	---
-	Reads and initializes the applied texture to Base object
+    ---
+    Reads and initializes the applied texture to Base object
     and saves it to a file.
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
-	None
-	
-	Example call:
-	---
-	saveTexture()
-**************************************************************	
+    Input Arguments:
+    ---
+    None
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    saveTexture()
+**************************************************************  
 ]]--
 function saveTexture()
     baseHandle = sim.getObjectHandle("Base")
@@ -116,22 +116,22 @@ end
 **************************************************************
   YOU ARE NOT ALLOWED TO MODIFY OR CALL THIS HELPER FUNCTION
 **************************************************************
-	Function Name : retrieveTexture()
+    Function Name : retrieveTexture()
     Purpose:
-	---
-	Loads texture from file.
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
-	None
-	
-	Example call:
-	---
-	retrieveTexture()
-**************************************************************	
+    ---
+    Loads texture from file.
+    Input Arguments:
+    ---
+    None
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    retrieveTexture()
+**************************************************************  
 ]]--
 function retrieveTexture()
     textureData, resolution = sim.loadImage(0, "models/other/base_template.png") 
@@ -141,22 +141,22 @@ end
 **************************************************************
   YOU ARE NOT ALLOWED TO MODIFY OR CALL THIS HELPER FUNCTION
 **************************************************************
-	Function Name : reapplyTexture()
+    Function Name : reapplyTexture()
     Purpose:
-	---
-	Re-applies texture to Base object
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
-	None
-	
-	Example call:
-	---
+    ---
+    Re-applies texture to Base object
+    Input Arguments:
+    ---
+    None
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
     reapplyTexture()
-**************************************************************	
+**************************************************************  
 ]]--
 function reapplyTexture()
     plane, textureID = sim.createTexture("", 0, nil, {1.01, 1.01}, nil, 0, {512, 512})
@@ -169,241 +169,188 @@ end
 
 --[[
 **************************************************************
-	Function Name : receiveData()
+    Function Name : receiveData()
     Purpose:
-	---
-	Receives data via Remote API. This function is called by 
+    ---
+    Receives data via Remote API. This function is called by 
     simx.callScriptFunction() in the python code (task_2b.py)
-	Input Arguments:
-	---
-	inInts : Table of Ints
+    Input Arguments:
+    ---
+    inInts : Table of Ints
     inFloats : Table of Floats
     inStrings : Table of Strings
     inBuffer : string
-	
-	Returns:
-	---
-	inInts : Table of Ints
+    
+    Returns:
+    ---
+    inInts : Table of Ints
     inFloats : Table of Floats
     inStrings : Table of Strings
     inBuffer : string
     
     These 4 variables represent the data being passed from remote
     API client(python) to the CoppeliaSim scene
-	
-	Example call:
-	---
-	N/A
+    
+    Example call:
+    ---
+    N/A
     
     Hint:
     ---
     You might want to study this link to understand simx.callScriptFunction()
     better 
     https://www.coppeliarobotics.com/helpFiles/en/remoteApiExtension.htm
-**************************************************************	
+**************************************************************  
 ]]--
 function receiveData(inInts,inFloats,inStrings,inBuffer)
 
     --*******************************************************
     --               ADD YOUR CODE HERE
-    
-    maze_array = {}
     x = 1
     for i=0,9 do
         maze_array[i] = {}
         for j=0,9 do
-            maze_array[i][j] = inInts[x]
+            maze_array[i][j] = inInts[x]    -- storing data as 2D array indexing start from 00
             x = x+1
         end
     end
-    print("number of elements recieved in recieveData function :", (x-1))
-    
-    --[[
-    --yash code to recieve and store data in maze_array
-    for i = 1, 10 do
-        maze_array[i] = {}
-    end
-   
-    
-    
-    x = 1
-    for i =1,10 do
-        for j =1,10 do
-        
-            maze_array[i][j] = inInts[x]
-            
-            x = x+1
-        end
-    end
-    
-    ]]--
-           
-            
-            
-    print("checking")
-    
-
-    
-
-
-   
-    
-    
-
-
-        
     --*******************************************************
     return inInts, inFloats, inStrings, inBuffer
 end
 
 --[[
 **************************************************************
-	Function Name : generateHorizontalWalls()
+    Function Name : generateHorizontalWalls()
     Purpose:
-	---
-	Generates all the Horizontal Walls in the scene.
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    ---
+    Generates all the Horizontal Walls in the scene.
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	generateHorizontalWalls()
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    generateHorizontalWalls()
+**************************************************************  
 ]]--
 function generateHorizontalWalls()
+    --*******************************************************
+    --               ADD YOUR CODE HERE
     x = -0.45
     y = 0.5
-    z = 0.08
-    for i=1,11 do --11
-        for j=1,10 do --10
+    z = 0.065
+    for i=1,11 do
+        for j=1,10 do
             position = {x,y,z}
             orientation = {0,0,0}
             wallObjectHandle = createWall()
-            wall_name = "h" .. (i-1) .. (j-1)
-            sim.setObjectName(wallObjectHandle,wall_name)       -- use 	sim.setObjectParent(number objectHandle,number parentObjectHandle,boolean keepInPlace) to make a prent child relationship
-            sim.setObjectPosition(wallObjectHandle,-1,position)
-            sim.setObjectOrientation(wallObjectHandle,-1,orientation)
+            sim.setObjectParent(wallObjectHandle,baseHandle,true)   -- making generated wall child of Base
+            wall_name = "H_WallSegment_" .. (i-1) .. "x" .. (j-1)   -- wall name indexing starting from 00
+            sim.setObjectName(wallObjectHandle,wall_name)
+            sim.setObjectPosition(wallObjectHandle,sim_handle_parent,position)  -- setting wall at desired position
+            sim.setObjectOrientation(wallObjectHandle,sim_handle_parent,orientation)    --setting wall desired orientation
             x = x + 0.1
         end
         y = y - 0.1
         x = -0.45
     end
-    --return nil
-    --*******************************************************
-    --               ADD YOUR CODE HERE
-    
-    
 
-
-        
     --*******************************************************
 end
 
 --[[
 **************************************************************
-	Function Name : generateVerticalWalls()
+    Function Name : generateVerticalWalls()
     Purpose:
-	---
-	Generates all the Vertical Walls in the scene.
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    ---
+    Generates all the Vertical Walls in the scene.
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	generateVerticalWalls()
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    generateVerticalWalls()
+**************************************************************  
 ]]--
 function generateVerticalWalls()
+
+    --*******************************************************
+    --               ADD YOUR CODE HERE
     x = -0.5
     y = 0.45
-    z = 0.08
-    for i=1,11 do --11
-        for j=1,10 do --10
+    z = 0.065
+    for i=1,11 do
+        for j=1,10 do
             position = {x,y,z}
-            orientation = {0,0,1.571}
-            print("Creating vertical wall")
+            orientation = {0,0,math.pi/2}
             wallObjectHandle = createWall()
-            print((j-1),(i-1))
-            print("vertical wall created",(j-1),(i-1)," at position",position," handle:",wallObjectHandle)
-            wall_name = "v" .. (j-1) .. (i-1)
+            sim.setObjectParent(wallObjectHandle,baseHandle,true)
+            wall_name = "V_WallSegment_" .. (j-1) .. "x" .. (i-1)
             sim.setObjectName(wallObjectHandle,wall_name)
-            sim.setObjectPosition(wallObjectHandle,-1,position)
-            sim.setObjectOrientation(wallObjectHandle,-1,orientation)
+            sim.setObjectPosition(wallObjectHandle,sim_handle_parent,position)
+            sim.setObjectOrientation(wallObjectHandle,sim_handle_parent,orientation)
             y = y - 0.1
-            
         end
         x = x + 0.1
         y = 0.45
     end
 
     --*******************************************************
-    --               ADD YOUR CODE HERE
-    
-    
-
-
-        
-    --*******************************************************
 end
 
 --[[
 **************************************************************
-	Function Name : deleteWalls()
+    Function Name : deleteWalls()
     Purpose:
-	---
-	Deletes all the walls in the given scene
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    ---
+    Deletes all the walls in the given scene
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	deleteWalls()
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    deleteWalls()
+**************************************************************  
 ]]--
 function deleteWalls()
-    for i=1,11 do
-        for j=1,10 do
-            objectName_horizontal = "h" .. (i-1) .. (j-1)
-            objectHandle_horizontal = 1
-            objectName_vertical = "v" .. (j-1) .. (i-1)
-            objectHandle_vertical = 1
-            local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
-            sim.setInt32Parameter(sim.intparam_error_report_mode,0)
-            objectHandle_horizontal = sim.getObjectHandle(objectName_horizontal)
-            objectHandle_vertical = sim.getObjectHandle(objectName_vertical)
-            sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
-            if objectHandle_horizontal > 0 then
-                sim.removeObject(objectHandle_horizontal)
-            end
-            if objectHandle_vertical > 0 then
-                sim.removeObject(objectHandle_vertical)
-            end
-        end
-    end
 
         
     --*******************************************************
     --               ADD YOUR CODE HERE
-    
-    
-
-
-        
+    for i=1,11 do
+        for j=1,10 do
+            objectName_horizontal = "H_WallSegment_" .. (i-1) .. "x" .. (j-1)
+            objectHandle_horizontal = 1
+            objectName_vertical = "V_WallSegment_" .. (j-1) .. "x" .. (i-1)
+            objectHandle_vertical = 1
+            local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)  
+            sim.setInt32Parameter(sim.intparam_error_report_mode,0)                 --desabling error report mode    
+            objectHandle_horizontal = sim.getObjectHandle(objectName_horizontal)
+            objectHandle_vertical = sim.getObjectHandle(objectName_vertical)
+            sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)        -- enabling error report mode
+            if objectHandle_horizontal > 0 then
+                sim.removeObject(objectHandle_horizontal)      --deleting horizontal wall
+            end
+            if objectHandle_vertical > 0 then
+                sim.removeObject(objectHandle_vertical)         --deleting vertical wall
+            end
+        end
+    end
+       
     --*******************************************************
 end
 
@@ -413,33 +360,31 @@ end
   YOU CAN DEFINE YOUR OWN INPUT AND OUTPUT PARAMETERS FOR THIS
                           FUNCTION
 **************************************************************
-	Function Name : createMaze()
+    Function Name : createMaze()
     Purpose:
-	---
-	Creates the maze in the given scene by deleting specific 
+    ---
+    Creates the maze in the given scene by deleting specific 
     horizontal and vertical walls
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	createMaze()
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    createMaze()
+**************************************************************  
 ]]--
 function createMaze()
 
-    
     --*******************************************************
-    --   ADD YOUR CODE HERE
+    --               ADD YOUR CODE HERE
     for x=0,9 do
         for y=0,9 do
-            n = maze_array[x][y]
-            number = n
+            n = maze_array[x][y]        --generating binary number corresponding to the cell xy data
             binary=""
             if (n==0) then
                 binary="0000"
@@ -462,63 +407,51 @@ function createMaze()
                                 binary=binary .. (n%2)
                                 n=n/2
                             else
-                                print("*** Unexpected ERROR ***")
+                                print("*** Unexpected ERROR in binary generation ***")
                             end
                         end
                     end
-                    binary=string.reverse(binary)
+                    binary=string.reverse(binary)       -- binary data generated
                 end
             end
-            print(number,"-->",binary, type(binary))
             
             for i=1,4 do
-              num=binary:sub(i,i)
+              num=binary:sub(i,i)   -- reading binary string letter by letter
               num=tonumber(num)
-              print(type(num),num)
               --SENW
               --cell number(x,y)
               wall_Handle = -1
-              print("wall_Handle :",wall_Handle)
               
               local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
               sim.setInt32Parameter(sim.intparam_error_report_mode,0)
               if (i==1 and num ==0) then
-                --print("delete SOUTH wall (h(x+1)y)")
-                wall_Name = "h" .. (x+1) .. y
+                --South wall
+                wall_Name = "H_WallSegment_" .. (x+1) .. "x" .. y
                 wall_Handle=sim.getObjectHandle(wall_Name)
-                print("wall deleted :",wall_Name," $ wall_Handle :",wall_Handle)
               elseif (i==2 and num ==0) then
-                --print("delete EAST wall (vx(y+1))")
-                wall_Name = "v" .. x .. (y+1)
+                --East wall
+                wall_Name = "V_WallSegment_" .. x .. "x" .. (y+1)
                 wall_Handle=sim.getObjectHandle(wall_Name)
-                print("wall deleted",wall_Name," $ wall_Handle :",wall_Handle)
               elseif (i==3 and num ==0) then
-                --print("delete NORTH wall (hxy)")
-                wall_Name = "h" .. x .. y
+                --North wall
+                wall_Name = "H_WallSegment_" .. x .. "x" .. y
                 wall_Handle=sim.getObjectHandle(wall_Name)
-                print("wall deleted",wall_Name," $ wall_Handle :",wall_Handle)
               elseif (i==4 and num ==0) then
-                --print("delete WEST wall (vxy)")
-                wall_Name = "v" .. x .. y
+                --West wall
+                wall_Name = "V_WallSegment_" .. x .. "x" .. y
                 wall_Handle=sim.getObjectHandle(wall_Name)
-                print("wall deleted",wall_Name," $ wall_Handle :",wall_Handle)
               else
-                print("No wall deleted")
+                    --no wall delete case
               end
               sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
               if (wall_Handle > 0) then
                 objectName=sim.getObjectName(wall_Handle)
-                --print("wall_Handle :",wall_Handle)
                 sim.removeObject(wall_Handle)
-                print("wall deleted here :",objectName)
               end
             end
         end
     end
-    
-    
-
-
+    print("Maze successfully created")
         
     --*******************************************************
 end
@@ -527,23 +460,23 @@ end
 
 --[[
 **************************************************************
-	Function Name : sysCall_init()
+    Function Name : sysCall_init()
     Purpose:
-	---
-	Can be used for initialization of parameters
+    ---
+    Can be used for initialization of parameters
     
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	N/A
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    N/A
+**************************************************************  
 ]]--
 function sysCall_init()
 
@@ -560,23 +493,23 @@ end
 **************************************************************
         YOU ARE NOT ALLOWED TO MODIFY THIS FUNCTION. 
 **************************************************************
-	Function Name : sysCall_beforeSimulation()
+    Function Name : sysCall_beforeSimulation()
     Purpose:
-	---
-	This is executed before simulation starts
+    ---
+    This is executed before simulation starts
     
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	N/A
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    N/A
+**************************************************************  
 ]]--
 function sysCall_beforeSimulation()
     
@@ -591,23 +524,23 @@ end
 **************************************************************
         YOU ARE NOT ALLOWED TO MODIFY THIS FUNCTION. 
 **************************************************************
-	Function Name : sysCall_afterSimulation()
+    Function Name : sysCall_afterSimulation()
     Purpose:
-	---
-	This is executed after simulation ends
+    ---
+    This is executed after simulation ends
     
-	Input Arguments:
-	---
-	None
-	
-	Returns:
-	---
+    Input Arguments:
+    ---
     None
-	
-	Example call:
-	---
-	N/A
-**************************************************************	
+    
+    Returns:
+    ---
+    None
+    
+    Example call:
+    ---
+    N/A
+**************************************************************  
 ]]--
 function sysCall_afterSimulation()
     -- is executed after a simulation ends
