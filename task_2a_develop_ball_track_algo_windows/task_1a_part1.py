@@ -206,7 +206,7 @@ def scan_image(img_file_path):
     shapes={}
 
     #Read the image
-    print(type(img_file_path))
+
     if type(img_file_path) == type(str()):
         img_file_path = cv2.imread(img_file_path)
     else:
