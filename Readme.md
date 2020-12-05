@@ -6,6 +6,9 @@ Aman Tyagi : 4 question<br>
 Anurag Saxena : 2 question<br>
 Yash Varshney : 4 Question<br>
 
+![](REsult%20and%20marks%20ss/Task0result.PNG)
+![](REsult%20and%20marks%20ss/Task0Graph.PNG)
+
 
 
 # Task1 :
@@ -23,6 +26,10 @@ Store the details of the these detected shapes in a dictionary in the same order
 
 1c> Use OpenCV techniques to detect the maze in the above given image and convert it into a 2D maze array with appropriate Cell Numbers
 
+![](REsult%20and%20marks%20ss/Task1result.PNG)
+![](REsult%20and%20marks%20ss/Task1graph.PNG)
+
+
 # Task2 :
 (1) Task 2A
 This task is based on Image Processing using Vision Sensors in CoppeliaSim.<br>
@@ -33,7 +40,8 @@ Teams should apply the concepts learnt in Task 1A and 1B and build a Python Remo
 This task is based on maze generation in CoppeliaSim using the output of Task 1B.<br>
 Teams should use python remote API to transmit the encoded maze array (output of task 1b) to a Lua script in CoppeliaSim scene to generate walls of the maze.<br>
 
-
+![](REsult%20and%20marks%20ss/Task2A%20result.PNG)
+![](REsult%20and%20marks%20ss/Task2Graph.PNG)
 
 
 #  At last
