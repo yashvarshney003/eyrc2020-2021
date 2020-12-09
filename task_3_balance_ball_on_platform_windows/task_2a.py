@@ -157,7 +157,7 @@ def start_simulation():
 	return return_code
 
 
-def get_vision_sensor_image():
+def get_vision_sensor_image(vision_sensor_handle):
 	
 	"""
 	Purpose:
@@ -195,11 +195,12 @@ def get_vision_sensor_image():
 
 	##############	ADD YOUR CODE HERE	##############
 	
-	return_code,handel = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
+	
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_blocking)
 	
 	while(vision_sensor_image[1024] == 0  ):
-		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_buffer)
+		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_buffer)
+	print(f"output of resolution {image_resolution}")
 
 
 
@@ -256,7 +257,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
 
 	
-	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024,3))
+	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024))
 	
 	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
 	transformed_image = cv2.flip(transformed_image, 0)

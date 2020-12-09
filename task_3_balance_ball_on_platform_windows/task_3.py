@@ -17,8 +17,8 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [ Team-ID ]
-# Author List:      [ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:          2139
+# Author List:      Yash Varshney
 # Filename:         task_3.py
 # Functions:        init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint)
 #                   [ Comma separated list of functions in this file ]
@@ -56,7 +56,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-set_point = [640,640]
+setpoint = [640,640]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -113,6 +113,7 @@ def init_setup(rec_client_id):
 	client_id = rec_client_id
 
 	##############	ADD YOUR CODE HERE	##############
+	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 
 	
 	
