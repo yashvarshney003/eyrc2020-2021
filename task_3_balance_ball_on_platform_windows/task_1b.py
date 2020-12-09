@@ -77,11 +77,11 @@ def applyPerspectiveTransform(input_img):
 
 	##############	ADD YOUR CODE HERE	##############
 	#Conversion into GrayScale
-	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+	
 
-	ret,thresh1 = cv.threshold(gray,230,255,cv.THRESH_BINARY_INV)
+	ret,thresh1 = cv.threshold(input_img,230,255,cv.THRESH_BINARY_INV)
 	#Applying Canny Edge Detection
-	edged = cv.Canny(gray, 50, 200)
+	edged = cv.Canny(thresh1, 50, 200)
 	
 
 					
@@ -148,6 +148,14 @@ def applyPerspectiveTransform(input_img):
 
 	# Finally the warped image 
 	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
+	#cv.imshow("window_name", warped_img) 
+  
+#waits for user to press any key  
+#(this is necessary to avoid Python kernel form crashing) 
+	#cv.waitKey(0)  
+  
+#closing all open windows  
+	#cv.destroyAllWindows() 
 	
 	
 	

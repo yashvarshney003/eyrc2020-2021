@@ -323,7 +323,9 @@ if __name__ == "__main__":
 		init_simulation_time=float(init_simulation_time_string)
 
 	# Running the coppeliasim simulation for 15 seconds
+	i = 0 
 	while(curr_simulation_time - init_simulation_time <=15):
+		i+=1
 		
 		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 		
@@ -342,18 +344,21 @@ if __name__ == "__main__":
 
 					if (type(transformed_image) is np.ndarray):
 
-						# cv2.imshow('transformed image', transformed_image)
-						# cv2.waitKey(0)
-						# cv2.destroyAllWindows()
+						#cv2.imshow('transformed image', transformed_image)
+						#cv2.waitKey(0)
+						#cv2.destroyAllWindows()
 
 						# Get the resultant warped transformed vision sensor image after applying Perspective Transform
 						try:
 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+							name = str(i) + ".png"
+							cv2.imwrite(name,warped_img)
 							
 							if (type(warped_img) is np.ndarray):
 								
 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 								try:
+									print("printing/{i}")
 									shapes = task_1a_part1.scan_image(warped_img)
 
 									if (type(shapes) is dict and shapes!={}):
