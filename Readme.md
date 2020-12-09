@@ -46,6 +46,6 @@ Teams should use python remote API to transmit the encoded maze array (output of
 
 #  At last
 
-![Alt Text](https://tenor.com/view/donaldtrump-trump-win-trump-wins-gif-4656058)
+![](REsult%20and%20marks%20ss/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6566504132594439424657533330474a35762f67697068792e676966.gif)
 
 
