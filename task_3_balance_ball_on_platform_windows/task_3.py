@@ -326,6 +326,7 @@ if __name__ == "__main__":
 	i = 0 
 	while(curr_simulation_time - init_simulation_time <=15):
 		i+=1
+		print(curr_simulation_time - init_simulation_time)
 		
 		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 		
@@ -341,6 +342,7 @@ if __name__ == "__main__":
 				# Get the transformed vision sensor image captured in correct format
 				try:
 					transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
+					
 
 					if (type(transformed_image) is np.ndarray):
 
@@ -354,11 +356,12 @@ if __name__ == "__main__":
 							name = str(i) + ".png"
 							cv2.imwrite(name,warped_img)
 							
+							
 							if (type(warped_img) is np.ndarray):
 								
 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 								try:
-									print("printing/{i}")
+									print(f"printing/{i}")
 									shapes = task_1a_part1.scan_image(warped_img)
 
 									if (type(shapes) is dict and shapes!={}):

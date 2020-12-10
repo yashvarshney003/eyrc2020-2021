@@ -163,10 +163,71 @@ def shape(approx):
         Purpose: This function masks the RGB colours and calls detect fucntion to
         detect shapes in the image and writes the required output in the shapes dictionary'''
 
+# def process(imageFrame):
+#     #initialize a list for keeping records of detected shapes and co-ordinates
+#     colo= []
+    
+#     #Convert BGR image to HSV
+#     imageFrame = cv2.GaussianBlur(imageFrame,(5,5),cv2.BORDER_TRANSPARENT)
+#     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
+    
+#     #To create a mask for red colour
+#     red_lower = np.array([0, 50, 50]) 
+#     red_upper = np.array([10, 255, 255]) 
+#     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
+#     kernal = np.ones((5, 5))
+#     red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
+#     gray_blur_red= cv2.Canny(red_gray,100,255)
+
+    
+#     #Create a mask for blue colour
+#     blue_lower = np.array([94, 20, 0], np.uint8) 
+#     blue_upper = np.array([140,255 ,255], np.uint8) 
+#     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+#     kernal = np.ones((5, 5))  
+#     blue_mask = cv2.dilate(blue_mask, kernal)
+#     blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
+#     gray_blur_blue= cv2.Canny(blue_gray,100,255)
+    
+#     #find contours on blue mask
+#     cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+#     ret1 =None
+    
+#     #If blue contours found
+#     if type(cnts[-1]) !=type(None) :
+#         if len(cnts) == 2:
+#             cnts = cnts[0]
+#         elif len(cnts) == 3:
+#             cnts = cnts[1]
+#         for i in cnts:
+#              ret1 = detect('blue',i)
+#     if(ret1):
+
+#         colo.append(ret1)
+           
+#     #Find red contours in the image
+#     cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    
+#     #If red contours found
+#     if type(cnts[-1]) !=type(None) :
+            
+#         if len(cnts) == 2:
+#             cnts = cnts[0]
+
+#         elif len(cnts) == 3:
+#             cnts = cnts[1]
+#         for i in cnts:
+#             ret = detect('red',i)
+#     colo.append(ret)
+    
+#     #return the list containing all detected values
+#     return(colo)        
+
+
+##############################################################
+
 
 def scan_image(img_file_path):
-    print("shapes function called")
-    
     global shapes
     shapes={}
 
@@ -188,26 +249,29 @@ def scan_image(img_file_path):
     # cv2.imshow('imagein', image)
     # cv2.waitKey(0)
     
-    image = cv2.Canny(image, 40, 70)
-    # output = image.copy()
     image = cv2.GaussianBlur(image,(5,5), -1)
-    cnts = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    ret,thresh1 = cv2.threshold(image,127,255,cv2.THRESH_BINARY_INV)
+
+    edges = cv2.Canny(thresh1,30,200)
+    cnts = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
     if len(cnts) == 2:
-        cnts = cnts[0]
+            cnts = cnts[0]
     elif len(cnts) == 3:
-        cnts = cnts[1]
+            cnts = cnts[1]
     for cnt in cnts:
         M = cv2.moments(cnt)
         cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
         cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
         peri = cv2.arcLength(cnt, True)
         approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
-        area=cv2.contourArea((cnt))
-        if shape(approx) =='Circle' and area>360 and area<400:
+        #area=cv2.contourArea((cnt))
+        print(shape(approx))
+        if shape(approx) =='Circle':
             # print(cX, cY)
             # print(len(approx), area)
-            if shapes.get('Circle'): shapes.get('Circle').append(['None', cX, cY])
-            else: shapes.setdefault('Circle', ['None', cX, cY])
+            shapes['Circle'] =[None,cX,cY]
+
         
 
     # cv2.imshow('image', image)
