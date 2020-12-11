@@ -92,7 +92,6 @@ def init_setup(rec_client_id):
 	1. Get all the required handles from the CoppeliaSim scene and store them in global variables.
 	2. Initialize the vision sensor in 'simx_opmode_streaming' operation mode (if required). 
 	   Teams are allowed to choose the appropriate the oeration mode depending on their code and logic.
-
 	Input Arguments:
 	---
 	`rec_client_id` 	:  [ integer ]
@@ -115,6 +114,9 @@ def init_setup(rec_client_id):
 	##############	ADD YOUR CODE HERE	##############
 	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 
+	returnCode, servohandle1=sim.simxGetObjectHandle(clientID,"joint_x", sim.simx_opmode_blocking)		#change object name as required
+	returnCode, servohandle2=sim.simxGetObjectHandle(clientID,"joint_y", sim.simx_opmode_blocking)
+
 	
 	
 	##################################################
@@ -125,21 +127,16 @@ def control_logic(center_x,center_y):
 	Purpose:
 	---
 	This function should implement the control logic to balance the ball at a particular setpoint on the table.
-
 	The orientation of the top table should "ONLY" be controlled by the servo motor as we would expect in a 
 	practical scenario.
-
 	Hence "ONLY" the shaft of the servo motor or in other words the revolute joint between servo and servo fin 
 	should have 'motor enabled' and 'control loop enabled option' checked. Refer documentation for further understanding of 
 	these options.
-
 	This function should use the necessary Legacy Python Remote APIs to control the revolute joints.
-
 	NOTE: In real life, a 180 degree servo motor can rotate between -90 to +90 degrees or -1.57 to 1.57 radians only. 
 		  Hence the command to be sent to servo motor should be between this range only. When the top plate is parallel to
 		  base plate, the revolute joint between servo and servo fin should be at 0 degrees orientation. Refer documentation
 		  for further understanding.
-
 	NOTE: Since the simulation is dynamic in nature there should not by any bottlenecks in this code due to which the 
 		  processing may take a lot of time. As a result 'control_logic' function should be called in every iteration of 
 		  the while loop. Use global variables instead of reinitialising the varibles used in this function.
@@ -162,6 +159,67 @@ def control_logic(center_x,center_y):
 	
 	"""
 	global setpoint, client_id
+
+
+	perror = [0,0] #for x and y error values initialization
+	derror = [0,0]
+	ierror = [0,0]
+	prev_error = [0,0]
+	prev_time = time.time()
+	sample_time = 0.01 #set accordingly
+	kp = [0,0]
+	kd = [0,0]
+	ki = [0,0]
+
+	x_limit = [-90,90] # min limit and maximum limit in degrees
+	y_limit = [-90,90]
+
+	trim = [0,0] # if any trimming in angles is required
+
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+
+	current_time = time.time()
+	dt = current_time - prev_time
+
+	if (dt >= sample_time): # code is running for a sample time
+
+		perror[0] = setpoint[0]-center_x
+		perror[1] = setpoint[1]-center_y
+
+		derror[0] = (perror[0] - prev_error[0])/dt
+		derror[1] = (perror[1] - prev_error[1])/dt
+
+		ierror[0] = ierror[0] + perror[0]
+		ierror[1] = ierror[1] + perror[1]
+		
+		angle_x = (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0]*dt)
+		angle_y = (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1]*dt)
+
+		angle_x = angle_x + trim[0] #if any trim required
+		angle_y = angle_y + trim[1]
+
+		#limiting maximum and minimum values of the output angle in degrees
+		if (angle_x < x_limit[0]):
+			angle_x = x_limit[0]
+		if (angle_x > x_limit[1]):
+			angle_x = x_limit[1]
+		
+		if (angle_y < y_limit[0]):
+			angle_y = y_limit[0]
+		if (angle_y < y_limit[1]):
+			angle_y = y_limit[1]
+
+		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
+		returnCode=sim.simxSetJointTargetPosition(clientID,servohandle1,angle_x,sim.simx_opmode_streaming)
+		returnCode=sim.simxSetJointTargetPosition(clientID,servohandle2,angle_y,sim.simx_opmode_streaming)
+
+		prev_error[0] = perror[0]
+		prev_error[1] = perror[1]
+
+	  	prev_time = current_time;
+
+
 	
 	##############	ADD YOUR CODE HERE	##############
 	
