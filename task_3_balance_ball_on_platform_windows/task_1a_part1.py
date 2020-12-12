@@ -60,7 +60,7 @@ shapes = {}
 def rect(c):
     perimeter = cv2.arcLength(c,True)
     approx = cv2.approxPolyDP(c,0.01*perimeter,True)
-    print(f"approx{approx}")
+
     if(len(approx)== 4):
         pts = approx.reshape(4, 2)
 
@@ -266,7 +266,7 @@ def scan_image(img_file_path):
         peri = cv2.arcLength(cnt, True)
         approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
         #area=cv2.contourArea((cnt))
-        print(shape(approx))
+       # print(shape(approx))
         if shape(approx) =='Circle':
             # print(cX, cY)
             # print(len(approx), area)
@@ -279,7 +279,7 @@ def scan_image(img_file_path):
 
  
   #return the updated dictionary
-    print(shapes)
+   # print(shapes)
     
     return shapes
 
@@ -325,7 +325,7 @@ if __name__ == '__main__':
         shapes = scan_image(img_file_path)
 
         if type(shapes) is dict:
-            print(shapes)
+            #print(shapes)
             print('\nOutput generated. Please verify.')
         
         else:

@@ -60,10 +60,28 @@ setpoint = [640,640]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
-vision_sensor_handle = 0
+
 
 # You can add your global variables here
 ##############################################################
+vision_sensor_handle = 0
+dt = 0
+current_time = 0
+prev_time = 0
+perror = [0,0] #for x and y error values initialization
+derror = [0,0]
+ierror = [0,0]
+prev_error = [0,0]
+
+ #set accordingly
+kp = [10,10]
+kd = [0.1,0.1]
+ki = [0.001,0.001]
+
+x_limit = [-90,90] # min limit and maximum limit in degrees
+y_limit = [-90,90]
+
+trim = [0,0] # if
 
 
 
@@ -75,7 +93,8 @@ vision_sensor_handle = 0
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-
+servohandle1 = -1
+servohandle2 = -1
 
 
 
@@ -106,17 +125,19 @@ def init_setup(rec_client_id):
 	init_setup()
 	
 	"""
-	global client_id, vision_sensor_handle
+	global client_id, vision_sensor_handle,servohandle1,servohandle2
 
 	# since client_id is defined in task_2a.py file, it needs to be assigned here as well.
 	client_id = rec_client_id
 
 	##############	ADD YOUR CODE HERE	##############
 	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
+	print(f" return code{return_code} vsision hadnle {vision_sensor_handle}")
 
-	returnCode, servohandle1=sim.simxGetObjectHandle(clientID,"joint_x", sim.simx_opmode_blocking)		#change object name as required
-	returnCode, servohandle2=sim.simxGetObjectHandle(clientID,"joint_y", sim.simx_opmode_blocking)
-
+	returnCode, servohandle1 =sim.simxGetObjectHandle(client_id,"joint_y", sim.simx_opmode_blocking)	
+	print(f" servihandle1 {returnCode} and {servohandle1}")	#change object name as required
+	returnCode, servohandle2 =sim.simxGetObjectHandle(client_id,"joint_x", sim.simx_opmode_blocking)
+	print(f" servihandle2 {returnCode} and {servohandle2}")
 	
 	
 	##################################################
@@ -158,48 +179,42 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
-	global setpoint, client_id
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1
+	print("function_called")
 
 
-	perror = [0,0] #for x and y error values initialization
-	derror = [0,0]
-	ierror = [0,0]
-	prev_error = [0,0]
-	prev_time = time.time()
-	sample_time = 0.01 #set accordingly
-	kp = [0,0]
-	kd = [0,0]
-	ki = [0,0]
-
-	x_limit = [-90,90] # min limit and maximum limit in degrees
-	y_limit = [-90,90]
-
-	trim = [0,0] # if any trimming in angles is required
+	current_time = time.time()
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+	sample_time = 0.25
 
-	current_time = time.time()
+	
 	dt = current_time - prev_time
+	print(dt,current_time,prev_time)
 
-	if (dt >= sample_time): # code is running for a sample time
+	if (dt >= sample_time): # code is running 	for a sample time
 
-		perror[0] = setpoint[0]-center_x
-		perror[1] = setpoint[1]-center_y
+		perror[0] = center_x-setpoint[0]
+		perror[1] = center_y- setpoint[1]
 
 		derror[0] = (perror[0] - prev_error[0])/dt
 		derror[1] = (perror[1] - prev_error[1])/dt
 
 		ierror[0] = ierror[0] + perror[0]
 		ierror[1] = ierror[1] + perror[1]
+		print("--------------------------------------------")
+		print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
+		print("--------------------------------------------")
 		
-		angle_x = (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0]*dt)
-		angle_y = (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1]*dt)
+		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0]*dt)
+		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1]*dt)
 
 		angle_x = angle_x + trim[0] #if any trim required
 		angle_y = angle_y + trim[1]
 
 		#limiting maximum and minimum values of the output angle in degrees
+		print(f"set value of algo {angle_x} and angle y {angle_y}")
 		if (angle_x < x_limit[0]):
 			angle_x = x_limit[0]
 		if (angle_x > x_limit[1]):
@@ -207,20 +222,23 @@ def control_logic(center_x,center_y):
 		
 		if (angle_y < y_limit[0]):
 			angle_y = y_limit[0]
-		if (angle_y < y_limit[1]):
+		if (angle_y > y_limit[1]):
 			angle_y = y_limit[1]
 
+		print("************")
+		print(angle_x,angle_y)
+
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
-		returnCode=sim.simxSetJointTargetPosition(clientID,servohandle1,angle_x,sim.simx_opmode_streaming)
-		returnCode=sim.simxSetJointTargetPosition(clientID,servohandle2,angle_y,sim.simx_opmode_streaming)
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle1,angle_x,sim.simx_opmode_oneshot)
+		print(returnCode)
+		
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle2,angle_y,sim.simx_opmode_oneshot)
+		print(returnCode)
+		
 
 		prev_error[0] = perror[0]
 		prev_error[1] = perror[1]
-
-	  	prev_time = current_time;
-
-
-	
+		
 	##############	ADD YOUR CODE HERE	##############
 	
 	
@@ -384,7 +402,7 @@ if __name__ == "__main__":
 	i = 0 
 	while(curr_simulation_time - init_simulation_time <=15):
 		i+=1
-		print(curr_simulation_time - init_simulation_time)
+		
 		
 		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 		
@@ -410,25 +428,30 @@ if __name__ == "__main__":
 
 						# Get the resultant warped transformed vision sensor image after applying Perspective Transform
 						try:
+							name = str(i) + ".png"
+							cv2.imwrite(name,transformed_image)
 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 							name = str(i) + ".png"
-							cv2.imwrite(name,warped_img)
+							
+							print(i)
 							
 							
 							if (type(warped_img) is np.ndarray):
 								
 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 								try:
-									print(f"printing/{i}")
+									#print(f"printing/{i}")
 									shapes = task_1a_part1.scan_image(warped_img)
 
 									if (type(shapes) is dict and shapes!={}):
-										print('\nShapes detected by Vision Sensor are: ')
-										print(shapes)
+										#print('\nShapes detected by Vision Sensor are: ')
+										#print(shapes)
 										
 										# Storing the detected x and y centroid in center_x and center_y variable repectively
 										center_x = shapes['Circle'][1]
+										print(f" ball position x{center_x}")
 										center_y = shapes['Circle'][2]
+										print(f" ball position x{center_x}")
 
 									elif(type(shapes) is not dict):
 										print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
@@ -470,7 +493,9 @@ if __name__ == "__main__":
 					sys.exit()
 			
 			try:
+				
 				control_logic(center_x,center_y)
+				prev_time = time.time()
 			
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')

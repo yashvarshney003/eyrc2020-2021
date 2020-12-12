@@ -78,6 +78,7 @@ def applyPerspectiveTransform(input_img):
 	##############	ADD YOUR CODE HERE	##############
 	#Conversion into GrayScale
 	
+	
 
 	ret,thresh1 = cv.threshold(input_img,230,255,cv.THRESH_BINARY_INV)
 	#Applying Canny Edge Detection
@@ -99,7 +100,7 @@ def applyPerspectiveTransform(input_img):
 	#Looping through the Contours and approxing Contours
 	for c in cnts:
 		peri = cv.arcLength(c, True)
-		approx = cv.approxPolyDP(c, 0.05 * peri, True)
+		approx = cv.approxPolyDP(c, 0.1 * peri, True)
 		#0.02
 		
 	# If length is 4 then it is ROI
