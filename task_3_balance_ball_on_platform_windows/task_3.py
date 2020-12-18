@@ -66,17 +66,19 @@ setpoint = [640,640]
 ##############################################################
 vision_sensor_handle = 0
 dt = 0
-current_time = 0
+current_time =0
 prev_time = 0
+
+
 perror = [0,0] #for x and y error values initialization
 derror = [0,0]
 ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [10,10]
-kd = [0.1,0.1]
-ki = [0.001,0.001]
+kp = [0.004,0.004]
+kd = [0.009,0.009]
+ki = [0.000,0.000]
 
 x_limit = [-90,90] # min limit and maximum limit in degrees
 y_limit = [-90,90]
@@ -132,12 +134,12 @@ def init_setup(rec_client_id):
 
 	##############	ADD YOUR CODE HERE	##############
 	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
-	print(f" return code{return_code} vsision hadnle {vision_sensor_handle}")
+	#print(f" return code{return_code} vsision hadnle {vision_sensor_handle}")
 
 	returnCode, servohandle1 =sim.simxGetObjectHandle(client_id,"joint_y", sim.simx_opmode_blocking)	
-	print(f" servihandle1 {returnCode} and {servohandle1}")	#change object name as required
+	#print(f" servihandle1 {returnCode} and {servohandle1}")	#change object name as required
 	returnCode, servohandle2 =sim.simxGetObjectHandle(client_id,"joint_x", sim.simx_opmode_blocking)
-	print(f" servihandle2 {returnCode} and {servohandle2}")
+	#print(f" servihandle2 {returnCode} and {servohandle2}")
 	
 	
 	##################################################
@@ -179,19 +181,22 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1
-	print("function_called")
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1,rt_code
+	#print("function_called")
 
 
-	current_time = time.time()
+	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+	print(rt_code)
+	current_time = float(current_time)
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
-	sample_time = 0.25
+	sample_time = 0.2
 
 	
 	dt = current_time - prev_time
-	print(dt,current_time,prev_time)
+	#print(f" dt time is {dt}")
+	#print(dt,current_time,prev_time)
 
 	if (dt >= sample_time): # code is running 	for a sample time
 
@@ -201,20 +206,21 @@ def control_logic(center_x,center_y):
 		derror[0] = (perror[0] - prev_error[0])/dt
 		derror[1] = (perror[1] - prev_error[1])/dt
 
-		ierror[0] = ierror[0] + perror[0]
-		ierror[1] = ierror[1] + perror[1]
-		print("--------------------------------------------")
-		print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
-		print("--------------------------------------------")
+		ierror[0] += perror[0]*dt
+		ierror[1] +=  perror[1]*dt
 		
-		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0]*dt)
-		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1]*dt)
+		#print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
+		
+		
+		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0])
+		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1])
 
 		angle_x = angle_x + trim[0] #if any trim required
 		angle_y = angle_y + trim[1]
 
 		#limiting maximum and minimum values of the output angle in degrees
 		print(f"set value of algo {angle_x} and angle y {angle_y}")
+		print("--------------------------------------------")
 		if (angle_x < x_limit[0]):
 			angle_x = x_limit[0]
 		if (angle_x > x_limit[1]):
@@ -229,15 +235,16 @@ def control_logic(center_x,center_y):
 		print(angle_x,angle_y)
 
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
-		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle1,angle_x,sim.simx_opmode_oneshot)
-		print(returnCode)
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle1,angle_x,sim.simx_opmode_oneshot) # for x
+		#print(returnCode)
 		
-		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle2,angle_y,sim.simx_opmode_oneshot)
-		print(returnCode)
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle2,angle_y,sim.simx_opmode_oneshot)  # for y
+		#print(returnCode)
 		
 
 		prev_error[0] = perror[0]
 		prev_error[1] = perror[1]
+		prev_time = current_time
 		
 	##############	ADD YOUR CODE HERE	##############
 	
@@ -284,6 +291,7 @@ def change_setpoint(new_setpoint):
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should not be edited.
 
 if __name__ == "__main__":
+	
 
 	# Import 'task_1b.py' file as module
 	try:
@@ -394,7 +402,8 @@ if __name__ == "__main__":
 
 	# Storing time when the simulation started in variable init_simulation_time
 	return_code_signal,init_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-
+	
+	
 	if(return_code_signal==0):
 		init_simulation_time=float(init_simulation_time_string)
 
@@ -429,11 +438,13 @@ if __name__ == "__main__":
 						# Get the resultant warped transformed vision sensor image after applying Perspective Transform
 						try:
 							name = str(i) + ".png"
-							cv2.imwrite(name,transformed_image)
+							
 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
-							name = str(i) + ".png"
+							#cv2.imwrite(name,warped_img)
+							#name = str(i) + ".png"
 							
 							print(i)
+							print("--------------------------------------------")
 							
 							
 							if (type(warped_img) is np.ndarray):
@@ -495,7 +506,7 @@ if __name__ == "__main__":
 			try:
 				
 				control_logic(center_x,center_y)
-				prev_time = time.time()
+				
 			
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
@@ -550,3 +561,5 @@ if __name__ == "__main__":
 		traceback.print_exc(file=sys.stdout)
 		print()
 		sys.exit()
+
+
