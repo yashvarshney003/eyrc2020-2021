@@ -181,6 +181,13 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
+	import json
+	with open('data.json') as file:
+		data = json.load(file)
+		kp = data['kp']
+		ki = data['ki']
+		kd = data['kd']
+	print('kp:', kp,'ki:', ki, 'kd:',kd)
 	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1,rt_code
 	#print("function_called")
 
@@ -561,5 +568,4 @@ if __name__ == "__main__":
 		traceback.print_exc(file=sys.stdout)
 		print()
 		sys.exit()
-
 
