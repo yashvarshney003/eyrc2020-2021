@@ -182,13 +182,14 @@ def control_logic(center_x,center_y):
 	
 	"""
 	import json
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1,rt_code
 	with open('data.json') as file:
 		data = json.load(file)
-		kp = data['kp']
-		ki = data['ki']
-		kd = data['kd']
+		kp = data['kp'] / 1000
+		ki = data['ki'] / 1000
+		kd = data['kd'] / 10000
 	print('kp:', kp,'ki:', ki, 'kd:',kd)
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1,rt_code
+	
 	#print("function_called")
 
 
