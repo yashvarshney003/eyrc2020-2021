@@ -1,3 +1,7 @@
+# version 1.0.0
+# #org for those which was original but i changed them for convineance
+# #notim for those which i inicluded externally and not used anywhere
+
 '''
 *****************************************************************************************
 *
@@ -56,7 +60,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-setpoint = [640,640]
+setpoint = [240,500]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -76,14 +80,16 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.004,0.004]
-kd = [0.009,0.009]
-ki = [0.000,0.000]
+kp = [0.00005,0.00005]#[0.004,0.004]
+kd = [0.0001,0.0001]#[0.009,0.009]
+ki = [0.0,0.0]#[0.000,0.000]
 
-x_limit = [-90,90] # min limit and maximum limit in degrees
-y_limit = [-90,90]
+x_limit = [-0.01,0.01] # min limit and maximum limit in degrees
+y_limit = [-0.01,0.01]
 
 trim = [0,0] # if
+
+
 
 
 
@@ -95,8 +101,8 @@ trim = [0,0] # if
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-servohandle1 = -1
-servohandle2 = -1
+servohandle_x = -1
+servohandle_y = -1
 
 
 
@@ -127,8 +133,7 @@ def init_setup(rec_client_id):
 	init_setup()
 	
 	"""
-	global client_id, vision_sensor_handle,servohandle1,servohandle2
-
+	global client_id, vision_sensor_handle,servohandle_x,servohandle_y
 	# since client_id is defined in task_2a.py file, it needs to be assigned here as well.
 	client_id = rec_client_id
 
@@ -136,10 +141,10 @@ def init_setup(rec_client_id):
 	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 	#print(f" return code{return_code} vsision hadnle {vision_sensor_handle}")
 
-	returnCode, servohandle1 =sim.simxGetObjectHandle(client_id,"joint_y", sim.simx_opmode_blocking)	
-	#print(f" servihandle1 {returnCode} and {servohandle1}")	#change object name as required
-	returnCode, servohandle2 =sim.simxGetObjectHandle(client_id,"joint_x", sim.simx_opmode_blocking)
-	#print(f" servihandle2 {returnCode} and {servohandle2}")
+	returnCode, servohandle_x =sim.simxGetObjectHandle(client_id,"revolute_joint_uy_1", sim.simx_opmode_blocking)	
+	#print(f" servihandle1 {returnCode} and {servohandle_x}")	#change object name as required
+	returnCode, servohandle_y =sim.simxGetObjectHandle(client_id,"revolute_joint_yu_1", sim.simx_opmode_blocking)
+	#print(f" servihandle2 {returnCode} and {servohandle_y}")
 	
 	
 	##################################################
@@ -182,32 +187,33 @@ def control_logic(center_x,center_y):
 	
 	"""
 	import json
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1,rt_code
-	with open('data.json') as file:
-		data = json.load(file)
-		kp = data['kp'] / 1000
-		ki = data['ki'] / 1000
-		kd = data['kd'] / 10000
-	print('kp:', kp,'ki:', ki, 'kd:',kd)
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code
+	# with open('data.json') as file:
+	# 	data = json.load(file)
+	# 	kp = data['kp'] / 1000
+	# 	ki = data['ki'] / 1000
+	# 	kd = data['kd'] / 10000
+	# print('kp:', kp,'ki:', ki, 'kd:',kd)
 	
 	#print("function_called")
 
 
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-	print(rt_code)
+	#print(rt_code)
 	current_time = float(current_time)
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
-	sample_time = 0.2
+	sample_time = 0.1
 
 	
 	dt = current_time - prev_time
+	#print("dt called")
 	#print(f" dt time is {dt}")
 	#print(dt,current_time,prev_time)
 
-	if (dt >= sample_time): # code is running 	for a sample time
-
+	if (1):#(dt >= sample_time): # code is running 	for a sample time
+		print("value of dt:",dt)
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
@@ -225,10 +231,10 @@ def control_logic(center_x,center_y):
 
 		angle_x = angle_x + trim[0] #if any trim required
 		angle_y = angle_y + trim[1]
-
+		print("x_tilt:",angle_x,"    y_tilt",angle_y)
 		#limiting maximum and minimum values of the output angle in degrees
-		print(f"set value of algo {angle_x} and angle y {angle_y}")
-		print("--------------------------------------------")
+	#	print(f"set value of algo {angle_x} and angle y {angle_y}")
+	#	print("--------------------------------------------")
 		if (angle_x < x_limit[0]):
 			angle_x = x_limit[0]
 		if (angle_x > x_limit[1]):
@@ -239,14 +245,19 @@ def control_logic(center_x,center_y):
 		if (angle_y > y_limit[1]):
 			angle_y = y_limit[1]
 
-		print("************")
-		print(angle_x,angle_y)
+	#	print("************")
+		print("setpoint:",setpoint)
+		#angle_x = 0.01
+		#angle_y = 0.00002
+		print("x_tilt:",angle_x,"    y_tilt",angle_y)
+		angle_y = -angle_y
+		print("position:",center_x,center_y)
 
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
-		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle1,angle_x,sim.simx_opmode_oneshot) # for x
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,angle_x,sim.simx_opmode_oneshot) # for x
 		#print(returnCode)
 		
-		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle2,angle_y,sim.simx_opmode_oneshot)  # for y
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_y,angle_y,sim.simx_opmode_oneshot)  # for y
 		#print(returnCode)
 		
 
@@ -299,6 +310,7 @@ def change_setpoint(new_setpoint):
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should not be edited.
 
 if __name__ == "__main__":
+	
 	
 
 	# Import 'task_1b.py' file as module
@@ -417,7 +429,7 @@ if __name__ == "__main__":
 
 	# Running the coppeliasim simulation for 15 seconds
 	i = 0 
-	while(curr_simulation_time - init_simulation_time <=15):
+	while(curr_simulation_time - init_simulation_time <=1500):#org
 		i+=1
 		
 		
@@ -468,9 +480,9 @@ if __name__ == "__main__":
 										
 										# Storing the detected x and y centroid in center_x and center_y variable repectively
 										center_x = shapes['Circle'][1]
-										print(f" ball position x{center_x}")
+										#print(f" ball position x{center_x}")#org
 										center_y = shapes['Circle'][2]
-										print(f" ball position x{center_x}")
+										#print(f" ball position x{center_x}")#org
 
 									elif(type(shapes) is not dict):
 										print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
@@ -512,9 +524,7 @@ if __name__ == "__main__":
 					sys.exit()
 			
 			try:
-				
 				control_logic(center_x,center_y)
-				
 			
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
@@ -569,4 +579,3 @@ if __name__ == "__main__":
 		traceback.print_exc(file=sys.stdout)
 		print()
 		sys.exit()
-
