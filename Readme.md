@@ -47,6 +47,7 @@ In this task we were asked to design PID algorithm to balance the ball on table 
 We changed our designed from four servo motor to two servo holder to reduce mathmatical complexity and programming complexity.
 we don't get enough time to work more efficiently on this task but we gave our 100%.
 But other teams performed well from us and got more marks because thier control logic is more efficient than our's.
+We did lot's of mistake in this task and now we are very much behind the trophy. We are in top 41.
 ![](REsult%20and%20marks%20ss/Task4%20result.PNG)
 ![](REsult%20and%20marks%20ss/Task4%20Graph.PNG)
 
