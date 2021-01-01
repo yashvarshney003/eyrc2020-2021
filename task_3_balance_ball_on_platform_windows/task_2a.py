@@ -79,7 +79,6 @@ def init_remote_api_server():
 	---
 	This function should first close any open connections and then start
 	communication thread with server i.e. CoppeliaSim.
-
 	NOTE: In this Task, do not call the exit_remote_api_server function in case of failed connection to the server.
 	The test_task_2a executable script will handle that condition.
 	
@@ -119,7 +118,6 @@ def start_simulation():
 	This function should first start the simulation if the connection to server
 	i.e. CoppeliaSim was successful and then wait for last command sent to arrive
 	at CoppeliaSim server end.
-
 	NOTE: In this Task, do not call the exit_remote_api_server function in case of failed connection to the server.
 	The test_task_2a executable script will handle that condition.
 	
@@ -164,7 +162,6 @@ def get_vision_sensor_image(vision_sensor_handle):
 	---
 	This function should first get the handle of the Vision Sensor object from the scene.
 	After that it should get the Vision Sensor's image array from the CoppeliaSim scene.
-
 	Input Arguments:
 	---
 	None
@@ -181,7 +178,6 @@ def get_vision_sensor_image(vision_sensor_handle):
 	Example call:
 	---
 	vision_sensor_image, image_resolution, return_code = get_vision_sensor_image()
-
 	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
 	"""
 
@@ -286,7 +282,6 @@ def stop_simulation():
 	Purpose:
 	---
 	This function should stop the running simulation in CoppeliaSim server.
-
 	NOTE: In this Task, do not call the exit_remote_api_server function in case of failed connection to the server.
 	The test_task_2a executable script will handle that condition.
 	
@@ -332,7 +327,6 @@ def exit_remote_api_server():
 	This function should wait for the last command sent to arrive at the Coppeliasim server
 	before closing the connection and then end the communication thread with server
 	i.e. CoppeliaSim using simxFinish Remote API.
-
 	Input Arguments:
 	---
 	None
@@ -595,4 +589,3 @@ if __name__ == "__main__":
 		traceback.print_exc(file=sys.stdout)
 		print()
 		sys.exit()
-

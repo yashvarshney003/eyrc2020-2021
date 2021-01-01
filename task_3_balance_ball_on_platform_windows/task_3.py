@@ -1,3 +1,7 @@
+# version 1.0.0
+# #org for those which was original but i changed them for convineance
+# #notim for those which i inicluded externally and not used anywhere
+
 '''
 *****************************************************************************************
 *
@@ -18,11 +22,11 @@
 '''
 
 # Team ID:          2139
-# Author List:      Yash Varshney
+# Author List:      Yash Varshney,Anurag Saxena
 # Filename:         task_3.py
 # Functions:        init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint)
 #                   [ Comma separated list of functions in this file ]
-# Global variables: client_id, setpoint=[]
+# Global variables: client_id, setpoint=[],vision_sensor_handle,dt,current_time,prev_time,perror,derror,ierror,prev_error,kp,ki,kd,x_limit,y_limit,servohandle_x,servihandle_y
 # 					[ List of global variables defined in this file ]
 
 
@@ -36,6 +40,8 @@ import cv2
 import os, sys
 import traceback
 import time
+
+
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -76,14 +82,22 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.004,0.004]
-kd = [0.009,0.009]
-ki = [0.000,0.000]
+'''kp = [0.0035,0.0035]#[0.004,0.004]
+kd = [0.007,0.007]#[0.009,0.009]
+ki = [0.000009,0.000009]#[0.000,0.000] [0.000001,0.0000001]
+'''
+kp = [0.00179,0.00179]#[0.004,0.004]
+kd = [0.0042,0.0042]#[0.009,0.009]
+ki = [0.00001,0.00001]
 
-x_limit = [-90,90] # min limit and maximum limit in degrees
-y_limit = [-90,90]
+x_limit = [-0.7,0.7] # min limit and maximum limit in degrees
+y_limit = [-0.7,0.7]
 
-trim = [0,0] # if
+
+
+
+
+
 
 
 
@@ -95,8 +109,8 @@ trim = [0,0] # if
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-servohandle1 = -1
-servohandle2 = -1
+servohandle_x = -1
+servohandle_y = -1
 
 
 
@@ -127,8 +141,7 @@ def init_setup(rec_client_id):
 	init_setup()
 	
 	"""
-	global client_id, vision_sensor_handle,servohandle1,servohandle2
-
+	global client_id, vision_sensor_handle,servohandle_x,servohandle_y
 	# since client_id is defined in task_2a.py file, it needs to be assigned here as well.
 	client_id = rec_client_id
 
@@ -136,10 +149,10 @@ def init_setup(rec_client_id):
 	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 	#print(f" return code{return_code} vsision hadnle {vision_sensor_handle}")
 
-	returnCode, servohandle1 =sim.simxGetObjectHandle(client_id,"joint_y", sim.simx_opmode_blocking)	
-	#print(f" servihandle1 {returnCode} and {servohandle1}")	#change object name as required
-	returnCode, servohandle2 =sim.simxGetObjectHandle(client_id,"joint_x", sim.simx_opmode_blocking)
-	#print(f" servihandle2 {returnCode} and {servohandle2}")
+	returnCode, servohandle_x =sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1", sim.simx_opmode_blocking)	
+	#print(f" servihandle1 {returnCode} and {servohandle_x}")	#change object name as required
+	returnCode, servohandle_y =sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2", sim.simx_opmode_blocking)
+	#print(f" servihandle2 {returnCode} and {servohandle_y}")
 	
 	
 	##################################################
@@ -181,33 +194,27 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
-	import json
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle2,servohandle1,rt_code
-	with open('data.json') as file:
-		data = json.load(file)
-		kp = data['kp'] / 1000
-		ki = data['ki'] / 1000
-		kd = data['kd'] / 10000
-	print('kp:', kp,'ki:', ki, 'kd:',kd)
+	##############	ADD YOUR CODE HERE	##############
 	
-	#print("function_called")
-
-
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x
+	
+	
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-	print(rt_code)
+	#print(rt_code)
 	current_time = float(current_time)
 
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
-	sample_time = 0.2
+
+	sample_time = 0.25
 
 	
 	dt = current_time - prev_time
+	#print("dt called")
 	#print(f" dt time is {dt}")
 	#print(dt,current_time,prev_time)
 
-	if (dt >= sample_time): # code is running 	for a sample time
-
+	if (dt>=0.25): # code is running 	for a sample time
+		#print("value of dt:",dt)
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
@@ -216,19 +223,26 @@ def control_logic(center_x,center_y):
 
 		ierror[0] += perror[0]*dt
 		ierror[1] +=  perror[1]*dt
+		#print(f"print {perror} and {derror} and {ierror}")
 		
 		#print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
+		if(abs(setpoint[0] -center_x) < 100):
 		
-		
-		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0])
-		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1])
+			angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0])
+		else:
+			angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) 
+		if(abs(setpoint[1]-center_y)< 100):
+			angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1])
+		else:
+			angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) 
 
-		angle_x = angle_x + trim[0] #if any trim required
-		angle_y = angle_y + trim[1]
 
+		angle_x = angle_x  #if any trim required
+		angle_y = angle_y 
+		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
 		#limiting maximum and minimum values of the output angle in degrees
-		print(f"set value of algo {angle_x} and angle y {angle_y}")
-		print("--------------------------------------------")
+	#	print(f"set value of algo {angle_x} and angle y {angle_y}")
+	#	print("--------------------------------------------")
 		if (angle_x < x_limit[0]):
 			angle_x = x_limit[0]
 		if (angle_x > x_limit[1]):
@@ -239,14 +253,20 @@ def control_logic(center_x,center_y):
 		if (angle_y > y_limit[1]):
 			angle_y = y_limit[1]
 
-		print("************")
-		print(angle_x,angle_y)
+	#	print("************")
+		#print("setpoint:",setpoint)
+		#angle_x = 0.0
+		#angle_y = -0.5
+
+		#angle_y = -angle_y
+		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
+		#print("position:",center_x,center_y)
 
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
-		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle1,angle_x,sim.simx_opmode_oneshot) # for x
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,angle_x,sim.simx_opmode_oneshot) # for x
 		#print(returnCode)
 		
-		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle2,angle_y,sim.simx_opmode_oneshot)  # for y
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_y,angle_y,sim.simx_opmode_oneshot)  # for y
 		#print(returnCode)
 		
 
@@ -254,7 +274,9 @@ def control_logic(center_x,center_y):
 		prev_error[1] = perror[1]
 		prev_time = current_time
 		
-	##############	ADD YOUR CODE HERE	##############
+		
+		
+	
 	
 	
 
@@ -299,7 +321,6 @@ def change_setpoint(new_setpoint):
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should not be edited.
 
 if __name__ == "__main__":
-	
 
 	# Import 'task_1b.py' file as module
 	try:
@@ -410,16 +431,12 @@ if __name__ == "__main__":
 
 	# Storing time when the simulation started in variable init_simulation_time
 	return_code_signal,init_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	
-	
+
 	if(return_code_signal==0):
 		init_simulation_time=float(init_simulation_time_string)
 
 	# Running the coppeliasim simulation for 15 seconds
-	i = 0 
 	while(curr_simulation_time - init_simulation_time <=15):
-		i+=1
-		
 		
 		return_code_signal,curr_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 		
@@ -435,42 +452,30 @@ if __name__ == "__main__":
 				# Get the transformed vision sensor image captured in correct format
 				try:
 					transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image, image_resolution)
-					
 
 					if (type(transformed_image) is np.ndarray):
 
-						#cv2.imshow('transformed image', transformed_image)
-						#cv2.waitKey(0)
-						#cv2.destroyAllWindows()
+						# cv2.imshow('transformed image', transformed_image)
+						# cv2.waitKey(0)
+						# cv2.destroyAllWindows()
 
 						# Get the resultant warped transformed vision sensor image after applying Perspective Transform
 						try:
-							name = str(i) + ".png"
-							
 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
-							#cv2.imwrite(name,warped_img)
-							#name = str(i) + ".png"
-							
-							print(i)
-							print("--------------------------------------------")
-							
 							
 							if (type(warped_img) is np.ndarray):
 								
 								# Get the 'shapes' dictionary by passing the 'warped_img' to scan_image function
 								try:
-									#print(f"printing/{i}")
 									shapes = task_1a_part1.scan_image(warped_img)
 
 									if (type(shapes) is dict and shapes!={}):
-										#print('\nShapes detected by Vision Sensor are: ')
-										#print(shapes)
+										print('\nShapes detected by Vision Sensor are: ')
+										print(shapes)
 										
 										# Storing the detected x and y centroid in center_x and center_y variable repectively
 										center_x = shapes['Circle'][1]
-										print(f" ball position x{center_x}")
 										center_y = shapes['Circle'][2]
-										print(f" ball position x{center_x}")
 
 									elif(type(shapes) is not dict):
 										print('\n[ERROR] scan_image function returned a ' + str(type(shapes)) + ' instead of a dictionary.')
@@ -512,9 +517,7 @@ if __name__ == "__main__":
 					sys.exit()
 			
 			try:
-				
 				control_logic(center_x,center_y)
-				
 			
 			except:
 				print('\n[ERROR] Your control_logic function throwed an Exception. Kindly debug your code!')
@@ -569,4 +572,3 @@ if __name__ == "__main__":
 		traceback.print_exc(file=sys.stdout)
 		print()
 		sys.exit()
-
