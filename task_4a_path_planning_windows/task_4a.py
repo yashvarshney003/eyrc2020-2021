@@ -18,7 +18,7 @@
 '''
 
 # Team ID:		2139
-# Author List:		[ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Author List: Anurag Saxena
 # Filename:			task_4a.py
 # Functions:		find_path, read_start_end_coordinates
 # 					[ Comma separated list of functions in this file ]
@@ -37,6 +37,7 @@ import os
 import traceback
 import sys
 import json
+import time
 
 
 # Import 'task_1b.py' file as module
@@ -98,9 +99,100 @@ def find_path(maze_array, start_coord, end_coord):
 	path = find_path(maze_array, start_coord, end_coord)
 	"""
 
-	path = None
+	path = []
+	time.sleep(3)
 
 	################# ADD YOUR CODE HERE #################
+	k=0
+	walls=[]
+	children_list=[]
+	prev_parent =(-1,-1)
+	alternative =[]
+	i = start_coord[0]
+	j = start_coord[1]
+	while(1):
+		if(i==end_coord[0] and j == end_coord[1]):
+			path.append((i,j))
+			print("maze solved successfully")
+			print(path)
+			break
+		n = maze_array[i][j]
+		number = n
+		binary =[]
+		if(n==0):
+			binary.append(0)
+			binary.append(0)
+			binary.append(0)
+			binary.append(0)
+		else:
+			if(n==1):
+				binary.append(0)
+				binary.append(0)
+				binary.append(0)
+				binary.append(1)
+			else:
+				for b in range(4):
+					if (n==1):
+						binary.append(1)
+						n=n-1
+					elif (n==0):
+						binary.append (0)
+					else:
+						if (n%2 == 1):
+							binary.append(n%2)
+							n=n-1
+							n=n/2
+						elif (n%2==0):
+							binary.append(n%2)
+							n=n/2
+				binary.reverse()
+		print(number,"-->",binary)
+		for l in range(0,4):
+			bit = binary[l]
+			if (bit==0): #means there is no wall
+				if i<9: #for south boyndary condition
+					if l==0: #south block
+						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2) #distance of the block to the target in this step for priority by assuming i,j indexing as x,y co-ordinates
+						children=(distance,i+1,j,i,j)	#(distance between the child block and target block(i+1,j),index of child block,index of parent block(i,j))
+				if j<9: #for east boundary condition
+					if l==1: #east block
+						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2)
+						children=(distance,i,j+1,i,j)
+				if i>0: #for north boundary condition
+					if l==2: #north block
+						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2)
+						children=(distance,i-1,j,i,j)
+				if j>0: #for south boundary condition
+					if l==3: #south block
+						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2)
+						children=(distance,i,j-1,i,j)
+				#************************************************************************
+				if ((children[1]!=prev_parent[0]) or (children[2]!=prev_parent[1])): #if children is not the previous parent then append the children
+					children_list.append(children)
+		children_list.sort(reverse = True)
+		prev_parent =(i,j)
+		path.append(prev_parent)
+		if(len(children_list)>0):
+			next_parent = children_list.pop()
+			i = next_parent[1]
+			j = next_parent[2]
+			if(len(children_list)>0):
+				for a in range(0,len(children_list)):
+					alternative.append(children_list[a])
+				children_list= []
+		else:
+			next_parent = alternative.pop()
+			i = next_parent[1]
+			j = next_parent[2]
+			prev_parent = (next_parent[3],next_parent[4])
+			
+			while ((path[len(path)-1][0]!= prev_parent[0]) or (path[len(path)-1][1]!= prev_parent[1])):
+				popped_element=path.pop()
+				print("popped_element =",popped_element)
+	print(f"we dound the path{path}")
+
+
+
 
 
 
@@ -140,8 +232,13 @@ def read_start_end_coordinates(file_name, maze_name):
 	start_coord = None
 	end_coord = None
 
-	################# ADD YOUR CODE HERE #################
 
+	################# ADD YOUR CODE HERE #################
+	with open(file_name) as file:
+		data = json.load(file)
+	start_coord = data[maze_name]["start_coord"]
+	end_coord = data[maze_name]["end_coord"]
+	print(f" we find the values{start_coord} and {end_coord}")
 
 		
 	######################################################
@@ -167,7 +264,7 @@ if __name__ == "__main__":
 	# path directory of images in 'test_cases' folder
 	img_dir_path = 'test_cases/'
 
-	file_num = 0
+	file_num = 1
 
 	maze_name = 'maze0' + str(file_num)
 
