@@ -37,7 +37,6 @@
 
 base_children_list={} --Do not change or delete this variable
 baseHandle = -1       --Do not change or delete this variable
-
 --############################################################
 
 --[[
@@ -123,7 +122,14 @@ function receiveData(inInts,inFloats,inStrings,inBuffer)
 
 	--*******************************************************
 	--               ADD YOUR CODE HERE
-
+    x = 1
+    for i=0,9 do
+        maze_array[i] = {}
+        for j=0,9 do
+            maze_array[i][j] = inInts[x]    -- storing data as 2D array indexing start from 00
+            x = x+1
+        end
+    end
 	--*******************************************************
 	return inInts, inFloats, inStrings, inBuffer
 end
@@ -152,7 +158,23 @@ function generateHorizontalWalls()
 
 	--*******************************************************
 	--               ADD YOUR CODE HERE
-
+    x = -0.45
+    y = 0.5
+    z = 0.37087 --0.065
+    for i=1,11 do
+        for j=1,10 do
+            position = {x,y,z}
+            orientation = {0,0,0}
+            wallObjectHandle = createWall()
+            wall_name = "H_WallSegment_" .. (i-1) .. "x" .. (j-1)   -- wall name indexing starting from 00
+            sim.setObjectName(wallObjectHandle,wall_name)
+            sim.setObjectPosition(wallObjectHandle,sim.handle_parent,position)  -- setting wall at desired position
+            sim.setObjectOrientation(wallObjectHandle,sim.handle_parent,orientation)    --setting wall desired orientation
+            x = x + 0.1
+        end
+        y = y - 0.1
+        x = -0.45
+    end
 	--*******************************************************
 end
 
@@ -180,6 +202,23 @@ function generateVerticalWalls()
 
 	--*******************************************************
 	--               ADD YOUR CODE HERE
+    x = -0.5
+    y = 0.45
+    z = 0.37087 -- 0.065
+    for i=1,11 do
+        for j=1,10 do
+            position = {x,y,z}
+            orientation = {0,0,math.pi/2}
+            wallObjectHandle = createWall()
+            wall_name = "V_WallSegment_" .. (j-1) .. "x" .. (i-1)
+            sim.setObjectName(wallObjectHandle,wall_name)
+            sim.setObjectPosition(wallObjectHandle,sim.handle_parent,position)
+            sim.setObjectOrientation(wallObjectHandle,sim.handle_parent,orientation)
+            y = y - 0.1
+        end
+        x = x + 0.1
+        y = 0.45
+    end
 
 	--*******************************************************
 end
@@ -208,7 +247,11 @@ function deleteWalls()
 
 	--*******************************************************
 	--               ADD YOUR CODE HERE
-		
+
+    local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)  
+    sim.setInt32Parameter(sim.intparam_error_report_mode,0)                 --desabling error report mode (considering the case of empty maze)
+    sim.removeObject(wallsGroupHandle)      								--deleting horizontal wall
+    sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)        -- enabling error report mode
 	--*******************************************************
 end
 
@@ -241,7 +284,77 @@ function createMaze()
 	
 	--*******************************************************
 	--               ADD YOUR CODE HERE
-
+    for x=0,9 do
+        for y=0,9 do
+            n = maze_array[x][y]        --generating binary number corresponding to the cell xy data
+            binary=""
+            if (n==0) then
+                binary="0000"
+            else
+                if (n==1) then
+                    binary="0001"
+                else
+                    for i=1,4 do
+                        if (n==1) then
+                            binary=binary .. 1
+                            n=n-1
+                        elseif (n==0) then
+                            binary=binary .. 0
+                        else
+                            if (n%2==1) then
+                                binary=binary .. (n%2)
+                                n=n-1
+                                n=n/2
+                            elseif (n%2==0) then
+                                binary=binary .. (n%2)
+                                n=n/2
+                            else
+                                print("*** Unexpected ERROR in binary generation ***")
+                            end
+                        end
+                    end
+                    binary=string.reverse(binary)       -- binary data generated
+                end
+            end
+            
+            for i=1,4 do
+              num=binary:sub(i,i)   -- reading binary string letter by letter
+              num=tonumber(num)
+              --SENW
+              --cell number(x,y)
+              wall_Handle = -1
+              
+              local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)
+              sim.setInt32Parameter(sim.intparam_error_report_mode,0)
+              if (i==1 and num ==0) then
+                --South wall
+                wall_Name = "H_WallSegment_" .. (x+1) .. "x" .. y
+                wall_Handle=sim.getObjectHandle(wall_Name)
+              elseif (i==2 and num ==0) then
+                --East wall
+                wall_Name = "V_WallSegment_" .. x .. "x" .. (y+1)
+                wall_Handle=sim.getObjectHandle(wall_Name)
+              elseif (i==3 and num ==0) then
+                --North wall
+                wall_Name = "H_WallSegment_" .. x .. "x" .. y
+                wall_Handle=sim.getObjectHandle(wall_Name)
+              elseif (i==4 and num ==0) then
+                --West wall
+                wall_Name = "V_WallSegment_" .. x .. "x" .. y
+                wall_Handle=sim.getObjectHandle(wall_Name)
+              else
+                    --no wall delete case
+              end
+              sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)
+              if (wall_Handle > 0) then
+                objectName=sim.getObjectName(wall_Handle)
+                sim.removeObject(wall_Handle)
+              end
+            end
+        end
+    end
+    print("Maze successfully created")
+    print("Maze creating function bypassed.")
 	--*******************************************************
 end
 --[[
@@ -268,7 +381,33 @@ end
 function groupWalls()
 	--*******************************************************
 	--               ADD YOUR CODE HERE
+    
+    wall_handles={}
+    for i=1,11 do
+        for j=1,10 do
+            objectName_horizontal = "H_WallSegment_" .. (i-1) .. "x" .. (j-1)
+            objectHandle_horizontal = 1
+            objectName_vertical = "V_WallSegment_" .. (j-1) .. "x" .. (i-1)
+            objectHandle_vertical = 1
+            local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)  
+            sim.setInt32Parameter(sim.intparam_error_report_mode,0)                 --desabling error report mode    
+            objectHandle_horizontal = sim.getObjectHandle(objectName_horizontal)
+            objectHandle_vertical = sim.getObjectHandle(objectName_vertical)
+            if objectHandle_horizontal > 0 then
+                wall_handles[table.maxn(wall_handles)+1] = objectHandle_horizontal    -- storing horizontal wall handle in the end
+            end
+            if objectHandle_vertical > 0 then
+               wall_handles[table.maxn(wall_handles)+1] = objectHandle_vertical         --deleting vertical wall
+            end
+        end
+    end
+    force_sensor_pw_1_handle =sim.getObjectHandle("force_sensor_pw_1")
 
+    wallsGroupHandle = sim.groupShapes(wall_handles,false) 
+    sim.setObjectName(wallsGroupHandle,"walls_1")
+    sim.setObjectParent(wallsGroupHandle,force_sensor_pw_1_handle,true)
+   	sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)        -- enabling error report mode (enabling in the end considering blank maze case)
+    print("walls grouped successfully")
 	--*******************************************************
 end
 
@@ -295,7 +434,9 @@ end
 function addToCollection()
 	--*******************************************************
 	--               ADD YOUR CODE HERE
-
+	collectionHandle=sim.getCollectionHandle("colliding_objects")
+	sim.addObjectToCollection(collectionHandle,wallsGroupHandle,sim_handle_single,0)
+	print("walls_1 added to the collection")
 	--*******************************************************
 end
 
