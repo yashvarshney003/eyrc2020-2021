@@ -17,8 +17,8 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [ Team-ID ]
-# Author List:      [ Names of team members worked on this file separated by Comma: Name1, Name2, ... ]
+# Team ID:          2139
+# Author List:      Yash Varshney
 # Filename:         task_4b.py
 # Functions:        calculate_path_from_maze_image, send_data_to_draw_path, 
 # 					convert_path_to_pixels, traverse_path
@@ -418,6 +418,7 @@ def convert_path_to_pixels(path):
 	
 	"""
 	##############	ADD YOUR CODE HERE	##############
+	print(f"We get the list{path}")
 
 
 	
@@ -450,6 +451,7 @@ def traverse_path(pixel_path):
 
 	"""
 	##############	ADD YOUR CODE HERE	##############
+	time.sleep(300)
 
 
 
@@ -522,7 +524,9 @@ if __name__ == "__main__":
 
 			try:
 				# Send maze array data to CoppeliaSim via Remote API
+				print(f"her is my clientid{client_id}")
 				return_code = task_2b.send_data(client_id,maze_array)
+				print(f"error coee is  {return_code}")
 
 				if (return_code == sim.simx_return_ok):
 					# Starting the Simulation
@@ -566,7 +570,7 @@ if __name__ == "__main__":
 						sys.exit()
 				
 				else:
-					print('\n[ERROR] Failed sending data to CoppeliaSim!')
+					print('\n[ERROR] gama gama Failed sending data to CoppeliaSim!')
 					print('send_data function in task_2b.py is not configured correctly, check the code!')
 					print()
 					sys.exit()

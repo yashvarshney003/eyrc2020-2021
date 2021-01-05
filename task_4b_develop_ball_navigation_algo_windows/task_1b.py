@@ -77,21 +77,17 @@ def applyPerspectiveTransform(input_img):
 
 	##############	ADD YOUR CODE HERE	##############
 	#Conversion into GrayScale
-	gray = cv.GaussianBlur(input_img, (5,5), 2)
-	
-	
+	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
 
-	ret,thresh1 = cv.threshold(gray,230,255,cv.THRESH_BINARY_INV)
+	#Applying Gaussian Blur 
+	gray = cv.GaussianBlur(gray, (9,9), 2)
+
 	#Applying Canny Edge Detection
-	edged = cv.Canny(thresh1, 50, 200)
-	
-
-					
-
+	edged = cv.Canny(gray, 50, 200)
 
 
 	#Finding Contours 
-	cnts = cv.findContours(edged, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+	cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
 		
 
 
@@ -101,7 +97,7 @@ def applyPerspectiveTransform(input_img):
 	#Looping through the Contours and approxing Contours
 	for c in cnts:
 		peri = cv.arcLength(c, True)
-		approx = cv.approxPolyDP(c, 0.1* peri, True)
+		approx = cv.approxPolyDP(c, 0.05 * peri, True)
 		#0.02
 		
 	# If length is 4 then it is ROI
@@ -129,15 +125,17 @@ def applyPerspectiveTransform(input_img):
 
 	#Finding Maximum width
 
-	
-	maxWidth = 1280
+	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+	maxWidth = max(int(widthA), int(widthB))
 
 
 
 	#Findinf Maximum height
 
-	
-	maxHeight = 1280
+	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+	maxHeight = max(int(heightA), int(heightB))
 
 	#Destination Array of ROI
 	
@@ -150,15 +148,6 @@ def applyPerspectiveTransform(input_img):
 
 	# Finally the warped image 
 	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
-	#cv.imshow("window_name", warped_img) 
-  
-#waits for user to press any key  
-#(this is necessary to avoid Python kernel form crashing) 
-	#cv.waitKey(0)  
-  
-#closing all open windows  
-	#cv.destroyAllWindows() 
-	
 	
 	
 
