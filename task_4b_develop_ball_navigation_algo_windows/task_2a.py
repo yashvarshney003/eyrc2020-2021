@@ -103,7 +103,6 @@ def init_remote_api_server():
 	##############	ADD YOUR CODE HERE	##############
 	sim.simxFinish(-1) # just in case, close all opened connections
 	client_id = sim.simxStart('127.0.0.1',19997,True,True,5000,5) 
-	print(f"client is isssssss {client_id}")
 	
 	
 	##################################################
@@ -156,7 +155,7 @@ def start_simulation():
 	return return_code
 
 
-def get_vision_sensor_image(vision_sensor_handle):
+def get_vision_sensor_image(client_id1,vision_sensor_handle):
 	
 	"""
 	Purpose:
@@ -182,7 +181,8 @@ def get_vision_sensor_image(vision_sensor_handle):
 	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
 	"""
 
-	global client_id
+	global client_id 
+	client_id = client_id1
 	
 
 	vision_sensor_image = []

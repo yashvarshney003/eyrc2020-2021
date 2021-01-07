@@ -244,7 +244,7 @@ def send_data(client_id1,maze_array):
 
 	global client_id
 	client_id = client_id1
-	print(f"clientid is {client_id} and maza data is {maze_array}")
+	#print(f"clientid is {client_id} and maza data is {maze_array}")
 
 	return_code = -1
 	maze_array1 = []

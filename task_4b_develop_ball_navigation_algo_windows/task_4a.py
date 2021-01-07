@@ -114,8 +114,7 @@ def find_path(maze_array, start_coord, end_coord):
 	while(1):
 		if(i==end_coord[0] and j == end_coord[1]):
 			path.append((i,j))
-			print("maze solved successfully")
-			print(path)
+			
 			break
 		n = maze_array[i][j]
 		number = n
@@ -194,7 +193,7 @@ def find_path(maze_array, start_coord, end_coord):
 			while ((path[len(path)-1][0]!= prev_parent[0]) or (path[len(path)-1][1]!= prev_parent[1])):
 				popped_element=path.pop()
 				
-	print(f"we dound the path{path}")
+	#print(f"we dound the path{path}")
 
 
 

@@ -34,7 +34,7 @@
 ## DO NOT TAMPER WITH THE ALREADY DEFINED GLOBAL VARIABLES. ##
 ##############################################################
 ]]--
-
+maze_array = {}
 base_children_list={} --Do not change or delete this variable
 baseHandle = -1       --Do not change or delete this variable
 --############################################################
@@ -121,7 +121,7 @@ end
 function receiveData(inInts,inFloats,inStrings,inBuffer)
 
 	--*******************************************************
-	--               ADD YOUR CODE HERE
+	--               ADD YOUR CODE HERE ____UNCOMMENT HERE____
     x = 1
     for i=0,9 do
         maze_array[i] = {}
@@ -273,7 +273,7 @@ end
 	
 	Returns:
 	---
-	None
+	None 
 	
 	Example call:
 	---
@@ -283,13 +283,13 @@ end
 function createMaze()
 	
 	--*******************************************************
-	--               ADD YOUR CODE HERE
+	--               ADD YOUR CODE HERE ____UNCOMMENT HERE____
     for x=0,9 do
         for y=0,9 do
             n = maze_array[x][y]        --generating binary number corresponding to the cell xy data
             binary=""
             if (n==0) then
-                binary="0000"
+                binary ="0000"
             else
                 if (n==1) then
                     binary="0001"
@@ -354,7 +354,7 @@ function createMaze()
         end
     end
     print("Maze successfully created")
-    print("Maze creating function bypassed.")
+    --print("Maze creating function bypassed.")
 	--*******************************************************
 end
 --[[
@@ -405,6 +405,7 @@ function groupWalls()
 
     wallsGroupHandle = sim.groupShapes(wall_handles,false) 
     sim.setObjectName(wallsGroupHandle,"walls_1")
+    sim.setObjectOrientation(wallsGroupHandle,sim.handle_parent,{0,-math.pi/2,0})
     sim.setObjectParent(wallsGroupHandle,force_sensor_pw_1_handle,true)
    	sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)        -- enabling error report mode (enabling in the end considering blank maze case)
     print("walls grouped successfully")
@@ -435,7 +436,7 @@ function addToCollection()
 	--*******************************************************
 	--               ADD YOUR CODE HERE
 	collectionHandle=sim.getCollectionHandle("colliding_objects")
-	sim.addObjectToCollection(collectionHandle,wallsGroupHandle,sim_handle_single,0)
+	sim.addObjectToCollection(collectionHandle,wallsGroupHandle,sim.handle_single,0)
 	print("walls_1 added to the collection")
 	--*******************************************************
 end

@@ -160,6 +160,7 @@ end_coord = (9,5)
 
 # You can add your global variables here
 ##############################################################
+vision_sensor_handle = -1
 
 
 
@@ -218,7 +219,7 @@ def calculate_path_from_maze_image(img_file_path):
 
 		try:
 			# get the resultant warped maze image after applying Perspective Transform
-			warped_img = task_1b.applyPerspectiveTransform(input_img)
+			warped_img = task_1b.applyPerspectiveTransform(input_img,0)
 
 			if type(warped_img) is np.ndarray:
 
@@ -418,9 +419,40 @@ def convert_path_to_pixels(path):
 	
 	"""
 	##############	ADD YOUR CODE HERE	##############
-	print(f"We get the list{path}")
+	global client_id
+	resolution_x = 1280
+	
+	resolution_y = 1280
+	x_increment = resolution_x//10
+	y_increment = resolution_y//10
+	pixel_path = []
+	for i in range(len(path)):
+		pixel_path.append([])
+	
+	
+	for i in range(len(path)):
+		x_pixel = (x_increment//2) + path[i][0]*x_increment
+		y_pixel = (y_increment//2) + path[i][1]*y_increment
+		pixel_path[i].append(x_pixel)
+		pixel_path[i].append(y_pixel)
+	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
+	transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+	
+	warped_img = task_1b.applyPerspectiveTransform(transformed_image,1)
+	data= cv2.imread("result_maze01.jpg",0)
+	data = cv2.resize(data,(1280,1280))
 
-
+	for i in range(len(pixel_path)):
+		print("kutte")
+		print(pixel_path[i][0],pixel_path[i][1])
+		data = cv2.circle(data, (pixel_path[i][0],pixel_path[i][1]) , 5,(255,0,0),3)
+	cv2.imshow("circled image",data)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+	
+		
+	#print(f"so we get the list{pixel_path}")
+	
 	
 	##################################################	
 	return pixel_path
@@ -485,9 +517,11 @@ def traverse_path(pixel_path):
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should NOT be edited.
 
 if __name__ == "__main__":
+	
 
 	# path directory of images in 'test_cases' folder
 	img_dir_path = 'test_cases/'
+
 
 	# path to 'maze00.jpg' image file
 	file_num = 0
@@ -524,9 +558,10 @@ if __name__ == "__main__":
 
 			try:
 				# Send maze array data to CoppeliaSim via Remote API
-				print(f"her is my clientid{client_id}")
+				#print(f"her is my clientid{client_id}")
 				return_code = task_2b.send_data(client_id,maze_array)
-				print(f"error coee is  {return_code}")
+				#
+				# print(f"error coee is  {return_code}")
 
 				if (return_code == sim.simx_return_ok):
 					# Starting the Simulation
@@ -539,6 +574,8 @@ if __name__ == "__main__":
 							# Storing the required handles in respective global variables.
 							try:
 								task_3.init_setup(client_id)
+								#hatani hai 
+								return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 								try:
 									send_data_to_draw_path(client_id,path)
 								
@@ -570,7 +607,7 @@ if __name__ == "__main__":
 						sys.exit()
 				
 				else:
-					print('\n[ERROR] gama gama Failed sending data to CoppeliaSim!')
+					print('\n[ERROR] Failed sending data to CoppeliaSim!')
 					print('send_data function in task_2b.py is not configured correctly, check the code!')
 					print()
 					sys.exit()

@@ -51,7 +51,7 @@ import csv
 ##############################################################
 
 
-def applyPerspectiveTransform(input_img):
+def applyPerspectiveTransform(input_img,code):
 
 	"""
 	Purpose:
@@ -72,88 +72,153 @@ def applyPerspectiveTransform(input_img):
 	---
 	warped_img = applyPerspectiveTransform(input_img)
 	"""
+	if code == 0:
 
-	warped_img = None
+		warped_img = None
+
+		##############	ADD YOUR CODE HERE	##############
+		#Conversion into GrayScale
+		gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+
+		#Applying Gaussian Blur 
+		gray = cv.GaussianBlur(gray, (9,9), 2)
+
+		#Applying Canny Edge Detection
+		edged = cv.Canny(gray, 50, 200)
+
+
+		#Finding Contours 
+		cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+			
+
+
+		#Sorting the Contours in decreasing order because Square containing the Maze is largest
+		cnts = sorted(cnts, key = cv.contourArea, reverse = True)
+
+		#Looping through the Contours and approxing Contours
+		for c in cnts:
+			peri = cv.arcLength(c, True)
+			approx = cv.approxPolyDP(c, 0.05 * peri, True)
+			#0.02
+			
+		# If length is 4 then it is ROI
+			if len(approx) == 4:
+				screenCnt = approx
+				break
+
+		# Reshaping Contours for further use
+		pts = screenCnt.reshape(4, 2)
+
+		#creating Array of Zero of Size(4,2)	
+		rect = np.zeros((4, 2), dtype = "float32")
+
+		#Ordering of points in Clockwise manner
+
+		s = pts.sum(axis = 1)
+		rect[0] = pts[np.argmin(s)]
+		rect[2] = pts[np.argmax(s)]
+
+		diff = np.diff(pts, axis = 1)
+		rect[1] = pts[np.argmin(diff)]
+		rect[3] = pts[np.argmax(diff)]
+		(tl, tr, br, bl) = rect
+
+
+		#Finding Maximum width
+
+		widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+		widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+		maxWidth = max(int(widthA), int(widthB))
+
+
+
+		#Findinf Maximum height
+
+		heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+		heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+		maxHeight = max(int(heightA), int(heightB))
+
+		#Destination Array of ROI
+		
+
+		dst = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
+
+
+		#Applying perspective transform
+		M = cv.getPerspectiveTransform(rect, dst)
+
+		# Finally the warped image 
+		warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
+		
+		
+
+		##################################################
+
+		return warped_img
+	else:
+		warped_img = None
 
 	##############	ADD YOUR CODE HERE	##############
-	#Conversion into GrayScale
-	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+		gray = cv.GaussianBlur(input_img,(5,5), 2)
 
-	#Applying Gaussian Blur 
-	gray = cv.GaussianBlur(gray, (9,9), 2)
+			
+			
 
-	#Applying Canny Edge Detection
-	edged = cv.Canny(gray, 50, 200)
+		ret,thresh1 = cv.threshold(gray,230,255,cv.THRESH_BINARY_INV)
+		edged = cv.Canny(thresh1, 50, 200)
+		cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+		cnts = sorted(cnts, key = cv.contourArea, reverse = True)
+		for c in cnts:
+				peri = cv.arcLength(c, True)
+				approx = cv.approxPolyDP(c, 0.05 * peri, True)
+			
+				#0.02
+				
+			# If length is 4 then it is ROI
+				if len(approx) == 4:
+					screenCnt = approx
+					break
+		pts = screenCnt.reshape(4, 2)
+
+			#creating Array of Zero of Size(4,2)	
+		rect = np.zeros((4, 2), dtype = "float32")
+		s = pts.sum(axis = 1)
+		rect[0] = pts[np.argmin(s)]
+		rect[2] = pts[np.argmax(s)]
+
+		diff = np.diff(pts, axis = 1)
+		rect[1] = pts[np.argmin(diff)]
+		rect[3] = pts[np.argmax(diff)]
+		(tl, tr, br, bl) = rect
+		
+		maxWidth = 1280
 
 
-	#Finding Contours 
-	cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+
+			#Findinf Maximum height
+
+			
+		maxHeight = 1280
+
+			#Destination Array of ROI
+			
+
+		dst = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
+
+
+			#Applying perspective transform
+		M = cv.getPerspectiveTransform(rect, dst)
+
+			# Finally the warped image 
+		warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
+				
+		
+		
 		
 
+		##################################################
 
-	#Sorting the Contours in decreasing order because Square containing the Maze is largest
-	cnts = sorted(cnts, key = cv.contourArea, reverse = True)
-
-	#Looping through the Contours and approxing Contours
-	for c in cnts:
-		peri = cv.arcLength(c, True)
-		approx = cv.approxPolyDP(c, 0.05 * peri, True)
-		#0.02
-		
-	# If length is 4 then it is ROI
-		if len(approx) == 4:
-			screenCnt = approx
-			break
-
-	# Reshaping Contours for further use
-	pts = screenCnt.reshape(4, 2)
-
-	#creating Array of Zero of Size(4,2)	
-	rect = np.zeros((4, 2), dtype = "float32")
-
-	#Ordering of points in Clockwise manner
-
-	s = pts.sum(axis = 1)
-	rect[0] = pts[np.argmin(s)]
-	rect[2] = pts[np.argmax(s)]
-
-	diff = np.diff(pts, axis = 1)
-	rect[1] = pts[np.argmin(diff)]
-	rect[3] = pts[np.argmax(diff)]
-	(tl, tr, br, bl) = rect
-
-
-	#Finding Maximum width
-
-	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-	maxWidth = max(int(widthA), int(widthB))
-
-
-
-	#Findinf Maximum height
-
-	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-	maxHeight = max(int(heightA), int(heightB))
-
-	#Destination Array of ROI
-	
-
-	dst = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
-
-
-	#Applying perspective transform
-	M = cv.getPerspectiveTransform(rect, dst)
-
-	# Finally the warped image 
-	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
-	
-	
-
-	##################################################
-
-	return warped_img
+		return warped_img
 
 
 def detectMaze(warped_img):
