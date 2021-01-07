@@ -161,6 +161,8 @@ end_coord = (9,5)
 # You can add your global variables here
 ##############################################################
 vision_sensor_handle = -1
+servohandle_x = -1
+servohandle_y = -1
 
 
 
@@ -172,6 +174,12 @@ vision_sensor_handle = -1
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+def make_connection():
+	global servohandle_x,servohandle_y
+	returnCode, servohandle_x =sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1", sim.simx_opmode_blocking)	
+	#print(f" servihandle1 {returnCode} and {servohandle_x}")	#change object name as required
+	returnCode, servohandle_y =sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2", sim.simx_opmode_blocking)
+	#print(f" servihandle2 {returnCode} and {servohandle_y}")
 
 
 
@@ -373,7 +381,7 @@ def send_data_to_draw_path(rec_client_id, path):
 	send_data_to_draw_path(rec_client_id,path)
 	
 	"""
-	global client_id
+	global client_id,servohandle_y,servohandle_x
 	client_id = rec_client_id
 
 	##############	IF REQUIRED, CHANGE THE CODE FROM HERE	##############
@@ -435,20 +443,11 @@ def convert_path_to_pixels(path):
 		y_pixel = (y_increment//2) + path[i][1]*y_increment
 		pixel_path[i].append(x_pixel)
 		pixel_path[i].append(y_pixel)
-	vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
-	transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+	make_connection()
 	
-	warped_img = task_1b.applyPerspectiveTransform(transformed_image,1)
-	data= cv2.imread("result_maze01.jpg",0)
-	data = cv2.resize(data,(1280,1280))
-
-	for i in range(len(pixel_path)):
-		print("kutte")
-		print(pixel_path[i][0],pixel_path[i][1])
-		data = cv2.circle(data, (pixel_path[i][0],pixel_path[i][1]) , 5,(255,0,0),3)
-	cv2.imshow("circled image",data)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	
+	
+	
 	
 		
 	#print(f"so we get the list{pixel_path}")
@@ -483,7 +482,17 @@ def traverse_path(pixel_path):
 
 	"""
 	##############	ADD YOUR CODE HERE	##############
-	time.sleep(300)
+
+	global client_id
+	for i in pixel_path:
+				print(f"client id in task 4b{client_id}")
+		
+				
+				task_3.control_logic(client_id,i[0],i[1])
+
+
+
+
 
 
 

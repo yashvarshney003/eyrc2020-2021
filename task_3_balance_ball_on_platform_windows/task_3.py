@@ -42,6 +42,8 @@ import traceback
 import time
 
 
+
+
 ##############################################################
 
 # Importing the sim module for Remote API connection with CoppeliaSim
@@ -62,7 +64,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-setpoint = [640,640]
+setpoint = [1063,217]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -71,7 +73,7 @@ setpoint = [640,640]
 # You can add your global variables here
 ##############################################################
 vision_sensor_handle = 0
-dt = 0
+dt = 0.20
 current_time =0
 prev_time = 0
 
@@ -90,8 +92,11 @@ kp = [0.00179,0.00179]#[0.004,0.004]
 kd = [0.0049,0.0049]#[0.009,0.009]
 ki = [0.00001,0.00001]
 
-x_limit = [-0.7,0.7] # min limit and maximum limit in degrees
-y_limit = [-0.7,0.7]
+x_limit = [-0.9,0.9] # min limit and maximum limit in degrees
+y_limit = [-0.9,0.9]
+last_output = [0,0]
+servohandle_x = -1
+servohandle_y = -1
 
 
 
@@ -109,8 +114,13 @@ y_limit = [-0.7,0.7]
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-servohandle_x = -1
-servohandle_y = -1
+def set_limits(integral_term):
+	x_limit= [-0.9,0.9]
+	if (integral_term < x_limit[0]):
+			integral_term = x_limit[0]
+	if (integral_term > x_limit[1]):
+			integral_term = x_limit[1]
+	return integral_term
 
 
 
@@ -196,7 +206,7 @@ def control_logic(center_x,center_y):
 	"""
 	##############	ADD YOUR CODE HERE	##############
 	
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,last_output
 	
 	
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
@@ -205,13 +215,18 @@ def control_logic(center_x,center_y):
 
 
 
-	sample_time = 0.25
+	sample_time = 0.2
 
 	
 	dt = current_time - prev_time
 	#print("dt called")
 	#print(f" dt time is {dt}")
 	#print(dt,current_time,prev_time)
+	if(dt < 0.17 ):
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,last_output[0],sim.simx_opmode_oneshot)
+		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_y,last_output[1],sim.simx_opmode_oneshot)
+		time.sleep(0.2 - dt)
+		
 
 	if (dt>=0.25): # code is running 	for a sample time
 		#print("value of dt:",dt)
@@ -222,19 +237,18 @@ def control_logic(center_x,center_y):
 		derror[1] = (perror[1] - prev_error[1])/dt
 
 		ierror[0] += perror[0]*dt
+		ierror[0] = set_limits(ierror[0])
 		ierror[1] +=  perror[1]*dt
-		#print(f"print {perror} and {derror} and {ierror}")
+		ierror[1] = set_limits(ierror[1])
+		print(f"print {perror} and {derror} and {ierror}")
 		
-		#print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
-		if(abs(setpoint[0] -center_x) < 100):
+		print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
 		
-			angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0])
-		else:
-			angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) 
-		if(abs(setpoint[1]-center_y)< 100):
-			angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1])
-		else:
-			angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) 
+		
+		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (ki[0]*ierror[0])
+		
+		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (ki[1]*ierror[1])
+		
 
 
 		angle_x = angle_x  #if any trim required
@@ -260,7 +274,7 @@ def control_logic(center_x,center_y):
 
 		#angle_y = -angle_y
 		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
-		#print("position:",center_x,center_y)
+		print("position:",center_x,center_y)
 
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
 		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,angle_x,sim.simx_opmode_oneshot) # for x
@@ -273,6 +287,8 @@ def control_logic(center_x,center_y):
 		prev_error[0] = perror[0]
 		prev_error[1] = perror[1]
 		prev_time = current_time
+		last_output[0] = angle_x
+		last_output[1] = angle_y
 		
 		
 		
