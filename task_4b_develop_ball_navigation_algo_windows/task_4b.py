@@ -484,11 +484,16 @@ def traverse_path(pixel_path):
 	##############	ADD YOUR CODE HERE	##############
 
 	global client_id
+	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
+	print(prev_time)
+	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+	print("didbdibdibdibd",current_time)
 	for i in pixel_path:
 				print(f"client id in task 4b{client_id}")
+				print(f"sent this {i[1]} and {i[0]}")
 		
 				
-				task_3.control_logic(client_id,i[0],i[1])
+				task_3.control_logic(client_id,i[1],i[0])
 
 
 

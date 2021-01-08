@@ -215,7 +215,9 @@ def control_logic(client_id,center_x,center_y):
 	last_output = [0,0]
 	init_setup(client_id)
 	sample_time = 0.2
-	time.sleep(2)
+	
+	return_code_signal,init_simulation_time_string=sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
+
 
 
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
