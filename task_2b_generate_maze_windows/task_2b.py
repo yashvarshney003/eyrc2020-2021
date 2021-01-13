@@ -359,14 +359,14 @@ if __name__ == "__main__":
 	maze_array_generated_flag = 0
 
 	# path directory of images in 'test_cases' folder
-	img_dir_path = 'test_cases/'
+	img_dir_path = 'task_4c_maze_images/'
 
 	# path directory to 'generated_images' folder 
-	generated_dir_path = 'generated_images/'
+	generated_dir_path = 'generated_images1/'
 
 	# path to 'maze00.jpg' image file
-	file_num = 0
-	img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
+	file_num = 1
+	img_file_path = img_dir_path + 'maze_t' + str(file_num) + '.jpg'
 
 	if os.path.exists(img_file_path):
 		# print('\nFound maze0' + str(file_num) + '.jpg')

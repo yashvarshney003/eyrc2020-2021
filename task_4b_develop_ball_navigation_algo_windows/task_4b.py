@@ -150,7 +150,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The 0th element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-setpoint = [0, 0]
+
 
 # Global tuple to store the start and end cell coordinates of the maze
 # The 0th element stores the row and 1st element stores the column
@@ -160,9 +160,34 @@ end_coord = (9,5)
 
 # You can add your global variables here
 ##############################################################
-vision_sensor_handle = -1
+#[1063,345]#[640,640]
+
+# Global variable "vision_sensor_handle" to store handle for Vision Sensor
+# NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
+
+
+# You can add your global variables here
+##############################################################
+vision_sensor_handle = 0
+
+
+
+
+
+##############################################################
+
+
+################# ADD UTILITY FUNCTIONS HERE #################
+## You can define any utility functions for your code.      ##
+## Please add proper comments to ensure that your code is   ##
+## readable and easy to understand.                         ##
+##############################################################
 servohandle_x = -1
 servohandle_y = -1
+
+
+
+
 
 
 
@@ -175,11 +200,12 @@ servohandle_y = -1
 ## readable and easy to understand.                         ##
 ##############################################################
 def make_connection():
-	global servohandle_x,servohandle_y
+	global servohandle_x,servohandle_y,vision_sensor_handle
 	returnCode, servohandle_x =sim.simxGetObjectHandle(client_id,"revolute_joint_ss_1", sim.simx_opmode_blocking)	
 	#print(f" servihandle1 {returnCode} and {servohandle_x}")	#change object name as required
 	returnCode, servohandle_y =sim.simxGetObjectHandle(client_id,"revolute_joint_ss_2", sim.simx_opmode_blocking)
 	#print(f" servihandle2 {returnCode} and {servohandle_y}")
+	return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 
 
 
@@ -483,18 +509,38 @@ def traverse_path(pixel_path):
 	"""
 	##############	ADD YOUR CODE HERE	##############
 
-	global client_id
+	global client_id,prev_time,current_time
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	print(prev_time)
+	#print(prev_time)
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 	print("didbdibdibdibd",current_time)
+	pixel_path.pop(0)
+	#time.sleep(10)
 	for i in pixel_path:
-				print(f"client id in task 4b{client_id}")
+		task_3.change_setpoint(i)
+		while(1):
+			print("#########################################################################")
+			
+			
+			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
+			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+			warped_img = task_1b.applyPerspectiveTransform(transformed_image,1)
+			
+			shapes = task_1a_part1.scan_image(warped_img)
+			if(shapes):
+				#print(f"client id in task 4b{client_id}")
 				print(f"sent this {i[1]} and {i[0]}")
-		
 				
-				task_3.control_logic(client_id,i[1],i[0])
-
+				print(f"here1 {shapes} and {i} ")
+				print(shapes['Circle'][1]-i[1],abs(shapes['Circle'][2]-i[0]))
+				if(abs(shapes['Circle'][1]-i[1]) <= 20  and abs(shapes['Circle'][2]-i[0]) <= 20):
+					print("here2")
+					print("her-------------------------------------------------------------------------------------")
+					break
+					
+				else:
+					task_3.control_logic(i[1],i[0])
+				
 
 
 
@@ -580,7 +626,7 @@ if __name__ == "__main__":
 				if (return_code == sim.simx_return_ok):
 					# Starting the Simulation
 					try:
-						return_code = task_2a.start_simulation()
+						return_code = task_2a.start_simulation(client_id)
 
 						if (return_code == sim.simx_return_novalue_flag):
 							print('\nSimulation started correctly in CoppeliaSim.')
@@ -589,7 +635,8 @@ if __name__ == "__main__":
 							try:
 								task_3.init_setup(client_id)
 								#hatani hai 
-								return_code,vision_sensor_handle = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
+								#Kya kare is line ka 
+								
 								try:
 									send_data_to_draw_path(client_id,path)
 								

@@ -80,7 +80,7 @@ def applyPerspectiveTransform(input_img):
 	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
 
 	#Applying Gaussian Blur 
-	gray = cv.GaussianBlur(gray, (9,9), 2)
+	gray = cv.GaussianBlur(gray, (5,5), 2)
 
 	#Applying Canny Edge Detection
 	edged = cv.Canny(gray, 50, 200)
@@ -315,6 +315,7 @@ def writeToCsv(csv_file_path, maze_array):
 # 					present in 'test_cases' folder or not. Write your solution ONLY in the space provided in the above
 # 					applyPerspectiveTransform and detectMaze functions.
 
+
 if __name__ == "__main__":
 
 	# path directory of images in 'test_cases' folder
@@ -331,7 +332,7 @@ if __name__ == "__main__":
 	csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 	
 	# read the 'maze00.jpg' image file
-	input_img = cv.imread(img_file_path)
+	input_img = cv2.imread(img_file_path)
 
 	# get the resultant warped maze image after applying Perspective Transform
 	warped_img = applyPerspectiveTransform(input_img)
@@ -349,9 +350,9 @@ if __name__ == "__main__":
 			# writes the encoded maze array to the csv file
 			writeToCsv(csv_file_path, maze_array)
 
-			cv.imshow('warped_img_0' + str(file_num), warped_img)
-			cv.waitKey(0)
-			cv.destroyAllWindows()
+			cv2.imshow('warped_img_0' + str(file_num), warped_img)
+			cv2.waitKey(0)
+			cv2.destroyAllWindows()
 		
 		else:
 
@@ -379,7 +380,7 @@ if __name__ == "__main__":
 			csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 			
 			# read the image file
-			input_img = cv.imread(img_file_path)
+			input_img = cv2.imread(img_file_path)
 
 			# get the resultant warped maze image after applying Perspective Transform
 			warped_img = applyPerspectiveTransform(input_img)
@@ -397,9 +398,9 @@ if __name__ == "__main__":
 					# writes the encoded maze array to the csv file
 					writeToCsv(csv_file_path, maze_array)
 
-					cv.imshow('warped_img_0' + str(file_num), warped_img)
-					cv.waitKey(0)
-					cv.destroyAllWindows()
+					cv2.imshow('warped_img_0' + str(file_num), warped_img)
+					cv2.waitKey(0)
+					cv2.destroyAllWindows()
 				
 				else:
 
@@ -414,4 +415,3 @@ if __name__ == "__main__":
 	else:
 
 		print('')
-

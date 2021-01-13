@@ -72,6 +72,7 @@ except Exception as e:
 
 
 def find_path(maze_array, start_coord, end_coord):
+	
 	"""
 	Purpose:
 	---
@@ -109,14 +110,41 @@ def find_path(maze_array, start_coord, end_coord):
 	children_list=[]
 	prev_parent =(-1,-1)
 	alternative =[]
+	alternative_parent=[]
+	all_paths=[]
+
 	i = start_coord[0]
 	j = start_coord[1]
 	while(1):
-		if(i==end_coord[0] and j == end_coord[1]):
+		if ((i==end_coord[0]) and j==end_coord[1]):
 			path.append((i,j))
 			
-			break
-		n = maze_array[i][j]
+			#******************************************
+			all_paths.append(path[:])
+
+			if (len(all_paths)==1):	#condition after the 1st path calculated
+				alternative_parent = alternative
+
+			if (len(alternative_parent)==0):
+				break
+			else:
+				#pop from the alternative
+				next_parent=alternative_parent.pop()
+				alternative=[]	#after calculating 1st path clear the alternative list for the second path
+				i=next_parent[1]
+				j=next_parent[2]
+				prev_parent=(next_parent[3],next_parent[4])
+				#need to delete some elements of path here to delete all the previous path cells untill the we get the altenative parent.
+				try:
+					position=path.index(prev_parent)
+					while(len(path)>(position+1)):
+						popped_element=path.pop()
+						
+				except VlaueError:
+					print("Vlauerrit")
+		
+		
+		n = maze_array[i][j]			
 		number = n
 		binary =[]
 		if(n==0):
@@ -152,19 +180,19 @@ def find_path(maze_array, start_coord, end_coord):
 			if (bit==0): #means there is no wall
 				if i<9: #for south boyndary condition
 					if l==0: #south block
-						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2) #distance of the block to the target in this step for priority by assuming i,j indexing as x,y co-ordinates
+						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(j))**2) #distance of the block to the target in this step for priority by assuming i,j indexing as x,y co-ordinates
 						children=(distance,i+1,j,i,j)	#(distance between the child block and target block(i+1,j),index of child block,index of parent block(i,j))
 				if j<9: #for east boundary condition
 					if l==1: #east block
-						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2)
+						distance=((end_coord[0]-(i))**2)+((end_coord[1]-(j+1))**2)
 						children=(distance,i,j+1,i,j)
 				if i>0: #for north boundary condition
 					if l==2: #north block
-						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2)
+						distance=((end_coord[0]-(i-1))**2)+((end_coord[1]-(j))**2)
 						children=(distance,i-1,j,i,j)
 				if j>0: #for south boundary condition
 					if l==3: #south block
-						distance=((end_coord[0]-(i+1))**2)+((end_coord[1]-(i))**2)
+						distance=((end_coord[0]-(i))**2)+((end_coord[1]-(j-1))**2)
 						children=(distance,i,j-1,i,j)
 				#************************************************************************
 				if ((children[1]!=prev_parent[0]) or (children[2]!=prev_parent[1])): #if children is not the previous parent then append the children
@@ -181,27 +209,61 @@ def find_path(maze_array, start_coord, end_coord):
 					alternative.append(children_list[a])
 				children_list= []
 		else:
-			if(len(alternative)==0):
-				print(f" path don't exist")
+			#Path does not exist case
+			if ((len(all_paths) ==0) and (len(alternative)==0)):
+				print(f" Path between start_coord :{start_coord} and end_coord: {end_coord} for this maze does not exist.")
 				path = None
 				break
-			next_parent = alternative.pop()
-			i = next_parent[1]
-			j = next_parent[2]
-			prev_parent = (next_parent[3],next_parent[4])
-			
-			while ((path[len(path)-1][0]!= prev_parent[0]) or (path[len(path)-1][1]!= prev_parent[1])):
-				popped_element=path.pop()
-				
-	#print(f"we dound the path{path}")
+
+			#pop from the alternative
+			if (len(alternative)!=0):
+				next_parent=alternative.pop()
+				i=next_parent[1]
+				j=next_parent[2]
+				prev_parent=(next_parent[3],next_parent[4])
+				#it need to delete some elements of path here to delete all the wrong cells untill the we get the altenative parent.
+				try:
+					position=path.index(prev_parent)
+					while(len(path)>(position+1)):
+						popped_element=path.pop()
+						#print("popped_element =",popped_element)
+				except VlaueError:
+					print("Vlauerror")
+					
+
+			else:
+				#pop from the alternative_parent list
+				if (len(alternative_parent)!=0):
+					next_parent=alternative_parent.pop()
+					alternative=[]	#after calculating 1st path clear the alternative list for the second path
+					i=next_parent[1]
+					j=next_parent[2]
+					prev_parent=(next_parent[3],next_parent[4])
+					#need to delete some elements of path here to delete all the previous path cells untill the we get the altenative parent.
+					try:
+						position=path.index(prev_parent)
+						while(len(path)>(position+1)):
+							popped_element=path.pop()
+						
+					except VlaueError:
+						print(f"prev_parent {prev_parent} is not present in the path list.")
+				else:
+					break
+	if (len(all_paths)!=0):
+		all_paths.sort(key=len,reverse=True)
+		path = all_paths.pop()
+	
+
+		
 
 
 
 
 
+		
 
 	######################################################
-
+	
 	return path
 
 
@@ -242,8 +304,7 @@ def read_start_end_coordinates(file_name, maze_name):
 		data = json.load(file)
 	start_coord = (data[maze_name]["start_coord"][0],data[maze_name]["start_coord"][1])
 	end_coord = (data[maze_name]["end_coord"][0],data[maze_name]["end_coord"][1])
-	print(f" we find the values{start_coord} and {end_coord}")
-
+	
 		
 	######################################################
 

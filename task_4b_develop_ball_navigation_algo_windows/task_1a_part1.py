@@ -230,6 +230,8 @@ def shape(approx):
 def scan_image(img_file_path):
     global shapes
     shapes={}
+    if(img_file_path is None):
+        return
 
     #Read the image
     

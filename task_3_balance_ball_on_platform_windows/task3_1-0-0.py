@@ -22,7 +22,7 @@
 '''
 
 # Team ID:          2139
-# Author List:      Anurag Saxena, Yash Varshney
+# Author List:      Yash Varshney
 # Filename:         task_3.py
 # Functions:        init_setup(rec_client_id), control_logic(center_x,center_y), change_setpoint(new_setpoint)
 #                   [ Comma separated list of functions in this file ]
@@ -82,7 +82,7 @@ prev_error = [0,0]
  #set accordingly
 kp = [0.003,0.003]#[0.0017,0.0017]#[0.004,0.004]
 kd = [0.0073,0.0073]#[0.0035,0.0035]#[0.009,0.009]
-ki =  [0.002,0.002]#[0.00000,0.00000]#[0.000,0.000]
+ki = [0.002,0.002]#[0.00000,0.00000]#[0.000,0.000]
 limiting = 2.0
 x_limit = [-limiting,limiting] # min limit and maximum limit in degrees
 y_limit = [-limiting,limiting]
@@ -187,7 +187,7 @@ def control_logic(center_x,center_y):
 	
 	"""
 	import json
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code,i_term,kp,kd,ki,trim
+	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code,i_term
 	# with open('data.json') as file:
 	# 	data = json.load(file)
 	# 	kp = data['kp'] / 1000
@@ -226,7 +226,7 @@ def control_logic(center_x,center_y):
 		ierror[0] += perror[0]*dt
 		ierror[1] +=  perror[1]*dt
 		
-		print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
+		#print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
 		i_term[0]= ki[0]*ierror[0]
 		i_term[1]= ki[1]*ierror[1]
 
@@ -243,16 +243,16 @@ def control_logic(center_x,center_y):
 			i_term[1] = 0
 			ierror[1] = 0
 
-		#print("Pterm :",perror[0]*kp[0],perror[1]*kp[1])
-		#print("Dterm :",derror[0]*kd[0],derror[1]*kd[1])
-		#print("Iterm output:",i_term)
-		#print("sim time :",current_time)
+		print("Pterm :",perror[0]*kp[0],perror[1]*kp[1])
+		print("Dterm :",derror[0]*kd[0],derror[1]*kd[1])
+		print("Iterm output:",i_term)
+		print("sim time :",current_time)
 		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (i_term[0])
 		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (i_term[1])
 
 		angle_x = angle_x + trim[0] #if any trim required
 		angle_y = angle_y + trim[1]
-		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
+		print("x_tilt:",angle_x,"    y_tilt",angle_y)
 		#limiting maximum and minimum values of the output angle in degrees
 	#	print(f"set value of algo {angle_x} and angle y {angle_y}")
 	#	print("--------------------------------------------")
@@ -279,8 +279,8 @@ def control_logic(center_x,center_y):
 		#angle_y = -0.5
 
 		#angle_y = -angle_y
-		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
-		#print("position:",center_x,center_y)
+		print("x_tilt:",angle_x,"    y_tilt",angle_y)
+		print("position:",center_x,center_y)
 
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
 		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,angle_x,sim.simx_opmode_oneshot) # for x

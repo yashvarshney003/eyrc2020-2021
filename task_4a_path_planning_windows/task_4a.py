@@ -72,7 +72,7 @@ except Exception as e:
 
 
 def find_path(maze_array, start_coord, end_coord):
-	start_time=time.time()
+	
 	"""
 	Purpose:
 	---
@@ -118,9 +118,7 @@ def find_path(maze_array, start_coord, end_coord):
 	while(1):
 		if ((i==end_coord[0]) and j==end_coord[1]):
 			path.append((i,j))
-			# print("Maze solved successfully")
-			# print("PATH :")
-			# print(path)
+			
 			#******************************************
 			all_paths.append(path[:])
 
@@ -141,11 +139,12 @@ def find_path(maze_array, start_coord, end_coord):
 					position=path.index(prev_parent)
 					while(len(path)>(position+1)):
 						popped_element=path.pop()
-						#print("popped_element =",popped_element)
+						
 				except VlaueError:
-					print("prev_parent is not present in the path list.")
-
-		n = maze_array[i][j]
+					print("Vlauerrit")
+		
+		
+		n = maze_array[i][j]			
 		number = n
 		binary =[]
 		if(n==0):
@@ -222,14 +221,15 @@ def find_path(maze_array, start_coord, end_coord):
 				i=next_parent[1]
 				j=next_parent[2]
 				prev_parent=(next_parent[3],next_parent[4])
-				#i need to delete some elements of path here to delete all the wrong cells untill the we get the altenative parent.
+				#it need to delete some elements of path here to delete all the wrong cells untill the we get the altenative parent.
 				try:
 					position=path.index(prev_parent)
 					while(len(path)>(position+1)):
 						popped_element=path.pop()
 						#print("popped_element =",popped_element)
 				except VlaueError:
-					print("prev_parent is not present in the path list.")
+					print("Vlauerror")
+					
 
 			else:
 				#pop from the alternative_parent list
@@ -244,7 +244,7 @@ def find_path(maze_array, start_coord, end_coord):
 						position=path.index(prev_parent)
 						while(len(path)>(position+1)):
 							popped_element=path.pop()
-							#print("popped_element =",popped_element)
+						
 					except VlaueError:
 						print(f"prev_parent {prev_parent} is not present in the path list.")
 				else:
@@ -252,10 +252,18 @@ def find_path(maze_array, start_coord, end_coord):
 	if (len(all_paths)!=0):
 		all_paths.sort(key=len,reverse=True)
 		path = all_paths.pop()
-		#print(f"Shortest path found between start_coord: {start_coord} and end_coord: {end_coord} in the maze {path}")
+	
+
+		
+
+
+
+
+
+		
 
 	######################################################
-	print("time took to calculate the shortest path:",time.time()-start_time)
+	
 	return path
 
 
@@ -296,8 +304,7 @@ def read_start_end_coordinates(file_name, maze_name):
 		data = json.load(file)
 	start_coord = (data[maze_name]["start_coord"][0],data[maze_name]["start_coord"][1])
 	end_coord = (data[maze_name]["end_coord"][0],data[maze_name]["end_coord"][1])
-	print(f" we find the values{start_coord} and {end_coord}")
-
+	
 		
 	######################################################
 

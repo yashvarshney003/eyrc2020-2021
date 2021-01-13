@@ -156,6 +156,7 @@ def applyPerspectiveTransform(input_img,code):
 
 		return warped_img
 	else:
+		
 		warped_img = None
 
 	##############	ADD YOUR CODE HERE	##############
@@ -178,7 +179,10 @@ def applyPerspectiveTransform(input_img,code):
 				if len(approx) == 4:
 					screenCnt = approx
 					break
-		pts = screenCnt.reshape(4, 2)
+		try:
+			pts = screenCnt.reshape(4, 2)
+		except:
+			return
 
 			#creating Array of Zero of Size(4,2)	
 		rect = np.zeros((4, 2), dtype = "float32")
