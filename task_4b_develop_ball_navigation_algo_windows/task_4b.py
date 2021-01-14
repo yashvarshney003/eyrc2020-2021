@@ -248,12 +248,16 @@ def calculate_path_from_maze_image(img_file_path):
 
 	# read the 'maze00.jpg' image file
 	input_img = cv2.imread(img_file_path)
+	print(input_img.shape)
+	cv2.imwrite("input.png",input_img)
 
 	if type(input_img) is np.ndarray:
 
 		try:
 			# get the resultant warped maze image after applying Perspective Transform
-			warped_img = task_1b.applyPerspectiveTransform(input_img,0)
+			
+
+			warped_img = task_1b.applyPerspectiveTransform(input_img)
 
 			if type(warped_img) is np.ndarray:
 
@@ -516,24 +520,37 @@ def traverse_path(pixel_path):
 	print("didbdibdibdibd",current_time)
 	pixel_path.pop(0)
 	#time.sleep(10)
+	j = 0
+	k= 0
 	for i in pixel_path:
 		task_3.change_setpoint(i)
 		while(1):
+			j+=1
+			k+=1
 			print("#########################################################################")
+			print(j)
+			name2 = str(k)+"k.png"
 			
 			
 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
-			warped_img = task_1b.applyPerspectiveTransform(transformed_image,1)
+			cv2.imwrite(name2,transformed_image)
+			
+			warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+			name = str(j) + ".png"
+			cv2.imwrite(name,warped_img)
+			
+			
+			
 			
 			shapes = task_1a_part1.scan_image(warped_img)
 			if(shapes):
 				#print(f"client id in task 4b{client_id}")
-				print(f"sent this {i[1]} and {i[0]}")
+				#print(f"sent this {i[1]} and {i[0]}")
 				
 				print(f"here1 {shapes} and {i} ")
 				print(shapes['Circle'][1]-i[1],abs(shapes['Circle'][2]-i[0]))
-				if(abs(shapes['Circle'][1]-i[1]) <= 20  and abs(shapes['Circle'][2]-i[0]) <= 20):
+				if(abs(shapes['Circle'][1]-i[1]) <= 50  and abs(shapes['Circle'][2]-i[0]) <= 50):
 					print("here2")
 					print("her-------------------------------------------------------------------------------------")
 					break
@@ -626,7 +643,7 @@ if __name__ == "__main__":
 				if (return_code == sim.simx_return_ok):
 					# Starting the Simulation
 					try:
-						return_code = task_2a.start_simulation(client_id)
+						return_code = task_2a.start_simulation()
 
 						if (return_code == sim.simx_return_novalue_flag):
 							print('\nSimulation started correctly in CoppeliaSim.')

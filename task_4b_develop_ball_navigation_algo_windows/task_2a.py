@@ -110,7 +110,7 @@ def init_remote_api_server():
 	return client_id
 
 
-def start_simulation(client_id):
+def start_simulation():
 
 	"""
 	Purpose:
@@ -137,7 +137,7 @@ def start_simulation(client_id):
 	NOTE: This function will be automatically called by test_task_2a executable at the start of simulation.
 	"""
 
-	#global client_id
+	global client_id
 
 	return_code = 0
 

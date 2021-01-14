@@ -51,7 +51,7 @@ import csv
 ##############################################################
 
 
-def applyPerspectiveTransform(input_img,code):
+def applyPerspectiveTransform(input_img):
 
 	"""
 	Purpose:
@@ -72,7 +72,8 @@ def applyPerspectiveTransform(input_img,code):
 	---
 	warped_img = applyPerspectiveTransform(input_img)
 	"""
-	if code == 0:
+	tup = input_img.shape
+	if (tup[0] == 512):
 
 		warped_img = None
 
