@@ -1,6 +1,4 @@
-# version 1.0.0
-# #org for those which was original but i changed them for convineance
-# #notim for those which i inicluded externally and not used anywhere
+
 
 '''
 *****************************************************************************************
@@ -60,7 +58,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-setpoint = [1063,217]#[1063,345]#[640,640]
+setpoint = [935,345]#[1063,345]#[640,640]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -80,13 +78,13 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0,0]#[0.0017,0.0017]#[0.004,0.004]
-kd = [0.0006,0.0006]#[0.0035,0.0035]#[0.009,0.009]
-ki =  [0.002,0.002]#[0.00000,0.00000]#[0.000,0.000]
-limiting = 0.7
+kp = [0.003,0.003]
+kd = [0.0055,0.0055]
+ki = [0,0]
+limiting = 2.0
 x_limit = [-limiting,limiting] # min limit and maximum limit in degrees
 y_limit = [-limiting,limiting]
-trim = [-0.09,-0.09] # if any required
+trim = [0,0]#[-0.1317,-0.1395] # if any required
 
 i_term = [0,0]
 
@@ -188,18 +186,10 @@ def control_logic(center_x,center_y):
 	"""
 	import json
 	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code,i_term,kp,kd,ki,trim
-	# with open('data.json') as file:
-	# 	data = json.load(file)
-	# 	kp = data['kp'] / 1000
-	# 	ki = data['ki'] / 1000
-	# 	kd = data['kd'] / 10000
-	# print('kp:', kp,'ki:', ki, 'kd:',kd)
-	
-	#print("function_called")
 
 
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-	#print(rt_code)
+
 	current_time = float(current_time)
 
 
@@ -208,32 +198,20 @@ def control_logic(center_x,center_y):
 
 	
 	dt = current_time - prev_time
-	#print("dt called")
-	#print(f" dt time is {dt}")
-	#print(dt,current_time,prev_time)
+
 
 	if (1):#(dt >= sample_time): # code is running 	for a sample time
-		print("value of dt:",dt)
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
 		derror[0] = (perror[0] - prev_error[0])/dt
 		derror[1] = (perror[1] - prev_error[1])/dt
 
-		print("perror :",perror,"    prev_error :",prev_error)
-		print("derror :",derror)
-
 		ierror[0] += perror[0]*dt
 		ierror[1] +=  perror[1]*dt
-		
-		print(f"{kp[0]*perror[0]} and {kd[0]*derror[0]} and {ki[0]*ierror[0]*dt}")
+
 		i_term[0]= ki[0]*ierror[0]
 		i_term[1]= ki[1]*ierror[1]
-
-		# if (perror[0]<= 30 and perror [0]>= -30):
-		# 	derror[0] = 0
-		# if (perror[1]<= 30 and perror [1]>= -30):
-		# 	derror[1] = 0
 
 		if (perror[0] <= -150 or perror[0] >= 150):
 			i_term[0] = 0
@@ -243,19 +221,34 @@ def control_logic(center_x,center_y):
 			i_term[1] = 0
 			ierror[1] = 0
 
-		#print("Pterm :",perror[0]*kp[0],perror[1]*kp[1])
-		#print("Dterm :",derror[0]*kd[0],derror[1]*kd[1])
-		#print("Iterm output:",i_term)
-		#print("sim time :",current_time)
 		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (i_term[0])
 		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (i_term[1])
 
+		# trim values calculation for ball to balance if output of pid is 0
+		if (center_x >= 640 and center_x <= 1280) and (center_y >= 0 and center_y <= 640):	# 1st Quadrant case
+			trim[0] = ((1060*(center_x - 640))/5200000) - 0.027
+			trim[1]	= ((1090*(center_y - 640))/5220000) - 0.031
+
+		elif (center_x >= 0 and center_x <= 640) and (center_y >= 0 and center_y <= 640):	# 2nd Quadrant case
+			trim[0] = ((1047*(center_x - 640))/5220000) - 0.027
+			trim[1]	= ((1085*(center_y - 640))/5220000) - 0.031
+
+		elif (center_x >= 0 and center_x <= 640) and (center_y >= 640 and center_y <= 1280):	# 3rd Quadrant case
+			trim[0] = ((1030*(center_x - 640))/5220000) - 0.027
+			trim[1]	= ((1110*(center_y - 640))/5200000) - 0.031
+
+		elif (center_x >= 640 and center_x <= 1280) and (center_y >= 640 and center_y <= 1280):		# 4th Quadrant case
+			trim[0] = ((1050*(center_x - 640))/5200000) - 0.027
+			trim[1]	= ((1110*(center_y - 640))/5200000) - 0.031
+
+		else:
+			print("Unexpected position of ball [center_x,center_y] :",center_x,center_x)
+
 		angle_x = angle_x + trim[0] #if any trim required
 		angle_y = angle_y + trim[1]
-		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
+
 		#limiting maximum and minimum values of the output angle in degrees
-	#	print(f"set value of algo {angle_x} and angle y {angle_y}")
-	#	print("--------------------------------------------")
+
 		if (angle_x < x_limit[0]):
 			angle_x = x_limit[0]
 		if (angle_x > x_limit[1]):
@@ -267,21 +260,6 @@ def control_logic(center_x,center_y):
 			angle_y = y_limit[1]
 
 
-
-		if (perror[0] < 300):
-			trim[0]= 0.07	#-0.06
-		if (perror[1] > 300):
-			trim[1]= -0.13	#0.11
-
-	#	print("************")
-		print("setpoint:",setpoint)
-		#angle_x = 0.0
-		#angle_y = -0.5
-
-		#angle_y = -angle_y
-		#print("x_tilt:",angle_x,"    y_tilt",angle_y)
-		#print("position:",center_x,center_y)
-
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
 		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,angle_x,sim.simx_opmode_oneshot) # for x
 		#print(returnCode)
@@ -292,6 +270,7 @@ def control_logic(center_x,center_y):
 
 		prev_error[0] = perror[0]
 		prev_error[1] = perror[1]
+
 		prev_time = current_time
 		
 	##############	ADD YOUR CODE HERE	##############
@@ -491,9 +470,6 @@ if __name__ == "__main__":
 							warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 							#cv2.imwrite(name,warped_img)
 							#name = str(i) + ".png"
-							
-							print(i)
-							print("--------------------------------------------")
 							
 							
 							if (type(warped_img) is np.ndarray):
