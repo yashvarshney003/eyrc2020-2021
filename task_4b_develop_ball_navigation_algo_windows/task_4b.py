@@ -169,23 +169,16 @@ end_coord = (9,5)
 # You can add your global variables here
 ##############################################################
 vision_sensor_handle = 0
-
-
-
-
-
-##############################################################
-
-
-################# ADD UTILITY FUNCTIONS HERE #################
-## You can define any utility functions for your code.      ##
-## Please add proper comments to ensure that your code is   ##
-## readable and easy to understand.                         ##
-##############################################################
 servohandle_x = -1
 servohandle_y = -1
 
 
+
+
+
+
+
+##############################################################
 
 
 
@@ -248,15 +241,11 @@ def calculate_path_from_maze_image(img_file_path):
 
 	# read the 'maze00.jpg' image file
 	input_img = cv2.imread(img_file_path)
-	print(input_img.shape)
-	cv2.imwrite("input.png",input_img)
 
 	if type(input_img) is np.ndarray:
 
 		try:
 			# get the resultant warped maze image after applying Perspective Transform
-			
-
 			warped_img = task_1b.applyPerspectiveTransform(input_img)
 
 			if type(warped_img) is np.ndarray:
@@ -515,14 +504,15 @@ def traverse_path(pixel_path):
 
 	global client_id,prev_time,current_time
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	#print(prev_time)
+	print(prev_time)
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 	print("didbdibdibdibd",current_time)
-	pixel_path.pop(0)
+	
 	#time.sleep(10)
 	j = 0
 	k= 0
 	for i in pixel_path:
+		i.reverse()
 		task_3.change_setpoint(i)
 		while(1):
 			j+=1
@@ -534,11 +524,10 @@ def traverse_path(pixel_path):
 			
 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
-			cv2.imwrite(name2,transformed_image)
+			
 			
 			warped_img = task_1b.applyPerspectiveTransform(transformed_image)
-			name = str(j) + ".png"
-			cv2.imwrite(name,warped_img)
+			
 			
 			
 			
@@ -549,14 +538,14 @@ def traverse_path(pixel_path):
 				#print(f"sent this {i[1]} and {i[0]}")
 				
 				print(f"here1 {shapes} and {i} ")
-				print(shapes['Circle'][1]-i[1],abs(shapes['Circle'][2]-i[0]))
-				if(abs(shapes['Circle'][1]-i[1]) <= 50  and abs(shapes['Circle'][2]-i[0]) <= 50):
+				print(shapes['Circle'][1]-i[0],abs(shapes['Circle'][2]-i[1]))
+				if(abs(shapes['Circle'][1]-i[0]) <= 10  and abs(shapes['Circle'][2]-i[1]) <= 10):
 					print("here2")
 					print("her-------------------------------------------------------------------------------------")
 					break
 					
 				else:
-					task_3.control_logic(i[1],i[0])
+					task_3.control_logic(shapes['Circle'][1],shapes['Circle'][2])
 				
 
 
@@ -593,12 +582,11 @@ def traverse_path(pixel_path):
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. Main function should NOT be edited.
 
+
 if __name__ == "__main__":
-	
 
 	# path directory of images in 'test_cases' folder
 	img_dir_path = 'test_cases/'
-
 
 	# path to 'maze00.jpg' image file
 	file_num = 0
@@ -635,10 +623,7 @@ if __name__ == "__main__":
 
 			try:
 				# Send maze array data to CoppeliaSim via Remote API
-				#print(f"her is my clientid{client_id}")
 				return_code = task_2b.send_data(client_id,maze_array)
-				#
-				# print(f"error coee is  {return_code}")
 
 				if (return_code == sim.simx_return_ok):
 					# Starting the Simulation
@@ -651,9 +636,6 @@ if __name__ == "__main__":
 							# Storing the required handles in respective global variables.
 							try:
 								task_3.init_setup(client_id)
-								#hatani hai 
-								#Kya kare is line ka 
-								
 								try:
 									send_data_to_draw_path(client_id,path)
 								

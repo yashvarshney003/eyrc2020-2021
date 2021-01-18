@@ -1,5 +1,3 @@
-
-
 '''
 *****************************************************************************************
 *
@@ -58,7 +56,7 @@ client_id = -1
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
 # NOTE: DO NOT change the value of this "setpoint" list
-setpoint = [935,345]#[1063,345]#[640,640]
+setpoint = [640,640]#[1063,345]#[640,640]
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -66,8 +64,7 @@ setpoint = [935,345]#[1063,345]#[640,640]
 
 # You can add your global variables here
 ##############################################################
-vision_sensor_handle = 0
-dt = 0
+dt = 0.25
 current_time =0
 prev_time = 0
 
@@ -91,6 +88,7 @@ i_term = [0,0]
 
 
 
+
 ##############################################################
 
 
@@ -99,8 +97,7 @@ i_term = [0,0]
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-servohandle_x = -1
-servohandle_y = -1
+
 
 
 
@@ -186,7 +183,7 @@ def control_logic(center_x,center_y):
 	"""
 	import json
 	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code,i_term,kp,kd,ki,trim
-
+	
 
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 
@@ -194,10 +191,12 @@ def control_logic(center_x,center_y):
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+	print(setpoint,client_id,current_time,prev_time,perror,derror,ierror,prev_error,kp,kd,ki,trim)
 	sample_time = 0.1
 
 	
 	dt = current_time - prev_time
+	print(f"setpoint {setpoint}")
 
 
 	if (1):#(dt >= sample_time): # code is running 	for a sample time
@@ -223,6 +222,7 @@ def control_logic(center_x,center_y):
 
 		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (i_term[0])
 		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (i_term[1])
+		print(f"angle_x:{angle_x} and angle_y :{angle_y}")
 
 		# trim values calculation for ball to balance if output of pid is 0
 		if (center_x >= 640 and center_x <= 1280) and (center_y >= 0 and center_y <= 640):	# 1st Quadrant case
