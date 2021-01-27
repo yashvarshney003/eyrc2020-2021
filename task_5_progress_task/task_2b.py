@@ -217,7 +217,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	return transformed_image
 
 
-def send_data(client_id,maze_array):
+def send_data(client_id,maze_array,maze):
 	
 	"""
 	Purpose:
@@ -246,6 +246,8 @@ def send_data(client_id,maze_array):
 
 	return_code = -1
 	maze_array1 = []
+	plate  = "top_plate_respondable_" + maze +"_1"
+	print(f"so maze build on {maze}")
 
 	##############	ADD YOUR CODE HERE	##############
 	for i in range(len(maze_array)):
@@ -254,7 +256,7 @@ def send_data(client_id,maze_array):
 			maze_array1.append(maze_array[i][j])
 
 	emptybuffer = bytearray()
-	return_code,ints,floats,strings,buffera = sim.simxCallScriptFunction(client_id,'top_plate_respondable_1',sim.sim_scripttype_customizationscript,'receiveData',maze_array1,[],[],emptybuffer,sim.simx_opmode_blocking)
+	return_code,ints,floats,strings,buffera = sim.simxCallScriptFunction(client_id,plate,sim.sim_scripttype_customizationscript,'receiveData',maze_array1,[],[],emptybuffer,sim.simx_opmode_blocking)
 	
 	##################################################
 

@@ -39,7 +39,7 @@ import math
 import json
 ##############################################################
 
-# Importing the sim module for Remote API connection with CoppeliaSim
+# Importing the sim module for Remote API connection with 
 try:
 	import sim
 	
@@ -141,6 +141,64 @@ except Exception as e:
 	print('Your task_4a.py throwed an Exception. Kindly debug your code!\n')
 	traceback.print_exc(file=sys.stdout)
 
+########################Global variables######################
+vision_sensor_1 = -1
+vision_sensor_2 = -1
+vision_sensor_3 = -1
+vision_sensor_4 = -1
+vision_sensor_5 = -1
+encoded_maze_t4 = None
+encoded_maze_t1 = None
+map_start = {
+	"t4":[],
+	"t3":[],
+	"t2":[],
+	"t1":[]
+	}# do mapping of start and end point on the basis of color and json file.
+
+
+
+map_end = {
+"t4":[],
+"t3":[],
+"t2":[].
+"t1":[]
+} 
+
+
+
+t4_path = None
+aux_path = None
+
+
+
+path_amp = {
+"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]],
+"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]]
+"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]],
+"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]]
+}
+
+
+maze_map ={
+	't1': encoded_maze_t1,
+	't2':encoded_maze_t2.
+	't3':encoded_maze_t3
+}
+
+
+
+
+
+
+
+
+
+
+
+
+client_id = -1
+############################################################
 ##############################################################
 
 
@@ -167,6 +225,19 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+def set_start_end_point(color):
+	global map_dictionary
+	
+def get_color():
+	global vision_sensor_5,client_id
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle_5,1,sim.simx_opmode_blocking)
+	print(f"length {len(vision_sensor_image)} and  {return_code}")
+	
+	
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_buffer)
+	color = task_1a_part1.color()
+	return color
+
 
 
 
@@ -204,6 +275,32 @@ def main(rec_client_id):
 	
 	"""
 	##############	ADD YOUR CODE HERE	##############
+	img_t4 = cv.imread("maze_t4.JPG")
+	warped_t4 = task_1b.applyPerspectiveTransform(img_t4)
+	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
+	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
+
+	print(f"Encoded maze of t4  is {encoded_maze_t4}")
+	
+	img_t1 = cv.imread("maze_t1.JPG")
+	warped_t1 = task_1b.applyPerspectiveTransform(img_t1)
+	encoded_maze_t1 = task_1b.detectMaze(warped_t1) 
+	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
+
+	print(f"Encoded maze of t4  is {encoded_maze_t1}")
+
+	return_code = task_2a.start_simulation()
+	color = get_color()
+	if(color):
+		table ,start_coord_t4,end_coord_t4,start_coord_aux,end_coord_aux = set_start_end_point(color)
+		
+		
+
+
+
+
+
+	
 
 
 
@@ -218,6 +315,6 @@ def main(rec_client_id):
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. This function should not be edited.
 if __name__ == "__main__":
-
 	client_id = task_2a.init_remote_api_server()
+	
 	main(client_id)
