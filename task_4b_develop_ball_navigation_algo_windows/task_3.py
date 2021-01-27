@@ -181,7 +181,8 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
-	import json
+	##############	ADD YOUR CODE HERE	##############
+	
 	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code,i_term,kp,kd,ki,trim
 	
 
@@ -190,16 +191,16 @@ def control_logic(center_x,center_y):
 	current_time = float(current_time)
 
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
-	print(setpoint,client_id,current_time,prev_time,perror,derror,ierror,prev_error,kp,kd,ki,trim)
+
+	#print(setpoint,client_id,current_time,prev_time,perror,derror,ierror,prev_error,kp,kd,ki,trim)
 	sample_time = 0.1
 
 	
 	dt = current_time - prev_time
-	print(f"setpoint {setpoint}")
+	#print(f"setpoint {setpoint}")
 
 
-	if (1):#(dt >= sample_time): # code is running 	for a sample time
+	if (1):
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
@@ -222,7 +223,7 @@ def control_logic(center_x,center_y):
 
 		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (i_term[0])
 		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (i_term[1])
-		print(f"angle_x:{angle_x} and angle_y :{angle_y}")
+		#print(f"angle_x:{angle_x} and angle_y :{angle_y}")
 
 		# trim values calculation for ball to balance if output of pid is 0
 		if (center_x >= 640 and center_x <= 1280) and (center_y >= 0 and center_y <= 640):	# 1st Quadrant case
@@ -273,7 +274,7 @@ def control_logic(center_x,center_y):
 
 		prev_time = current_time
 		
-	##############	ADD YOUR CODE HERE	##############
+	
 	
 	
 

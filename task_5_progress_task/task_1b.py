@@ -73,7 +73,7 @@ def applyPerspectiveTransform(input_img):
 	warped_img = applyPerspectiveTransform(input_img)
 	"""
 	tup = input_img.shape
-	if (tup[0] == 512):
+	if (tup[0] != 512):
 
 		warped_img = None
 
@@ -161,50 +161,72 @@ def applyPerspectiveTransform(input_img):
 		warped_img = None
 
 	##############	ADD YOUR CODE HERE	##############
-		gray = cv.GaussianBlur(input_img,(5,5), 2)
+		ret,thresh2 = cv.threshold(img,50,255,cv.THRESH_BINARY)
+		cnts = cv.findContours(thresh2,cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+		left_upper = [10000,10000]
+		right_upper = [0,0]
+		right_lower = [0,0]
+		left_lower =[0,0]
+		j = 1
+		for i in range(len(cnts)):
+			x,y,w,h = cv.boundingRect(cnts[i])
+            if(x !=0  and  y!=0):
+				if(j ==1):
+					j = 2
+					left_upper = [x,y]
+					right_upper = [x+w,y]
+					right_lower = [x+w,y+h]
+					left_lower =[x,y+h]
+				else:
 
-			
-			
+					if(x<left_upper[0] and y <left_upper[1]):
+						print("left upper changed")
+						left_upper[0] = x
+						left_upper[1] = y
+					if(x+w >right_upper[0] and y < 100):
+						print("right upper changed")
+						right_upper[0] = x+w 
+						right_upper[1] = y
+					if(x+w >right_lower[0] and y+h > right_lower[1]):
+						print("right lower changed")
+						right_lower[0] = x+w 
 
-		ret,thresh1 = cv.threshold(gray,230,255,cv.THRESH_BINARY_INV)
-		edged = cv.Canny(thresh1, 50, 200)
-		cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
-		cnts = sorted(cnts, key = cv.contourArea, reverse = True)
-		for c in cnts:
-				peri = cv.arcLength(c, True)
-				approx = cv.approxPolyDP(c, 0.05 * peri, True)
-			
-				#0.02
-				
-			# If length is 4 then it is ROI
-				if len(approx) == 4:
-					screenCnt = approx
-					break
-		try:
-			pts = screenCnt.reshape(4, 2)
-		except:
-			return
+						right_lower[1] = y+h 
+					if(y+h > left_lower[1] and x < 100):
+						print("left lower changed")
+						left_lower[0] = x
+						left_lower[1] = y+h
+		final_list = [left_upper,right_upper,right_lower,left_lower]
 
-			#creating Array of Zero of Size(4,2)	
+		
+		screenCnt = np.array(final_list)
+		pts = screenCnt.reshape(4, 2)
+
+		#creating Array of Zero of Size(4,2)	
 		rect = np.zeros((4, 2), dtype = "float32")
+
+		#Ordering of points in Clockwise manner
+
 		s = pts.sum(axis = 1)
 		rect[0] = pts[np.argmin(s)]
 		rect[2] = pts[np.argmax(s)]
-
 		diff = np.diff(pts, axis = 1)
 		rect[1] = pts[np.argmin(diff)]
 		rect[3] = pts[np.argmax(diff)]
-		(tl, tr, br, bl) = rect
-		
-		maxWidth = 1280
 
+
+
+			#Finding Maximum width
+
+			
+		maxWidth = 1280
+		
 
 
 			#Findinf Maximum height
 
 			
 		maxHeight = 1280
-
 			#Destination Array of ROI
 			
 
@@ -215,11 +237,22 @@ def applyPerspectiveTransform(input_img):
 		M = cv.getPerspectiveTransform(rect, dst)
 
 			# Finally the warped image 
-		warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
+		warped_img = cv.warpPerspective(img, M, (maxWidth, maxHeight))
+		cv.imwrite("warped.png",warped_img)
+					
+					
+			
+					
+					
+
+					
+					
+
 				
-		
-		
-		
+						
+				
+				
+				
 
 		##################################################
 

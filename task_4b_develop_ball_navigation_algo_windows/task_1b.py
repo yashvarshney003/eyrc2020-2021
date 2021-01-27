@@ -73,7 +73,7 @@ def applyPerspectiveTransform(input_img):
 	warped_img = applyPerspectiveTransform(input_img)
 	"""
 	tup = input_img.shape
-	if (tup[0] == 512):
+	if (tup[0] != 1024):
 
 		warped_img = None
 
@@ -123,7 +123,7 @@ def applyPerspectiveTransform(input_img):
 		rect[1] = pts[np.argmin(diff)]
 		rect[3] = pts[np.argmax(diff)]
 		(tl, tr, br, bl) = rect
-
+		print(f"rect is {rect}")
 
 		#Finding Maximum width
 

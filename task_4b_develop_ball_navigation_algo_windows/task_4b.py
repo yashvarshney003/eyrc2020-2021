@@ -21,9 +21,9 @@
 # Author List:      Yash Varshney
 # Filename:         task_4b.py
 # Functions:        calculate_path_from_maze_image, send_data_to_draw_path, 
-# 					convert_path_to_pixels, traverse_path
+# 					convert_path_to_pixels, traverse_path.make connections
 #                   [ Comma separated list of functions in this file ]
-# Global variables: client_id, setpoint, start_coord, end_coord
+# Global variables: client_id, setpoint, start_coord, end_coord,vision_Sensor_handle,servohandle_x,servohandle_y
 # 					[ List of global variables defined in this file ]
 
 
@@ -160,7 +160,7 @@ end_coord = (9,5)
 
 # You can add your global variables here
 ##############################################################
-#[1063,345]#[640,640]
+
 
 # Global variable "vision_sensor_handle" to store handle for Vision Sensor
 # NOTE: DO NOT change the value of this "vision_sensor_handle" variable here
@@ -469,7 +469,7 @@ def convert_path_to_pixels(path):
 	
 	
 		
-	#print(f"so we get the list{pixel_path}")
+	
 	
 	
 	##################################################	
@@ -504,26 +504,27 @@ def traverse_path(pixel_path):
 
 	global client_id,prev_time,current_time
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	print(prev_time)
-	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-	print("didbdibdibdibd",current_time)
 	
-	#time.sleep(10)
-	j = 0
+	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+	
+	
+	
+	
 	k= 0
 	for i in pixel_path:
 		i.reverse()
 		task_3.change_setpoint(i)
 		while(1):
-			j+=1
+			
 			k+=1
 			print("#########################################################################")
-			print(j)
+			
 			name2 = str(k)+"k.png"
 			
 			
 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+			cv2.imwrite(name2,transformed_image)
 			
 			
 			warped_img = task_1b.applyPerspectiveTransform(transformed_image)
@@ -534,14 +535,13 @@ def traverse_path(pixel_path):
 			
 			shapes = task_1a_part1.scan_image(warped_img)
 			if(shapes):
-				#print(f"client id in task 4b{client_id}")
-				#print(f"sent this {i[1]} and {i[0]}")
 				
-				print(f"here1 {shapes} and {i} ")
-				print(shapes['Circle'][1]-i[0],abs(shapes['Circle'][2]-i[1]))
+				
+				#print(f"here1 {shapes} and {i} ")
+				#print(shapes['Circle'][1]-i[0],abs(shapes['Circle'][2]-i[1]))
 				if(abs(shapes['Circle'][1]-i[0]) <= 10  and abs(shapes['Circle'][2]-i[1]) <= 10):
-					print("here2")
-					print("her-------------------------------------------------------------------------------------")
+					#print("here2")
+					#print("her-------------------------------------------------------------------------------------")
 					break
 					
 				else:

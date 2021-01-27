@@ -251,11 +251,15 @@ def scan_image(img_file_path):
     # cv2.imshow('imagein', image)
     # cv2.waitKey(0)
     
-    image = cv2.GaussianBlur(image,(5,5), -1)
-    ret,thresh1 = cv2.threshold(image,127,255,cv2.THRESH_BINARY_INV)
+    lower_gray= np.array([40,40,40])
+    upper_gray= np.array([100,100,100])
+    image_mark= image.copy()
+    mask = cv2.inRange(image_mark, lower_gray, upper_gray)
+    mask_inv= cv2.bitwise_not(mask)
+    colored_portion = cv2.bitwise_or(image, image, mask = mask)
+    rer,colored_portion = cv2.threshold(colored_portion,50,255,cv2.THRESH_BINARY_INV)
+    cnts = cv.findContours(thresh2,cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-    edges = cv2.Canny(thresh1,30,200)
-    cnts = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     if len(cnts) == 2:
             cnts = cnts[0]
