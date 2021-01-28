@@ -172,8 +172,8 @@ aux_path = None
 
 
 
-path_amp = {
-"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]],
+path_map = {
+"maze_t1",[[droptb1],[droptb2],[droptb3]],
 "maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]]
 "maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]],
 "maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]]
@@ -181,6 +181,7 @@ path_amp = {
 
 
 maze_map ={
+	't4':encoded_maze_t4,
 	't1': encoded_maze_t1,
 	't2':encoded_maze_t2.
 	't3':encoded_maze_t3
@@ -225,8 +226,11 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-def set_start_end_point(color):
-	global map_dictionary
+def set_path(color):
+	pass
+#set oath according to pixel
+def complete_all_mapping_path ():
+	pass
 	
 def get_color():
 	global vision_sensor_5,client_id
@@ -288,11 +292,14 @@ def main(rec_client_id):
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
 
 	print(f"Encoded maze of t4  is {encoded_maze_t1}")
+	complete_all_mapping_path()
 
 	return_code = task_2a.start_simulation()
 	color = get_color()
 	if(color):
-		table ,start_coord_t4,end_coord_t4,start_coord_aux,end_coord_aux = set_start_end_point(color)
+		t4_path,aux_path = set_path(color)
+	
+	
 		
 		
 
