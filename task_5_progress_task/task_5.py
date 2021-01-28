@@ -135,6 +135,15 @@ except ImportError:
 	print('\n[ERROR] task_4a.py file is not present in the current directory.')
 	print('Your current directory is: ', os.getcwd())
 	print('Make sure task_4a.py is present in this current directory.\n')
+
+try:
+	with open('ball_details.json') as file:
+		ball_details = json.load(file)
+
+except ImportError:
+	print('\n[ERROR] ball_details.json file is not present in the current directory.')
+	print('Your current directory is: ', os.getcwd())
+	print('Make sure ball_details.json is present in this current directory.\n')
 	
 	
 except Exception as e:
@@ -149,54 +158,38 @@ vision_sensor_4 = -1
 vision_sensor_5 = -1
 encoded_maze_t4 = None
 encoded_maze_t1 = None
+encoded_maze_t3 = None
+encoded_maze_t2 = None
 map_start = {
-	"t4":[],
-	"t3":[],
-	"t2":[],
-	"t1":[]
+	"T4":[(0,5)],
+	"T3":[(4,9)],
+	"T2":[(0,4)],
+	"T1":[(5,0)]
 	}# do mapping of start and end point on the basis of color and json file.
 
-
-
 map_end = {
-"t4":[],
-"t3":[],
-"t2":[].
-"t1":[]
+"T4":[(5,9), (9,4), (4,0)],
+"T3":[(9,5), (5,0), (0,4)],
+"T2":[(4,9), (9,5), (5,0)],
+"T1":[(0,4), (4,9), (9,5)]
 } 
 
+t4_path = None#path to table req
+aux_path = None#path to req cb
 
-
-t4_path = None
-aux_path = None
-
-
-
-path_map = {
-"maze_t1",[[droptb1],[droptb2],[droptb3]],
-"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]]
-"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]],
-"maze_t1_end_cord",[[droptb1],[droptb2],[droptb3]]
+path_map = {#pixel path
+"T1":[[droptb1],[droptb2],[droptb3]],
+"T2":[[droptb1],[droptb2],[droptb3]],
+"T3":[[droptb1],[droptb2],[droptb3]],
+"T4":[[table1entrypath],[table2entrypath],[table3entrypath]]
 }
-
 
 maze_map ={
-	't4':encoded_maze_t4,
-	't1': encoded_maze_t1,
-	't2':encoded_maze_t2.
-	't3':encoded_maze_t3
+	'T4':encoded_maze_t4,
+	'T1':encoded_maze_t1,
+	'T2':encoded_maze_t2,
+	'T3':encoded_maze_t3
 }
-
-
-
-
-
-
-
-
-
-
-
 
 client_id = -1
 ############################################################
@@ -227,10 +220,38 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## readable and easy to understand.                         ##
 ##############################################################
 def set_path(color):
-	pass
+	table, collection_box = ball_details[color][0].split('_')
+	# path_start = map_start[table]
+	# path_end = map_end[table][int(collection_box[-1])-1]
+	t4_path=path_map['T4'][int(table[-1])-1]
+	aux_path = path_map[table][int(collection_box[-1])-1]
+	###
+	#Traverese the ball now 
+	###
+	ball_details[color].pop(0)
+
 #set oath according to pixel
-def complete_all_mapping_path ():
-	pass
+def complete_all_mapping_path (tablenum):#, start_coord, end_coord):
+	for i in range(3):
+		start_coord= map_start[tablenum]
+		end_coord= map_end[tablenum][i]
+		mazearray = maze_map[tablenum]
+		path = task_4a.find_path(mazearray, start_coord, end_coord)	
+		resolution_x = 1280
+		resolution_y = 1280
+		x_increment = resolution_x//10
+		y_increment = resolution_y//10
+		pixel_path = []
+		for i in range(len(path)):
+			pixel_path.append([])
+
+		for i in range(len(path)):
+			x_pixel = (x_increment//2) + path[i][0]*x_increment
+			y_pixel = (y_increment//2) + path[i][1]*y_increment
+			pixel_path[i].append(x_pixel)
+			pixel_path[i].append(y_pixel)
+		path_map[tablenum][i]= pixel_path
+
 	
 def get_color():
 	global vision_sensor_5,client_id
@@ -239,7 +260,7 @@ def get_color():
 	
 	
 	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_buffer)
-	color = task_1a_part1.color()
+	color = task_1a_part1.color(vision_sensor_image)
 	return color
 
 
@@ -292,8 +313,10 @@ def main(rec_client_id):
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
 
 	print(f"Encoded maze of t4  is {encoded_maze_t1}")
-	complete_all_mapping_path()
-
+	complete_all_mapping_path('T1')
+	complete_all_mapping_path('T4')
+	# complete_all_mapping_path('T1')
+	# complete_all_mapping_path('T1')
 	return_code = task_2a.start_simulation()
 	color = get_color()
 	if(color):

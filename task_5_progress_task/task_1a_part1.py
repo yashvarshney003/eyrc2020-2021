@@ -163,65 +163,65 @@ def shape(approx):
         Purpose: This function masks the RGB colours and calls detect fucntion to
         detect shapes in the image and writes the required output in the shapes dictionary'''
 
-# def process(imageFrame):
-#     #initialize a list for keeping records of detected shapes and co-ordinates
-#     colo= []
-    
-#     #Convert BGR image to HSV
-#     imageFrame = cv2.GaussianBlur(imageFrame,(5,5),cv2.BORDER_TRANSPARENT)
-#     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
-    
-#     #To create a mask for red colour
-#     red_lower = np.array([0, 50, 50]) 
-#     red_upper = np.array([10, 255, 255]) 
-#     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
-#     kernal = np.ones((5, 5))
-#     red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
-#     gray_blur_red= cv2.Canny(red_gray,100,255)
+    def process(imageFrame):
+    #     #initialize a list for keeping records of detected shapes and co-ordinates
+    #     colo= []
+        
+    #     #Convert BGR image to HSV
+    #     imageFrame = cv2.GaussianBlur(imageFrame,(5,5),cv2.BORDER_TRANSPARENT)
+    #     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
+        
+    #     #To create a mask for red colour
+    #     red_lower = np.array([0, 50, 50]) 
+    #     red_upper = np.array([10, 255, 255]) 
+    #     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
+    #     kernal = np.ones((5, 5))
+    #     red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
+    #     gray_blur_red= cv2.Canny(red_gray,100,255)
 
-    
-#     #Create a mask for blue colour
-#     blue_lower = np.array([94, 20, 0], np.uint8) 
-#     blue_upper = np.array([140,255 ,255], np.uint8) 
-#     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-#     kernal = np.ones((5, 5))  
-#     blue_mask = cv2.dilate(blue_mask, kernal)
-#     blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
-#     gray_blur_blue= cv2.Canny(blue_gray,100,255)
-    
-#     #find contours on blue mask
-#     cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-#     ret1 =None
-    
-#     #If blue contours found
-#     if type(cnts[-1]) !=type(None) :
-#         if len(cnts) == 2:
-#             cnts = cnts[0]
-#         elif len(cnts) == 3:
-#             cnts = cnts[1]
-#         for i in cnts:
-#              ret1 = detect('blue',i)
-#     if(ret1):
+        
+    #     #Create a mask for blue colour
+    #     blue_lower = np.array([94, 20, 0], np.uint8) 
+    #     blue_upper = np.array([140,255 ,255], np.uint8) 
+    #     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+    #     kernal = np.ones((5, 5))  
+    #     blue_mask = cv2.dilate(blue_mask, kernal)
+    #     blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
+    #     gray_blur_blue= cv2.Canny(blue_gray,100,255)
+        
+    #     #find contours on blue mask
+    #     cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #     ret1 =None
+        
+    #     #If blue contours found
+    #     if type(cnts[-1]) !=type(None) :
+    #         if len(cnts) == 2:
+    #             cnts = cnts[0]
+    #         elif len(cnts) == 3:
+    #             cnts = cnts[1]
+    #         for i in cnts:
+    #              ret1 = detect('blue',i)
+    #     if(ret1):
 
-#         colo.append(ret1)
-           
-#     #Find red contours in the image
-#     cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-    
-#     #If red contours found
-#     if type(cnts[-1]) !=type(None) :
+    #         colo.append(ret1)
             
-#         if len(cnts) == 2:
-#             cnts = cnts[0]
+    #     #Find red contours in the image
+    #     cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+        
+    #     #If red contours found
+    #     if type(cnts[-1]) !=type(None) :
+                
+    #         if len(cnts) == 2:
+    #             cnts = cnts[0]
 
-#         elif len(cnts) == 3:
-#             cnts = cnts[1]
-#         for i in cnts:
-#             ret = detect('red',i)
-#     colo.append(ret)
-    
-#     #return the list containing all detected values
-#     return(colo)        
+    #         elif len(cnts) == 3:
+    #             cnts = cnts[1]
+    #         for i in cnts:
+    #             ret = detect('red',i)
+    #     colo.append(ret)
+        
+    #     #return the list containing all detected values
+    #     return(colo)        
 
 
 ##############################################################
@@ -288,6 +288,95 @@ def scan_image(img_file_path):
    # print(shapes)
     
     return shapes
+
+def color(img_file_path):
+    if(img_file_path is None):
+        return
+
+    #Read the image
+    
+    if type(img_file_path) == type(str()):
+        img_file_path = cv2.imread(img_file_path)
+    else:
+        img_file_path= img_file_path
+    
+    imageFrame = cv2.GaussianBlur(img_file_path,(5,5),cv2.BORDER_TRANSPARENT)
+    hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
+    
+    #To create a mask for red colour
+    red_lower = np.array([0, 50, 50]) 
+    red_upper = np.array([10, 255, 255]) 
+    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
+    kernal = np.ones((5, 5))
+    red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
+    gray_blur_red= cv2.Canny(red_gray,100,255)
+
+    #Create a mask for blue colour
+    blue_lower = np.array([94, 20, 0], np.uint8) 
+    blue_upper = np.array([140,255 ,255], np.uint8) 
+    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+    kernal = np.ones((5, 5))  
+    blue_mask = cv2.dilate(blue_mask, kernal)
+    blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
+    gray_blur_blue= cv2.Canny(blue_gray,100,255)
+    
+    #Create a mask for green colour
+    green_lower = np.array([25, 52, 72], np.uint8) 
+    green_upper = np.array([102, 255, 255], np.uint8) 
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+    kernal = np.ones((5, 5))
+    green_mask = cv2.dilate(green_mask, kernal)
+    green_gray=cv2.threshold(green_mask, 250,255, cv2.THRESH_BINARY)[1]
+    gray_blur_green = cv2.Canny(green_gray,100,255)
+    
+    #find contours on blue mask
+    cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #If blue contours found
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        for cnt in cnts:
+            M = cv2.moments(cnt)
+            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
+            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
+            if shape(approx) =='Circle':
+                return 'blue'
+        
+           
+    #Find red contours in the image
+    cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        for cnt in cnts:
+            M = cv2.moments(cnt)
+            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
+            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
+            if shape(approx) =='Circle':
+                return 'red'
+    cnts= cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        for cnt in cnts:
+            M = cv2.moments(cnt)
+            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
+            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
+            if shape(approx) =='Circle':
+                return 'green'
+    
 
 
 # NOTE: YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
