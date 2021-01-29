@@ -170,7 +170,7 @@ def applyPerspectiveTransform(input_img):
 		j = 1
 		for i in range(len(cnts)):
 			x,y,w,h = cv.boundingRect(cnts[i])
-            if(x !=0  and  y!=0):
+			if(x !=0  and  y!=0):
 				if(j ==1):
 					j = 2
 					left_upper = [x,y]

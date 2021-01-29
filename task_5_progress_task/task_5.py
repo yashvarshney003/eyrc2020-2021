@@ -160,6 +160,7 @@ encoded_maze_t4 = None
 encoded_maze_t1 = None
 encoded_maze_t3 = None
 encoded_maze_t2 = None
+
 map_start = {
 	"T4":[(0,5)],
 	"T3":[(4,9)],
@@ -178,10 +179,10 @@ t4_path = None#path to table req
 aux_path = None#path to req cb
 
 path_map = {#pixel path
-"T1":[[droptb1],[droptb2],[droptb3]],
-"T2":[[droptb1],[droptb2],[droptb3]],
-"T3":[[droptb1],[droptb2],[droptb3]],
-"T4":[[table1entrypath],[table2entrypath],[table3entrypath]]
+"T1":[],
+"T2":[],
+"T3":[],
+"T4":[]
 }
 
 maze_map ={
@@ -232,8 +233,9 @@ def set_path(color):
 
 #set oath according to pixel
 def complete_all_mapping_path (tablenum):#, start_coord, end_coord):
+	global map_start,map_end,maze_map,path_map
 	for i in range(3):
-		start_coord= map_start[tablenum]
+		start_coord= map_start[tablenum][0]
 		end_coord= map_end[tablenum][i]
 		mazearray = maze_map[tablenum]
 		path = task_4a.find_path(mazearray, start_coord, end_coord)	
@@ -275,16 +277,13 @@ def main(rec_client_id):
 	"""
 	Purpose:
 	---
-
 	Teams are free to design their code in this task.
 	The test executable will only call this function of task_5.py.
 	init_remote_api_server() and exit_remote_api_server() functions are already defined
 	in the executable and hence should not be called by the teams.
 	The obtained client_id is passed to this function so that teams can use it in their code.
-
 	However NOTE:
 	Teams will have to call start_simulation() and stop_simulation() function on their own. 
-
 	Input Arguments:
 	---
 	`rec_client_id` 	:  integer
@@ -293,28 +292,30 @@ def main(rec_client_id):
 	Returns:
 	---
 	None
-
 	Example call:
 	---
 	main(rec_client_id)
 	
 	"""
 	##############	ADD YOUR CODE HERE	##############
-	img_t4 = cv.imread("maze_t4.JPG")
+	global maze_map,encoded_maze_t1,encoded_maze_t2,encoded_maze_t3,encoded_maze_t4
+	img_t4 = cv2.imread("maze_t4.JPG")
 	warped_t4 = task_1b.applyPerspectiveTransform(img_t4)
 	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
 
 	print(f"Encoded maze of t4  is {encoded_maze_t4}")
 	
-	img_t1 = cv.imread("maze_t1.JPG")
+	img_t1 = cv2.imread("maze_t1.JPG")
 	warped_t1 = task_1b.applyPerspectiveTransform(img_t1)
 	encoded_maze_t1 = task_1b.detectMaze(warped_t1) 
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
 
-	print(f"Encoded maze of t4  is {encoded_maze_t1}")
+	print(f"Encoded maze of t1  is {encoded_maze_t1}")
+	print(path_map)
 	complete_all_mapping_path('T1')
 	complete_all_mapping_path('T4')
+	print(path_map)
 	# complete_all_mapping_path('T1')
 	# complete_all_mapping_path('T1')
 	return_code = task_2a.start_simulation()
