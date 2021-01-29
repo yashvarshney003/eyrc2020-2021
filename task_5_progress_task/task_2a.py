@@ -253,16 +253,24 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 
 
 	##############	ADD YOUR CODE HERE	##############
+	if(len(vision_sensor_image) != 12288):
 	
-	vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
+		vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
 
-	
-	vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024))
-	transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
-	
-	
-	transformed_image = cv2.flip(transformed_image, 0)
-	 
+		
+		vision_sensor_image = np.reshape(vision_sensor_image,(1024,1024))
+		transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
+		
+		
+		transformed_image = cv2.flip(transformed_image, 0)
+	else:
+		vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
+
+		
+		vision_sensor_image = np.reshape(vision_sensor_image,(64,64,3))
+		transformed_image= cv2.cvtColor(vision_sensor_image, cv2.COLOR_BGR2RGB)
+
+		
 	
 	
 

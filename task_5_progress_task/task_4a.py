@@ -101,7 +101,7 @@ def find_path(maze_array, start_coord, end_coord):
 	"""
 
 	path = []
-	
+	print(f"In task 4a {maze_array} and {start_coord} and{end_coord}")
 
 	################# ADD YOUR CODE HERE #################
 
@@ -221,13 +221,18 @@ def find_path(maze_array, start_coord, end_coord):
 				i=next_parent[1]
 				j=next_parent[2]
 				prev_parent=(next_parent[3],next_parent[4])
+				#print(f"before try-------------------")
 				#it need to delete some elements of path here to delete all the wrong cells untill the we get the altenative parent.
 				try:
 					position=path.index(prev_parent)
 					while(len(path)>(position+1)):
 						popped_element=path.pop()
+						
 						#print("popped_element =",popped_element)
-				except VlaueError:
+				except ValueError:
+					#print("----------------------------------")
+					
+					
 					print("Vlauerror")
 					
 
@@ -245,7 +250,7 @@ def find_path(maze_array, start_coord, end_coord):
 						while(len(path)>(position+1)):
 							popped_element=path.pop()
 						
-					except VlaueError:
+					except ValueError:
 						print(f"prev_parent {prev_parent} is not present in the path list.")
 				else:
 					break
@@ -263,6 +268,9 @@ def find_path(maze_array, start_coord, end_coord):
 		
 
 	######################################################
+	print("====================================")
+	print(f"Path is (in bocexe){path}")
+	print("---------------------------------------")
 	
 	return path
 

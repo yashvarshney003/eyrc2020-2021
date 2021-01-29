@@ -186,10 +186,6 @@ path_map = {#pixel path
 }
 
 maze_map ={
-	'T4':encoded_maze_t4,
-	'T1':encoded_maze_t1,
-	'T2':encoded_maze_t2,
-	'T3':encoded_maze_t3
 }
 
 client_id = -1
@@ -220,6 +216,15 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+def make_connection():
+	global vision_sensor_5,vision_sensor_4,vision_sensor_3,vision_sensor_2,vision_sensor_1
+	return_code,vision_sensor_1 = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
+	#return_code,vision_sensor_2 = sim.simxGetObjectHandle(client_id,"vision_sensor_2",sim.simx_opmode_blocking)
+	#return_code,vision_sensor_3 = sim.simxGetObjectHandle(client_id,"vision_sensor_3",sim.simx_opmode_blocking)
+	return_code,vision_sensor_4 = sim.simxGetObjectHandle(client_id,"vision_sensor_4",sim.simx_opmode_blocking)
+	return_code,vision_sensor_5 = sim.simxGetObjectHandle(client_id,"vision_sensor_5",sim.simx_opmode_blocking)
+	print(f"vision_sensor is {vision_sensor_1} and {vision_sensor_4} and {vision_sensor_5} ")
+
 def set_path(color):
 	table, collection_box = ball_details[color][0].split('_')
 	# path_start = map_start[table]
@@ -233,7 +238,7 @@ def set_path(color):
 
 #set oath according to pixel
 def complete_all_mapping_path (tablenum):#, start_coord, end_coord):
-	global map_start,map_end,maze_map,path_map
+	global map_start,map_end,maze_map,path_map,encoded_maze_t1
 	for i in range(3):
 		start_coord= map_start[tablenum][0]
 		end_coord= map_end[tablenum][i]
@@ -252,17 +257,30 @@ def complete_all_mapping_path (tablenum):#, start_coord, end_coord):
 			y_pixel = (y_increment//2) + path[i][1]*y_increment
 			pixel_path[i].append(x_pixel)
 			pixel_path[i].append(y_pixel)
-		path_map[tablenum][i]= pixel_path
+		path_map[tablenum].append(pixel_path)
+		print(f"{tablenum} and {pixel_path}")
+		print("-------------------------------------------------------------------")
 
 	
 def get_color():
 	global vision_sensor_5,client_id
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle_5,1,sim.simx_opmode_blocking)
-	print(f"length {len(vision_sensor_image)} and  {return_code}")
+	color =None
+	print(f"vsision sensor i s{vision_sensor_5}")
+	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_5,0,sim.simx_opmode_blocking)
+	print(vision_sensor_image)
+	i = 0 
 	
-	
-	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_buffer)
-	color = task_1a_part1.color(vision_sensor_image)
+	while(color is None ):
+		i+=1
+		return_code ,image_resolution,vision_sensor_image = sim.simxGetVisionSensorImage(client_id,vision_sensor_5,0,sim.simx_opmode_buffer)
+		print(f"lengthgggggggggggggggggg  {vision_sensor_image} and  {return_code}")
+		
+		print(f"length {vision_sensor_image} and  {return_code}")
+		vision_sensor_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+		cv2.imwrite("vision5image.png",vision_sensor_image)
+		print(f"number of iteration run  {i} ")
+		
+		color = task_1a_part1.color(vision_sensor_image)
 	return color
 
 
@@ -302,6 +320,7 @@ def main(rec_client_id):
 	img_t4 = cv2.imread("maze_t4.JPG")
 	warped_t4 = task_1b.applyPerspectiveTransform(img_t4)
 	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
+	maze_map['T4'] = encoded_maze_t4
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
 
 	print(f"Encoded maze of t4  is {encoded_maze_t4}")
@@ -309,17 +328,23 @@ def main(rec_client_id):
 	img_t1 = cv2.imread("maze_t1.JPG")
 	warped_t1 = task_1b.applyPerspectiveTransform(img_t1)
 	encoded_maze_t1 = task_1b.detectMaze(warped_t1) 
+	maze_map['T1'] = encoded_maze_t1
+	print(f"here it is{maze_map}")
+	
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
 
 	print(f"Encoded maze of t1  is {encoded_maze_t1}")
-	print(path_map)
+	#print(path_map)
+	print(maze_map)
 	complete_all_mapping_path('T1')
 	complete_all_mapping_path('T4')
-	print(path_map)
+	make_connection()
+	
 	# complete_all_mapping_path('T1')
 	# complete_all_mapping_path('T1')
 	return_code = task_2a.start_simulation()
 	color = get_color()
+	print(f" color is found is {color}")
 	if(color):
 		t4_path,aux_path = set_path(color)
 	
