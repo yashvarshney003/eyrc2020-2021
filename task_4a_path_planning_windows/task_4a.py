@@ -106,7 +106,7 @@ def find_path(maze_array, start_coord, end_coord):
 	################# ADD YOUR CODE HERE #################
 
 	k=0
-	walls=[]
+	walls=[]	#this variable can be ignored
 	children_list=[]
 	prev_parent =(-1,-1)
 	alternative =[]
@@ -115,6 +115,7 @@ def find_path(maze_array, start_coord, end_coord):
 
 	i = start_coord[0]
 	j = start_coord[1]
+	
 	while(1):
 		if ((i==end_coord[0]) and j==end_coord[1]):
 			path.append((i,j))
@@ -138,14 +139,14 @@ def find_path(maze_array, start_coord, end_coord):
 				try:
 					position=path.index(prev_parent)
 					while(len(path)>(position+1)):
-						popped_element=path.pop()
+						popped_element=path.pop()	#for printing and checking
 						
 				except VlaueError:
 					print("Vlauerrit")
 		
 		
 		n = maze_array[i][j]			
-		number = n
+		number = n		#for printing and checking
 		binary =[]
 		if(n==0):
 			binary.append(0)
@@ -227,7 +228,7 @@ def find_path(maze_array, start_coord, end_coord):
 					while(len(path)>(position+1)):
 						popped_element=path.pop()
 						#print("popped_element =",popped_element)
-				except VlaueError:
+				except ValueError:
 					print("Vlauerror")
 					
 
@@ -245,13 +246,25 @@ def find_path(maze_array, start_coord, end_coord):
 						while(len(path)>(position+1)):
 							popped_element=path.pop()
 						
-					except VlaueError:
+					except ValueError:
 						print(f"prev_parent {prev_parent} is not present in the path list.")
 				else:
 					break
 	if (len(all_paths)!=0):
 		all_paths.sort(key=len,reverse=True)
-		path = all_paths.pop()
+		
+		while(True):
+			continuity_flag = True
+			path = all_paths.pop()
+			if (len(path)==len(set(path))):		#checking there should not be duplicate element in the list
+				for i in range(0,(len(path)-2)):	#checking the continuity of the elements in the list "there should be difference of 1 in x or y of the successive element"
+					#if ( (path[i][0]==path[i+1][0])and((path[i][1]==(path[i+1][1]+1)) or (path[i][1]==(path[i+1][1]-1))))  or (((path[i][0]==(path[i+1][0]+1))or(path[i][0]==(path[i+1][0]-1)))and (path[i][1]==path[i+1][1]))
+					if ( ((path[i][0]==path[i+1][0])and( abs(path[i][1]-path[i+1][1])==1 ))  or  ((abs(path[i][0]-path[i+1][0])==1)and(path[i][1]==path[i+1][1])) ):
+						pass
+					else:
+						continuity_flag = False
+				if (continuity_flag == True):
+					break
 	
 
 		
