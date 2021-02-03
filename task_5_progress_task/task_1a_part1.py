@@ -180,8 +180,10 @@ def scan_image(img_file_path):
     #if only one circle is detected, add its details to the list in the dictionary
     # if(len(outputs)==1):
         # shapes['Circle'] = outputs[0]
+   
     
     image = img_file_path.copy()
+    image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     # image = cv2.resize(image, (1280, 1280))
     # cv2.imshow('imagein', image)
     # cv2.waitKey(0)
@@ -192,8 +194,10 @@ def scan_image(img_file_path):
     mask = cv2.inRange(image_mark, lower_gray, upper_gray)
     mask_inv= cv2.bitwise_not(mask)
     colored_portion = cv2.bitwise_or(image, image, mask = mask)
+    colored_portion = cv2.cvtColor(colored_portion,cv2.COLOR_RGB2GRAY)
     rer,colored_portion = cv2.threshold(colored_portion,50,255,cv2.THRESH_BINARY_INV)
-    cnts = cv.findContours(thresh2,cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.imwrite("coloredportion.png",colored_portion)
+    cnts = cv2.findContours(colored_portion,cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 
     
     if len(cnts) == 2:

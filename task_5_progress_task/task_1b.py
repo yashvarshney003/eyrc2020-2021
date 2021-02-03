@@ -73,7 +73,7 @@ def applyPerspectiveTransform(input_img):
 	warped_img = applyPerspectiveTransform(input_img)
 	"""
 	tup = input_img.shape
-	if (tup[0] != 512):
+	if (tup[0] != 1024):
 
 		warped_img = None
 
@@ -161,15 +161,27 @@ def applyPerspectiveTransform(input_img):
 		warped_img = None
 
 	##############	ADD YOUR CODE HERE	##############
-		ret,thresh2 = cv.threshold(img,50,255,cv.THRESH_BINARY)
+		input_img  =  cv.cvtColor(input_img,cv.COLOR_BGR2GRAY)
+		ret,thresh2 = cv.threshold(input_img,50,255,cv.THRESH_BINARY)
+		print(thresh2.shape)
+		cv.imwrite("input.png",thresh2)
 		cnts = cv.findContours(thresh2,cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
 		left_upper = [10000,10000]
 		right_upper = [0,0]
 		right_lower = [0,0]
 		left_lower =[0,0]
 		j = 1
+		k = 1
 		for i in range(len(cnts)):
+			k+=1
+			input_img2=thresh2
+			input_img2 = cv.cvtColor(input_img2,cv.COLOR_GRAY2RGB)
+			
 			x,y,w,h = cv.boundingRect(cnts[i])
+			#print(f"so value we het {x,y} ,  {x+w,y}, {x+w,y+h}  and {x,y+h}")
+			input_img2 = cv.rectangle(input_img2,(x,y),(x+w,y+h),(0,255,0),5)
+			name  = str(k)+"kk.png"
+			cv.imwrite(name,input_img2)
 			if(x !=0  and  y!=0):
 				if(j ==1):
 					j = 2
@@ -177,26 +189,30 @@ def applyPerspectiveTransform(input_img):
 					right_upper = [x+w,y]
 					right_lower = [x+w,y+h]
 					left_lower =[x,y+h]
+					final_list = [left_upper,right_upper,right_lower,left_lower]
+					#print(f" final_list{final_list}")
 				else:
+				
 
-					if(x<left_upper[0] and y <left_upper[1]):
-						print("left upper changed")
+					if((x< 90 and  y < 90 ) or (abs(x - left_upper[0]) < 20  and  abs(y - left_upper[1]) < 20 )  ):
+						#print("left upper changed")
 						left_upper[0] = x
 						left_upper[1] = y
-					if(x+w >right_upper[0] and y < 100):
-						print("right upper changed")
+					if(abs(x+w -right_upper[0]) < 10  and y < 100):
+						#print("right upper changed")
 						right_upper[0] = x+w 
 						right_upper[1] = y
 					if(x+w >right_lower[0] and y+h > right_lower[1]):
-						print("right lower changed")
+						#print("right lower changed")
 						right_lower[0] = x+w 
 
 						right_lower[1] = y+h 
-					if(y+h > left_lower[1] and x < 100):
-						print("left lower changed")
+					if(abs(y+h - left_lower[1]) < 10 and x < 100  ):
+						#print("left lower changed")
 						left_lower[0] = x
 						left_lower[1] = y+h
-		final_list = [left_upper,right_upper,right_lower,left_lower]
+					final_list = [left_upper,right_upper,right_lower,left_lower]
+					#print(f" final_list{final_list}")
 
 		
 		screenCnt = np.array(final_list)
@@ -237,8 +253,8 @@ def applyPerspectiveTransform(input_img):
 		M = cv.getPerspectiveTransform(rect, dst)
 
 			# Finally the warped image 
-		warped_img = cv.warpPerspective(img, M, (maxWidth, maxHeight))
-		cv.imwrite("warped.png",warped_img)
+		warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
+		#cv.imwrite("warped.png",warped_img)
 					
 					
 			

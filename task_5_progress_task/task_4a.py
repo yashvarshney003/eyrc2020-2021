@@ -101,7 +101,7 @@ def find_path(maze_array, start_coord, end_coord):
 	"""
 
 	path = []
-	print(f"In task 4a {maze_array} and {start_coord} and{end_coord}")
+	#print(f"In task 4a {maze_array} and {start_coord} and{end_coord}")
 
 	################# ADD YOUR CODE HERE #################
 

@@ -51,7 +51,7 @@ except Exception:
 
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
-client_id = -1
+client_id  = -1
 
 # Global list "setpoint" for storing target position of ball on the platform/top plate
 # The zeroth element stores the x pixel and 1st element stores the y pixel
@@ -145,7 +145,7 @@ def init_setup(rec_client_id):
 	##################################################
 
 
-def control_logic(center_x,center_y):
+def control_logic(center_x,center_y,servohandle_y,servohandle_x):
 	"""
 	Purpose:
 	---
@@ -181,17 +181,18 @@ def control_logic(center_x,center_y):
 	control_logic(center_x,center_y)
 	
 	"""
-	import json
-	global setpoint, client_id,current_time,prev_time,dt,perror,derror,ierror,prev_error,servohandle_y,servohandle_x,rt_code,i_term,kp,kd,ki,trim
 	
-
+	global setpoint,current_time,prev_time,dt,perror,derror,ierror,prev_error,rt_code,i_term,kp,kd,ki,trim
+	
+	client_id = 0 
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+	print(setpoint,client_id,current_time,prev_time,perror,derror,ierror,prev_error,kp,kd,ki,trim)
 
 	current_time = float(current_time)
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
-	print(setpoint,client_id,current_time,prev_time,perror,derror,ierror,prev_error,kp,kd,ki,trim)
+	
 	sample_time = 0.1
 
 	

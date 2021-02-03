@@ -37,6 +37,8 @@ import traceback
 import time
 import math
 import json
+import multiprocessing
+#import concurrent.features
 ##############################################################
 
 # Importing the sim module for Remote API connection with 
@@ -160,6 +162,16 @@ encoded_maze_t4 = None
 encoded_maze_t1 = None
 encoded_maze_t3 = None
 encoded_maze_t2 = None
+servo_handle_x_t4 = -1
+servo_handle_y_t4 = -1
+servo_handle_x_t3 = -1
+servo_handle_y_t3 = -1
+servo_handle_x_t2 = -1
+servo_handle_y_t2 = -1
+servo_handle_x_t1 = -1
+servo_handle_y_t1 = -1
+
+
 
 map_start = {
 	"T4":[(0,5)],
@@ -207,6 +219,7 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 	global client_id
 
 	color_and_cb = ball_color + '::' + collection_box_name
+	
 	inputBuffer = bytearray()
 	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'evaluation_screen_respondable_1',
 							sim.sim_scripttype_childscript,'color_and_cb_identification',[],[],color_and_cb,inputBuffer,sim.simx_opmode_blocking)
@@ -216,8 +229,80 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
+	global client_id
+	print(f" client is  {client_id}")
+	print("traverse function called")
+	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
+	print(prev_time)
+	current_time = ''
+	while(len(current_time) == 0  ):
+		rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+		print("didbdibdibdibd",current_time)
+	
+	time.sleep(3)
+	j = 0
+	k= 0
+	for i in pixel_path:
+		i.reverse()
+		task_3.change_setpoint(i)
+		while(1):
+			j+=1
+			k+=1
+			#print("#########################################################################")
+			#print(j)
+			name1 = str(j) + ".png"
+			name2 = str(k)+"k.png"
+			
+			
+			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
+			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+			
+			
+			warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+			#cv2.imwrite(name2,warped_img)
+			#cv2.imwrite(name1,transformed_image)
+			
+			
+			
+			
+			
+			shapes = task_1a_part1.scan_image(warped_img)
+			if(shapes):
+				#print(f"client id in task 4b{client_id}")
+				#print(f"sent this {i[1]} and {i[0]}")
+				
+				print(f"here1 {shapes} and {i} ")
+				print(shapes['Circle'][1]-i[0],abs(shapes['Circle'][2]-i[1]))
+				if(abs(shapes['Circle'][1]-i[0]) <= 10  and abs(shapes['Circle'][2]-i[1]) <= 10):
+					print("here2")
+					print("her-------------------------------------------------------------------------------------")
+					break
+					
+				else:
+					task_3.control_logic(shapes['Circle'][1],shapes['Circle'][2],servohandle_x,servohandle_y)
+	return 1
+		
+
+
+
+
+
+
+
+
+
+	
 def make_connection():
-	global vision_sensor_5,vision_sensor_4,vision_sensor_3,vision_sensor_2,vision_sensor_1
+	global vision_sensor_5,vision_sensor_4,vision_sensor_3,vision_sensor_2,vision_sensor_1,servo_handle_x_t1,servo_handle_y_t1,servo_handle_x_t4,servo_handle_y_t4
+	return_code,servo_handle_x_t1   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t1_1",sim.simx_opmode_blocking)
+	return_code,servo_handle_y_t1   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t1_2",sim.simx_opmode_blocking)
+	return_code,servo_handle_x_t4   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t4_1",sim.simx_opmode_blocking)
+	return_code,servo_handle_x_t4   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t4_2",sim.simx_opmode_blocking)
+	
+
+
+
 	return_code,vision_sensor_1 = sim.simxGetObjectHandle(client_id,"vision_sensor_1",sim.simx_opmode_blocking)
 	#return_code,vision_sensor_2 = sim.simxGetObjectHandle(client_id,"vision_sensor_2",sim.simx_opmode_blocking)
 	#return_code,vision_sensor_3 = sim.simxGetObjectHandle(client_id,"vision_sensor_3",sim.simx_opmode_blocking)
@@ -226,6 +311,7 @@ def make_connection():
 	print(f"vision_sensor is {vision_sensor_1} and {vision_sensor_4} and {vision_sensor_5} ")
 
 def set_path(color):
+	global t4_path,aux_path
 	table, collection_box = ball_details[color][0].split('_')
 	# path_start = map_start[table]
 	# path_end = map_end[table][int(collection_box[-1])-1]
@@ -258,29 +344,32 @@ def complete_all_mapping_path (tablenum):#, start_coord, end_coord):
 			pixel_path[i].append(x_pixel)
 			pixel_path[i].append(y_pixel)
 		path_map[tablenum].append(pixel_path)
-		print(f"{tablenum} and {pixel_path}")
-		print("-------------------------------------------------------------------")
+		#print(f"{tablenum} and {pixel_path}")
+		#print("-------------------------------------------------------------------")
 
 	
 def get_color():
 	global vision_sensor_5,client_id
-	color =None
+	color = None
 	print(f"vsision sensor i s{vision_sensor_5}")
 	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_5,0,sim.simx_opmode_blocking)
-	print(vision_sensor_image)
+	print(len(vision_sensor_image))
 	i = 0 
 	
 	while(color is None ):
 		i+=1
-		return_code ,image_resolution,vision_sensor_image = sim.simxGetVisionSensorImage(client_id,vision_sensor_5,0,sim.simx_opmode_buffer)
-		print(f"lengthgggggggggggggggggg  {vision_sensor_image} and  {return_code}")
+		return_code ,image_resolution,vision_sensor_image = sim.simxGetVisionSensorImage(client_id,vision_sensor_5,0,sim.simx_opmode_blocking)
+		#print(f"lengthgggggggggggggggggg  {len(vision_sensor_image)} and  {return_code}")
 		
-		print(f"length {vision_sensor_image} and  {return_code}")
-		vision_sensor_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
-		cv2.imwrite("vision5image.png",vision_sensor_image)
-		print(f"number of iteration run  {i} ")
 		
-		color = task_1a_part1.color(vision_sensor_image)
+		if(len(vision_sensor_image)>2):
+			#print(f"aa hi gaye {len(vision_sensor_image)}")
+			vision_sensor_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+			#cv2.imwrite("vision5image.png",vision_sensor_image)
+			#print(f"number of iteration run  {i} ")
+			color = task_1a_part1.color(vision_sensor_image)
+			
+		
 	return color
 
 
@@ -316,29 +405,33 @@ def main(rec_client_id):
 	
 	"""
 	##############	ADD YOUR CODE HERE	##############
-	global maze_map,encoded_maze_t1,encoded_maze_t2,encoded_maze_t3,encoded_maze_t4
+	global maze_map,encoded_maze_t1,encoded_maze_t2,encoded_maze_t3,encoded_maze_t4,t4_path,aux_path,servo_handle_x_t1,servo_handle_y_t1
+	global servo_handle_x_t4,servo_handle_y_t4
 	img_t4 = cv2.imread("maze_t4.JPG")
 	warped_t4 = task_1b.applyPerspectiveTransform(img_t4)
 	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
 	maze_map['T4'] = encoded_maze_t4
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
 
-	print(f"Encoded maze of t4  is {encoded_maze_t4}")
+	#print(f"Encoded maze of t4  is {encoded_maze_t4}")
 	
 	img_t1 = cv2.imread("maze_t1.JPG")
 	warped_t1 = task_1b.applyPerspectiveTransform(img_t1)
 	encoded_maze_t1 = task_1b.detectMaze(warped_t1) 
 	maze_map['T1'] = encoded_maze_t1
-	print(f"here it is{maze_map}")
+	#print(f"here it is{maze_map}")
 	
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
+	print(f"return_code is {return_code}")
 
-	print(f"Encoded maze of t1  is {encoded_maze_t1}")
+	#print(f"Encoded maze of t1  is {encoded_maze_t1}")
 	#print(path_map)
-	print(maze_map)
+	#print(maze_map)
 	complete_all_mapping_path('T1')
 	complete_all_mapping_path('T4')
+	
 	make_connection()
+	
 	
 	# complete_all_mapping_path('T1')
 	# complete_all_mapping_path('T1')
@@ -346,8 +439,13 @@ def main(rec_client_id):
 	color = get_color()
 	print(f" color is found is {color}")
 	if(color):
-		t4_path,aux_path = set_path(color)
+		set_path(color)
+		print(f" we find tha path {t4_path} and {aux_path}")
 	
+	return_code = traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
+
+		
+
 	
 		
 		
