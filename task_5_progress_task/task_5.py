@@ -461,6 +461,7 @@ def main(rec_client_id):
 	
 	return_code = traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
 	return_code = traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
+	print(" ab hame sahi se bekaar ke print and saving statement hatha ke karna hai saari chezze ek baar check karlena kyuki ek bhi galti 0 makrs")
 
 		
 
