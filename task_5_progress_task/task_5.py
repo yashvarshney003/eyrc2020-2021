@@ -232,21 +232,23 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 	global client_id
 	
-	print(f" client is  {client_id}")
-	print(f" traverse function called{pixel_path}")
+	#print(f" client is  {client_id}")
+	#print(f" traverse function called{pixel_path}")
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	print(prev_time)
+	#print(prev_time)
 	current_time = ''
 	while(len(current_time) == 0  ):
 		rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-		print("didbdibdibdibd",current_time)
+		#print("didbdibdibdibd",current_time)
 	
 	
 	j = 0
 	k= 0
 	for i in pixel_path:
-		if(i == pixel_path[-1]):
-			i[0] = i[0]+20
+		i[0] = i[0]+round((5 - ((i[0]+64)//640)*10)* 4)
+		i[1] = i[1]+ round((5 - ((i[1]+64)//640)*10)*4)
+		#print(f" {i[0]} and {i[1]}")
+		
 		i.reverse()
 		task_3.change_setpoint(i)
 		while(1):
@@ -266,7 +268,7 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 			print(name2)
 			
 			#cv2.imwrite(name1,transformed_image)
-			#cv2.imwrite(name2,warped_img)
+			
 			
 			
 			
@@ -284,16 +286,18 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 				warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
 				warped_img = cv2.circle(warped_img,(shapes['Circle'][1],shapes['Circle'][2]),5,(0,255,0),2)
 				warped_img = cv2.circle(warped_img,(i[0],i[1]),5,(255,0,0),2)
+				#warped_img = cv2.circle(warped_img,(i[0],i[1]),10,(255,0,255),2)
+				cv2.imwrite(name2,warped_img)
 				
 					
 				
-				if(abs(shapes['Circle'][1]-i[0]) <= 30  and abs(shapes['Circle'][2]-i[1]) <= 30):
+				if(abs(shapes['Circle'][1]-i[0]) <= 20  and abs(shapes['Circle'][2]-i[1]) <= 20):
 					#print("here2")
 					#print("her-------------------------------------------------------------------------------------")
 					break
 					
 				else:
-					task_3.control_logic(client_id,shapes['Circle'][1],shapes['Circle'][2],servohandle_x,servohandle_y)
+					task_3.control_logic(client_id,shapes['Circle'][1]+abs(10 - (shapes['Circle'][1]+64)/1280)+10,shapes['Circle'][2]+abs(10 - (shapes['Circle'][2]+64)/1280)+10,servohandle_x,servohandle_y)
 	return 1
 		
 
