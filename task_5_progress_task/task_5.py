@@ -158,10 +158,6 @@ vision_sensor_2 = -1
 vision_sensor_3 = -1
 vision_sensor_4 = -1
 vision_sensor_5 = -1
-encoded_maze_t4 = None
-encoded_maze_t1 = None
-encoded_maze_t3 = None
-encoded_maze_t2 = None
 servo_handle_x_t4 = -1
 servo_handle_y_t4 = -1
 servo_handle_x_t3 = -1
@@ -170,6 +166,17 @@ servo_handle_x_t2 = -1
 servo_handle_y_t2 = -1
 servo_handle_x_t1 = -1
 servo_handle_y_t1 = -1
+
+encoded_maze_t4 = None
+encoded_maze_t1 = None
+encoded_maze_t3 = None
+encoded_maze_t2 = None
+
+global servo_handle_array
+servo_handle_array= [[vision_sensor_1, servo_handle_x_t1, servo_handle_y_t1], 
+					[vision_sensor_2, servo_handle_x_t2, servo_handle_y_t2],
+					[vision_sensor_3, servo_handle_x_t3, servo_handle_y_t3],
+					[vision_sensor_4, servo_handle_x_t4, servo_handle_y_t4]]
 
 
 
@@ -229,76 +236,90 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
-	global client_id
-	
-	#print(f" client is  {client_id}")
-	#print(f" traverse function called{pixel_path}")
-	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	#print(prev_time)
-	current_time = ''
-	while(len(current_time) == 0  ):
-		rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-		#print("didbdibdibdibd",current_time)
-	
-	
-	j = 0
-	k= 0
-	for i in pixel_path:
-		i[0] = i[0]+round((5 - ((i[0]+64)//640)*10)* 4)
-		i[1] = i[1]+ round((5 - ((i[1]+64)//640)*10)*4)
-		#print(f" {i[0]} and {i[1]}")
+class traversing_ball(color):
+	def __init__(self):
+		self.color = color
+		global t4_path,aux_path
+		self.table, self.collection_box = ball_details[color][0].split('_')
+		self.vision_sensor_handle, self.servohandle_x, self.servohandle_y = servo_handle_array[self.table-1]
+		t4_path=path_map['T4'][int(self.table[-1])-1]
+		aux_path = path_map[self.table][int(self.collection_box[-1])-1]
+		ball_details[self.color].pop(0)
+
+	def traverse_pid():#vision_sensor_handle, servohandle_x,servohandle_y):# def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
+		global client_id
 		
-		i.reverse()
-		task_3.change_setpoint(i)
-		while(1):
-			j+=1
-			k+=1
-			print("#########################################################################")
-			#print(j)
-			name1 = "table_"+ str(tabel_no)+ "__"+str(j) + ".png"
-			name2 = "table_"+ str(tabel_no)+ "__"+str(k)+"k123.png"
+		#print(f" client is  {client_id}")
+		#print(f" traverse function called{pixel_path}")
+		rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
+		#print(prev_time)
+		current_time = ''
+		while(len(current_time) == 0  ):
+			rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
+			#print("didbdibdibdibd",current_time)
+		
+		
+		j = 0
+		k= 0
+		for i in pixel_path:
+			# if( i == pixel_path[-1]):
+			# 	if(i[0] == or i[0] == or i[0]== or i[0]== or i == )
 			
+			i[0] = i[0]+round((5 - ((i[0]+64)//640)*10)* 4)
+			i[1] = i[1]+ round((5 - ((i[1]+64)//640)*10)*4)
+			#print(f" {i[0]} and {i[1]}")
 			
-			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
-			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
-			
-			
-			warped_img = task_1b.applyPerspectiveTransform(transformed_image,j,tabel_no)
-			print(name2)
-			
-			#cv2.imwrite(name1,transformed_image)
-			
-			
-			
-			
-			
-			
-			shapes = task_1a_part1.scan_image(warped_img,k)
+			i.reverse()
+			task_3.change_setpoint(i)
+			while(1):
+				j+=1
+				k+=1
+				print("#########################################################################")
+				#print(j)
+				name1 = "table_"+ str(tabel_no)+ "__"+str(j) + ".png"
+				name2 = "table_"+ str(tabel_no)+ "__"+str(k)+"k123.png"
+				
+				
+				vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(self.vision_sensor_handle)
+				transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
+				
+				
+				warped_img = task_1b.applyPerspectiveTransform(transformed_image)
+				print(name2)
+				
+				#cv2.imwrite(name1,transformed_image)
+				
+				
+				
+				
+				
+				
+				shapes = task_1a_part1.scan_image(warped_img,k)
 
-			if(shapes):
-				#print(f"client id in task 4b{client_id}")
-				#print(f"sent this {i[1]} and {i[0]}")
-				
-				#print(f"here1 {shapes} and {i} ")
-				#print(shapes['Circle'][1]-i[0],abs(shapes['Circle'][2]-i[1]))
-				
-				warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
-				warped_img = cv2.circle(warped_img,(shapes['Circle'][1],shapes['Circle'][2]),5,(0,255,0),2)
-				warped_img = cv2.circle(warped_img,(i[0],i[1]),5,(255,0,0),2)
-				#warped_img = cv2.circle(warped_img,(i[0],i[1]),10,(255,0,255),2)
-				cv2.imwrite(name2,warped_img)
-				
+				if(shapes):
+					#print(f"client id in task 4b{client_id}")
+					#print(f"sent this {i[1]} and {i[0]}")
 					
-				
-				if(abs(shapes['Circle'][1]-i[0]) <= 20  and abs(shapes['Circle'][2]-i[1]) <= 20):
-					#print("here2")
-					#print("her-------------------------------------------------------------------------------------")
-					break
+					#print(f"here1 {shapes} and {i} ")
+					#print(shapes['Circle'][1]-i[0],abs(shapes['Circle'][2]-i[1]))
 					
-				else:
-					task_3.control_logic(client_id,shapes['Circle'][1]+abs(10 - (shapes['Circle'][1]+64)/1280)+10,shapes['Circle'][2]+abs(10 - (shapes['Circle'][2]+64)/1280)+10,servohandle_x,servohandle_y)
-	return 1
+					warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
+					warped_img = cv2.circle(warped_img,(shapes['Circle'][1],shapes['Circle'][2]),5,(0,255,0),2)
+					warped_img = cv2.circle(warped_img,(i[0],i[1]),5,(255,0,0),2)
+					#warped_img = cv2.circle(warped_img,(i[0],i[1]),10,(255,0,255),2)
+					cv2.imwrite(name2,warped_img)
+					
+						
+					
+					if(abs(shapes['Circle'][1]-i[0]) <= 20  and abs(shapes['Circle'][2]-i[1]) <= 20):
+						#print("here2")
+						#print("her-------------------------------------------------------------------------------------")
+						break
+						
+					else:
+						task_3.control_logic(client_id,shapes['Circle'][1],shapes['Circle'][2],self.servohandle_x,self.servohandle_y)
+		return 1
+
 		
 
 
@@ -309,7 +330,9 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 
 
 
+
 	
+	##################################################	
 def make_connection():
 	global vision_sensor_5,vision_sensor_4,vision_sensor_3,vision_sensor_2,vision_sensor_1,servo_handle_x_t1,servo_handle_y_t1,servo_handle_x_t4,servo_handle_y_t4
 	return_code,servo_handle_x_t1   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t1_1",sim.simx_opmode_blocking)
@@ -460,13 +483,13 @@ def main(rec_client_id):
 	color = get_color()
 	print(f" color is found is {color}")
 	if(color):
-		set_path(color)
-		print(f" we find tha path {t4_path} and {aux_path}")
+	# 	set_path(color)
+	# 	print(f" we find tha path {t4_path} and {aux_path}")
 	
-	return_code = traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
-	return_code = traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
-	print(" ab hame sahi se bekaar ke print and saving statement hatha ke karna hai saari chezze ek baar check karlena kyuki ek bhi galti 0 makrs")
-
+	# return_code = traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
+	# return_code = traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
+	# print(" ab hame sahi se bekaar ke print and saving statement hatha ke karna hai saari chezze ek baar check karlena kyuki ek bhi galti 0 makrs")
+		ball = traversing_ball(color).traverse_pid()
 		
 
 		

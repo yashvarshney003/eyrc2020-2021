@@ -196,14 +196,14 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
 	
-	sample_time = 0.1
+	sample_time = 0.25
 
 	
 	dt = current_time - prev_time
 	print(f"time difference is{dt}")
 
 
-	if (1):#(dt >= sample_time): # code is running 	for a sample time
+	if (dt >= sample_time): # code is running 	for a sample time
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
