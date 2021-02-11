@@ -199,7 +199,7 @@ def get_vision_sensor_image():
 	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
 	
 	while(vision_sensor_image[1024] == 0  ):
-		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_buffer)
+		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,handel,0,sim.simx_opmode_blocking)
 
 
 

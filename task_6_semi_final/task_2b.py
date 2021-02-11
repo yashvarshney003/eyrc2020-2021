@@ -247,7 +247,7 @@ def send_data(client_id,maze_array,maze):
 	return_code = -1
 	maze_array1 = []
 	plate  = "top_plate_respondable_" + maze +"_1"
-	#print(f"so maze build on {maze}")
+	print(f"so maze build on {maze}")
 
 	##############	ADD YOUR CODE HERE	##############
 	for i in range(len(maze_array)):

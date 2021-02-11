@@ -80,7 +80,7 @@ function createWall()
 	--Refer https://www.coppeliarobotics.com/helpFiles/en/apiFunctions.htm#sim.setObjectInt32Parameter to understand the various parameters passed. 	
 	--The walls should only be collidable with the ball and not with each other.
 	--Hence we are enabling only the local respondable masks of the walls created.
-	sim.boolOr32(sim.objectspecialproperty_renderable, sim.objectspecialproperty_collidable)
+	sim.setObjectSpecialProperty(wallObjectHandle,sim.boolOr32(sim.objectspecialproperty_renderable, sim.objectspecialproperty_collidable))
 	--sim.setObjectSpecialProperty(wallObjectHandle, sim.objectspecialproperty_collidable)		--does not works two times
 	--Walls may have to be set as renderable........................... 
 	--This is required to make the wall as collidable
@@ -192,6 +192,13 @@ function generateHorizontalWalls()
         y = y - 0.1
         x = -0.45
     end
+
+    local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)  
+    sim.setInt32Parameter(sim.intparam_error_report_mode,0)                 --desabling error report mode (considering the case of empty maze)
+    sim.removeObject(sim.getObjectHandle("H_WallSegment_t1_0x4"))          --deleting boundary horizontal wall
+    sim.removeObject(sim.getObjectHandle("H_WallSegment_t1_10x5"))          --deleting boundary horizontal wall
+    sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)        -- enabling error report mode
+
 	--*******************************************************
 end
 
@@ -236,6 +243,11 @@ function generateVerticalWalls()
         x = x + 0.1
         y = 0.45
     end
+
+    local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)  
+    sim.setInt32Parameter(sim.intparam_error_report_mode,0)                 --desabling error report mode (considering the case of empty maze)
+    sim.removeObject(sim.getObjectHandle("V_WallSegment_t1_4x10"))          --deleting boundary vertical wall
+    sim.setInt32Parameter(sim.intparam_error_report_mode,savedState)        -- enabling error report mode
 
 	--*******************************************************
 end

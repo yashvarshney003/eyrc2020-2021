@@ -183,27 +183,27 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 	"""
 	
 	global setpoint,current_time,prev_time,dt,perror,derror,ierror,prev_error,rt_code,i_term,kp,kd,ki,trim
-	#print(servohandle_x,servohandle_y)
+	print(servohandle_x,servohandle_y)
 	
 	
 	rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
 	#print(setpoint,client_id,current_time,prev_time,perror,derror,ierror,prev_error,kp,kd,ki,trim)
 
 	current_time = float(current_time)
-	#print("position of ball [center_x,center_y] :",center_x,center_y)
+	print("position of ball [center_x,center_y] :",center_x,center_y)
 
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
 	
-	sample_time = 0.25 		
+	sample_time = 0.1
 
 	
 	dt = current_time - prev_time
-	#print(f"time difference is{dt}")
+	print(f"setpoint {setpoint}")
 
 
-	if (dt >= sample_time): # code is running 	for a sample time
+	if (1):#(dt >= sample_time): # code is running 	for a sample time
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
@@ -226,7 +226,7 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 
 		angle_x = 0 + (kp[0]*perror[0]) + (kd[0]*derror[0]) + (i_term[0])
 		angle_y = 0 + (kp[1]*perror[1]) + (kd[1]*derror[1]) + (i_term[1])
-		#print(f" before trim angle_x:{angle_x} and angle_y :{angle_y}")
+		print(f" before trim angle_x:{angle_x} and angle_y :{angle_y}")
 
 		# trim values calculation for ball to balance if output of pid is 0
 		if (center_x >= 640 and center_x <= 1280) and (center_y >= 0 and center_y <= 640):	# 1st Quadrant case
@@ -266,11 +266,11 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 
 		#send command to coppeliasim to rotate servo fin by simxsetjointtargetposition function try using simxopmodestreaming opmode
 		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,angle_x,sim.simx_opmode_oneshot) # for x
-		#print(returnCode)
-		#print(f" after trim  {angle_x} and  { angle_x} ")
+		print(returnCode)
+		print(f" after trim  {angle_x} and  { angle_x} ")
 		
 		returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_y,angle_y,sim.simx_opmode_oneshot)  # for y
-		#print(returnCode)
+		print(returnCode)
 		
 
 		prev_error[0] = perror[0]

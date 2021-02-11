@@ -196,18 +196,9 @@ path_map = {#pixel path
 "T3":[],
 "T4":[]
 }
-path_box_map = {
 
-"T1":[],
-"T2":[],
-"T3":[],
-"T4":[]
-
-}
 maze_map ={
 }
-collection_box = None
-
 
 client_id = -1
 ############################################################
@@ -226,9 +217,8 @@ client_id = -1
 def send_color_and_collection_box_identified(ball_color, collection_box_name):
 
 	global client_id
-	print(f"  send colr {client_id} and  {ball_color} and  {collection_box_name}")
 
-	color_and_cb = [ball_color + '::' + collection_box_name]
+	color_and_cb = ball_color + '::' + collection_box_name
 	
 	inputBuffer = bytearray()
 	return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id,'evaluation_screen_respondable_1',
@@ -242,27 +232,27 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 	global client_id
 	
-	#print(f" client is  {client_id}")
-	#print(f" traverse function called{pixel_path}")
+	print(f" client is  {client_id}")
+	print(f" traverse function called{pixel_path}")
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
-	#print(prev_time)
+	print(prev_time)
 	current_time = ''
 	while(len(current_time) == 0  ):
 		rt_code,current_time =sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_buffer)
-		#print("didbdibdibdibd",current_time)
+		print("didbdibdibdibd",current_time)
 	
 	
 	j = 0
 	k= 0
 	for i in pixel_path:
-		
-		
+		if(i == pixel_path[-1]):
+			i[0] = i[0]+20
 		i.reverse()
 		task_3.change_setpoint(i)
 		while(1):
 			j+=1
 			k+=1
-			#print("#########################################################################")
+			print("#########################################################################")
 			#print(j)
 			name1 = "table_"+ str(tabel_no)+ "__"+str(j) + ".png"
 			name2 = "table_"+ str(tabel_no)+ "__"+str(k)+"k123.png"
@@ -273,10 +263,10 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 			
 			
 			warped_img = task_1b.applyPerspectiveTransform(transformed_image,j,tabel_no)
-			#print(name2)
+			print(name2)
 			
 			#cv2.imwrite(name1,transformed_image)
-			
+			#cv2.imwrite(name2,warped_img)
 			
 			
 			
@@ -294,7 +284,6 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 				warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
 				warped_img = cv2.circle(warped_img,(shapes['Circle'][1],shapes['Circle'][2]),5,(0,255,0),2)
 				warped_img = cv2.circle(warped_img,(i[0],i[1]),5,(255,0,0),2)
-				#cv2.imwrite(name2,warped_img)
 				
 					
 				
@@ -315,28 +304,6 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 
 
 
-def send_data_to_draw_path(table,path):
-		global client_id
-		
-
-		##############	IF REQUIRED, CHANGE THE CODE FROM HERE	##############
-
-		coppelia_sim_coord_path = []
-		table_name = "top_plate_respondable_t" + str(table) + "_1"
-		
-		for coord in path:
-			for element in coord:
-				coppelia_sim_coord_path.append(((10*element) - 45)/100)
-		
-		print('\n============================================')
-		print('\nPath sent to drawPath function of Lua script is \n')
-		print(coppelia_sim_coord_path)
-
-		inputBuffer = bytearray()
-
-		return_code, retInts, retFloats, retStrings, retBuffer = sim.simxCallScriptFunction(client_id, \
-							table_name, sim.sim_scripttype_customizationscript, 'drawPath', [], \
-							coppelia_sim_coord_path, [], inputBuffer, sim.simx_opmode_oneshot)
 
 	
 def make_connection():
@@ -359,20 +326,12 @@ def make_connection():
 	print(f"vision_sensor is {vision_sensor_1} and {vision_sensor_4} and {vision_sensor_5} ")
 
 def set_path(color):
-	global t4_path,aux_path,collection_box
+	global t4_path,aux_path
 	table, collection_box = ball_details[color][0].split('_')
 	# path_start = map_start[table]
 	# path_end = map_end[table][int(collection_box[-1])-1]
-	aux_path = path_map[table][int(collection_box[-1])-1]
-	aux_path_drawn = path_box_map[table][int(collection_box[-1])-1]
-	print(f"       vkhvkhvkj {int(table[-1])} " )
-	
-	send_data_to_draw_path(1,aux_path_drawn)
 	t4_path=path_map['T4'][int(table[-1])-1]
-	t4_path_drawn = path_box_map['T4'][int(table[-1])-1]
-	#send_data_to_draw_path(4,t4_path_drawn)
-	
-	
+	aux_path = path_map[table][int(collection_box[-1])-1]
 	###
 	#Traverese the ball now 
 	###
@@ -380,55 +339,27 @@ def set_path(color):
 
 #set oath according to pixel
 def complete_all_mapping_path (tablenum):#, start_coord, end_coord):
-	global map_start,map_end,maze_map,path_map,encoded_maze_t1,path_box_map
+	global map_start,map_end,maze_map,path_map,encoded_maze_t1
 	for i in range(3):
 		start_coord= map_start[tablenum][0]
 		end_coord= map_end[tablenum][i]
 		mazearray = maze_map[tablenum]
-		path = task_4a.find_path(mazearray, start_coord, end_coord)
-		path_box_map[tablenum].append(path)	
-		resolution_x = 1120#1280
-	
-		resolution_y = 1120#1280
+		path = task_4a.find_path(mazearray, start_coord, end_coord)	
+		resolution_x = 1280
+		resolution_y = 1280
 		x_increment = resolution_x//10
 		y_increment = resolution_y//10
 		pixel_path = []
 		for i in range(len(path)):
 			pixel_path.append([])
-		
-
-		#print("path calculated")
 
 		for i in range(len(path)):
-			# to change the pixel trim: change 180 with pixel*10 and 18 with pixel
-			x_pix_trim = int(((180*path[i][0])/45)-18)
-			y_pix_trim = int(((180*path[i][1])/45)-18)
-
-			x_pixel = ((x_increment//2) + path[i][0]*x_increment) + 80 + x_pix_trim
-			y_pixel = ((y_increment//2) + path[i][1]*y_increment) + 80 + y_pix_trim
+			x_pixel = (x_increment//2) + path[i][0]*x_increment
+			y_pixel = (y_increment//2) + path[i][1]*y_increment
 			pixel_path[i].append(x_pixel)
 			pixel_path[i].append(y_pixel)
-		if (tablenum == 'T1'):
-			if (path[len(path)-1] == map_end[tablenum][0]):		#(0,4) decrease y pixel [tilt in +ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2), pixel_path[len(pixel_path)-1][1]])
-			elif (path[len(path)-1] == map_end[tablenum][1]):	#(4,9) increase x pixel [tilt in +ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (x_increment//2) , pixel_path[len(pixel_path)-1][1]])
-			elif (path[len(path)-1] == map_end[tablenum][2]):	#(9,5) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] , pixel_path[len(pixel_path)-1][1] + (y_increment//2)])
-			else:
-				print("Unexpected element in the end of the path in maze T1")
-		if (tablenum == 'T4'):
-			if (path[len(path)-1] == map_end[tablenum][0]):		#(5,9) increase x pixel [tilt in +ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1]+(x_increment//2)] )
-			elif (path[len(path)-1] == map_end[tablenum][1]):	#(9,4) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] , pixel_path[len(pixel_path)-1][1] + (y_increment//2)])
-			elif (path[len(path)-1] == map_end[tablenum][2]):	#(4,0) decrease x pixel [tilt in -ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] - (x_increment//2) , pixel_path[len(pixel_path)-1][1]])
-			else:
-				print("Unexpected element in the end of the path in maze T4")
-			
 		path_map[tablenum].append(pixel_path)
-		print(f"{tablenum} and {pixel_path}")
+		#print(f"{tablenum} and {pixel_path}")
 		#print("-------------------------------------------------------------------")
 
 	
@@ -463,8 +394,8 @@ def get_color():
 
 ##############################################################
 
-def main(rec_client_id):
 
+def main(rec_client_id):
 	"""
 	Purpose:
 	---
@@ -490,14 +421,12 @@ def main(rec_client_id):
 	"""
 	##############	ADD YOUR CODE HERE	##############
 	global maze_map,encoded_maze_t1,encoded_maze_t2,encoded_maze_t3,encoded_maze_t4,t4_path,aux_path,servo_handle_x_t1,servo_handle_y_t1
-	global servo_handle_x_t4,servo_handle_y_t4,path_box_map,collection_box
-	global client_id
-	client_id = rec_client_id
+	global servo_handle_x_t4,servo_handle_y_t4
 	img_t4 = cv2.imread("maze_t4.JPG")
 	warped_t4 = task_1b.applyPerspectiveTransform(img_t4,0,-1)
 	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
 	maze_map['T4'] = encoded_maze_t4
-	#return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
+	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
 
 	#print(f"Encoded maze of t4  is {encoded_maze_t4}")
 	
@@ -524,22 +453,14 @@ def main(rec_client_id):
 	# complete_all_mapping_path('T1')
 	# complete_all_mapping_path('T1')
 	return_code = task_2a.start_simulation()
-	print(path_box_map)
 	color = get_color()
 	print(f" color is found is {color}")
 	if(color):
 		set_path(color)
 		print(f" we find tha path {t4_path} and {aux_path}")
-
-	collection_box = "T1_CB1"
-	
 	
 	return_code = traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
-	print("t4 complete")
 	return_code = traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
-	time.sleep(5)
-	send_color_and_collection_box_identified(color, collection_box)
-	print(" ab hame sahi se bekaar ke print and saving statement hatha ke karna hai saari chezze ek baar check karlena kyuki ek bhi galti 0 makrs")
 
 		
 
@@ -568,7 +489,6 @@ def main(rec_client_id):
 
 # NOTE: Write your solution ONLY in the space provided in the above functions. This function should not be edited.
 if __name__ == "__main__":
-	
 	client_id = task_2a.init_remote_api_server()
 	
 	main(client_id)

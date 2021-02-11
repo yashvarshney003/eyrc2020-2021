@@ -1,4 +1,4 @@
---[[				for t4 platform (testing algo included)
+--[[				for t4 platform
 *****************************************************************************************
 *
 *        		===============================================
@@ -81,7 +81,7 @@ function createWall()
 	--The walls should only be collidable with the ball and not with each other.
 	--Hence we are enabling only the local respondable masks of the walls created.
 	sim.setObjectSpecialProperty(wallObjectHandle,sim.boolOr32(sim.objectspecialproperty_renderable, sim.objectspecialproperty_collidable))
-	--sim.setObjectSpecialProperty(wallObjectHandle, sim.objectspecialproperty_collidable)		--does not works two times
+    --sim.setObjectSpecialProperty(wallObjectHandle, sim.objectspecialproperty_collidable)		--does not works two times
 	--Walls may have to be set as renderable........................... 
 	--This is required to make the wall as collidable
 	return wallObjectHandle
@@ -123,13 +123,6 @@ function receiveData(inInts,inFloats,inStrings,inBuffer)
 
 	--*******************************************************
 	--               ADD YOUR CODE HERE ____UNCOMMENT HERE____
-    --**********************************************************************************
-    --only for testing purposes
-	inInts={7, 3, 10, 10, 6, 3, 10, 6, 3, 6, 1, 12, 3, 10, 12, 5, 7, 9, 12, 5, 1, 14, 9, 6, 7, 5, 9, 10, 6, 5, 5, 3, 6, 5, 5, 9, 6, 3, 12, 5, 5, 5, 9, 12, 1, 14, 9, 4, 3, 4, 5, 9, 6, 7, 1, 10, 10, 12, 5, 13, 9, 6, 5, 1, 8, 10, 10, 14, 9, 6, 7, 5, 5, 9, 6, 3, 6, 3, 6, 5, 5, 5, 9, 14, 13, 5, 9, 12, 5, 5, 9, 8, 10, 10, 10, 12, 11, 10, 8, 12}
-    --assigning only for testing Purposes
-    --**********************************************************************************
-    
-    maze_array={}
     x = 1
     for i=0,9 do
         maze_array[i] = {}
@@ -164,20 +157,6 @@ end
 ]]--
 function generateHorizontalWalls()
     --**********************************************************************************
-    --delete it in actual case only for testing purposes
-    inInts={7, 3, 10, 10, 6, 3, 10, 6, 3, 6, 1, 12, 3, 10, 12, 5, 7, 9, 12, 5, 1, 14, 9, 6, 7, 5, 9, 10, 6, 5, 5, 3, 6, 5, 5, 9, 6, 3, 12, 5, 5, 5, 9, 12, 1, 14, 9, 4, 3, 4, 5, 9, 6, 7, 1, 10, 10, 12, 5, 13, 9, 6, 5, 1, 8, 10, 10, 14, 9, 6, 7, 5, 5, 9, 6, 3, 6, 3, 6, 5, 5, 5, 9, 14, 13, 5, 9, 12, 5, 5, 9, 8, 10, 10, 10, 12, 11, 10, 8, 12}
-    --assigning only for testing Purposes
-    maze_array={}
-    x = 1
-    for i=0,9 do
-        maze_array[i] = {}
-        for j=0,9 do
-            maze_array[i][j] = inInts[x]    -- storing data as 2D array indexing start from 00
-            x = x+1
-        end
-    end
-    --**********************************************************************************
-	
     
     --*******************************************************
 	--               ADD YOUR CODE HERE
@@ -198,7 +177,7 @@ function generateHorizontalWalls()
         y = y - 0.1
         x = -0.45
     end
-
+    
     local savedState=sim.getInt32Parameter(sim.intparam_error_report_mode)  
     sim.setInt32Parameter(sim.intparam_error_report_mode,0)                 --desabling error report mode (considering the case of empty maze)
     sim.removeObject(sim.getObjectHandle("H_WallSegment_t4_10x4"))          --deleting boundary horizontal wall

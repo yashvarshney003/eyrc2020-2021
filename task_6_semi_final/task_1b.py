@@ -168,7 +168,7 @@ def applyPerspectiveTransform(input_img,number,table_no):
 		input_img  =  cv.cvtColor(input_img,cv.COLOR_BGR2GRAY)
 		ret,thresh2 = cv.threshold(input_img,50,255,cv.THRESH_BINARY)
 		#print(thresh2.shape)
-		#cv.imwrite("input.png",thresh2)
+		cv.imwrite("input.png",thresh2)
 		cnts = cv.findContours(thresh2,cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
 		left_upper = [10000,10000]
 		right_upper = [0,0]
@@ -186,14 +186,14 @@ def applyPerspectiveTransform(input_img,number,table_no):
 			input_img2 = cv.cvtColor(input_img2,cv.COLOR_GRAY2RGB)
 			
 			x,y,w,h = cv.boundingRect(cnts[i])
-			#print(f"so value we het {x,y} ,  {x+w,y}, {x+w,y+h}  and {x,y+h}")
+			print(f"so value we het {x,y} ,  {x+w,y}, {x+w,y+h}  and {x,y+h}")
 			input_img2 = cv.rectangle(input_img2,(x,y),(x+w,y+h),(0,255,0),5)
 			
 			if(table_no ==4):
 				dir = os.getcwd()
 				
 				name  = dir + "\\contour1\\" + "table_no" +str(table_no)+"sent_num"+str(number)+str(k)+"kk.png"
-				#cv.imwrite(name,input_img2)
+				cv.imwrite(name,input_img2)
 			if(x !=0  and  y!=0):
 				# if(j ==1):
 				# 	j = 2
@@ -207,21 +207,21 @@ def applyPerspectiveTransform(input_img,number,table_no):
 				
 
 					if(left_upper_dist > round(np.sqrt((x-0)**2 + (y-0)**2))):
-						#print("left upper changed")
-						#print(round(np.sqrt((x-0)**2 + (y-0)**2)))
+						print("left upper changed")
+						print(round(np.sqrt((x-0)**2 + (y-0)**2)))
 						left_upper_dist = round(np.sqrt((x-0)**2 + (y-0)**2))
 						
 						left_upper[0] = x
 						left_upper[1] = y
 					if(right_upper_dist > round(np.sqrt(((x+w)-256)**2 + (y-0)**2))):
-						#print("right upper changed")
-						#print(round(np.sqrt(((x+w)-256)**2 + (y-0)**2)))
+						print("right upper changed")
+						print(round(np.sqrt(((x+w)-256)**2 + (y-0)**2)))
 						right_upper_dist = np.sqrt(((x+w)-256)**2 + (y-0)**2)
 						right_upper[0] = x+w 
 						right_upper[1] = y
 					if(right_lower_dist > round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2))):
-						#print("right lower changed")
-						#print(round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2)))
+						print("right lower changed")
+						print(round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2)))
 						right_lower_dist = round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2))
 						
 						right_lower[0] = x+w 
@@ -230,12 +230,12 @@ def applyPerspectiveTransform(input_img,number,table_no):
 					if(left_lower_dist > round(np.sqrt((x-0)**2 + ((y+h)-256)**2))):
 						left_lower_dist = round(np.sqrt((x-0)**2 + ((y+h)-256)**2))
 						
-						#print("left lower changed")
-						#print(round(np.sqrt((x-0)**2 + ((y+h)-256)**2)))
+						print("left lower changed")
+						print(round(np.sqrt((x-0)**2 + ((y+h)-256)**2)))
 						left_lower[0] = x
 						left_lower[1] = y+h
 					final_list = [left_upper,right_upper,right_lower,left_lower]
-					#print(f" final_list{final_list}")
+					print(f" final_list{final_list}")
 
 		
 		screenCnt = np.array(final_list)
