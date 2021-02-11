@@ -75,7 +75,7 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.005,0.005]
+kp = [0.003,0.003]
 kd = [0.0055,0.0055]
 ki = [0,0]
 limiting = 2.0
@@ -196,11 +196,11 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
 	
-	sample_time = 0.25
+	sample_time = 0.25 		
 
 	
 	dt = current_time - prev_time
-	print(f"time difference is{dt}")
+	#print(f"time difference is{dt}")
 
 
 	if (dt >= sample_time): # code is running 	for a sample time

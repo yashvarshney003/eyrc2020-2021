@@ -489,9 +489,12 @@ function drawPath(inInts,path,inStrings,inBuffer)
 	posTable=sim.getObjectPosition(wallsGroupHandle,-1)
 	print('=========================================')
 	print('Path received is as follows: ')
+    print(posTable)
 	print(path)
 	if not lineContainer then
 		_lineContainer=sim.addDrawingObject(sim.drawing_lines,1,0,wallsGroupHandle,99999,{0.2,0.2,1})
+		print(_lineContainer)
+        
 		sim.addDrawingObjectItem(_lineContainer,nil)
 		if path then
 			local pc=#path/2

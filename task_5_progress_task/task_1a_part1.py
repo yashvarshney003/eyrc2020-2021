@@ -163,7 +163,7 @@ def shape(approx):
         Purpose: This function masks the RGB colours and calls detect fucntion to
         detect shapes in the image and writes the required output in the shapes dictionary'''
 def scan_image(img_file_path,k):
-    print("task1_part1 called")
+    #print("task1_part1 called")
     global shapes
     shapes={}
     if(img_file_path is None):
@@ -185,7 +185,7 @@ def scan_image(img_file_path,k):
     
     image = img_file_path.copy()
     
-    print(image.size)
+    #print(image.size)
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     # image = cv2.resize(image, (1280, 1280))
     # cv2.imshow('imagein', image)
@@ -203,8 +203,8 @@ def scan_image(img_file_path,k):
     
     name  = dir + "\\Images\\coloredportion" +str(k) + ".png"
     
-    if(cv2.imwrite(name,colored_portion)):
-        print(" file made")
+    #if(cv2.imwrite(name,colored_portion)):
+       # print(" file made")
     cnts = cv2.findContours(colored_portion,cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 
     
@@ -214,7 +214,7 @@ def scan_image(img_file_path,k):
             cnts = cnts[1]
     
     j = 0 
-    print(f"  hers is {len(cnts)} ")
+    #print(f"  hers is {len(cnts)} ")
     if(len(cnts) > 0 ):
         for cnt in cnts:
             # img2 = colored_portion.copy()
