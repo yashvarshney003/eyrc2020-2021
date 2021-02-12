@@ -110,7 +110,7 @@ def init_remote_api_server():
 	return client_id
 
 
-def start_simulation():
+def start_simulation(client_id):
 
 	"""
 	Purpose:
@@ -137,7 +137,7 @@ def start_simulation():
 	NOTE: This function will be automatically called by test_task_2a executable at the start of simulation.
 	"""
 
-	global client_id
+	
 
 	return_code = 0
 
@@ -155,7 +155,7 @@ def start_simulation():
 	return return_code
 
 
-def get_vision_sensor_image(vision_sensor_handle):
+def get_vision_sensor_image(client_id,vision_sensor_handle):
 	
 	"""
 	Purpose:
@@ -181,7 +181,7 @@ def get_vision_sensor_image(vision_sensor_handle):
 	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
 	"""
 
-	global client_id
+	
 	
 
 	vision_sensor_image = []
@@ -284,7 +284,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	return transformed_image
 
 
-def stop_simulation():
+def stop_simulation(client_id):
 
 	"""
 	Purpose:
@@ -309,7 +309,7 @@ def stop_simulation():
 	NOTE: This function will be automatically called by test_task_2a executable at the end of simulation.
 	"""
 
-	global client_id
+	
 
 	return_code = 0
 

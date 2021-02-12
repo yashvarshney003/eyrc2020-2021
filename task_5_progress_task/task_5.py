@@ -242,7 +242,7 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 	global client_id
 	
-	#print(f" client is  {client_id}")
+	print(f" client is  {client_id}")
 	#print(f" traverse function called{pixel_path}")
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
 	#print(prev_time)
@@ -268,7 +268,7 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 			name2 = "table_"+ str(tabel_no)+ "__"+str(k)+"k123.png"
 			
 			
-			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
+			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
 			
 			
@@ -370,7 +370,7 @@ def set_path(color):
 	send_data_to_draw_path(1,aux_path_drawn)
 	t4_path=path_map['T4'][int(table[-1])-1]
 	t4_path_drawn = path_box_map['T4'][int(table[-1])-1]
-	#send_data_to_draw_path(4,t4_path_drawn)
+	send_data_to_draw_path(4,t4_path_drawn)
 	
 	
 	###
@@ -497,7 +497,7 @@ def main(rec_client_id):
 	warped_t4 = task_1b.applyPerspectiveTransform(img_t4,0,-1)
 	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
 	maze_map['T4'] = encoded_maze_t4
-	#return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
+	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
 
 	#print(f"Encoded maze of t4  is {encoded_maze_t4}")
 	
@@ -523,7 +523,7 @@ def main(rec_client_id):
 	
 	# complete_all_mapping_path('T1')
 	# complete_all_mapping_path('T1')
-	return_code = task_2a.start_simulation()
+	return_code = task_2a.start_simulation(rec_client_id)
 	print(path_box_map)
 	color = get_color()
 	print(f" color is found is {color}")
@@ -532,13 +532,15 @@ def main(rec_client_id):
 		print(f" we find tha path {t4_path} and {aux_path}")
 
 	collection_box = "T1_CB1"
+	send_color_and_collection_box_identified(color, collection_box)
 	
 	
 	return_code = traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
 	print("t4 complete")
 	return_code = traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
 	time.sleep(5)
-	send_color_and_collection_box_identified(color, collection_box)
+	return_code  = task_2a.stop_simulation(rec_client_id)
+	
 	print(" ab hame sahi se bekaar ke print and saving statement hatha ke karna hai saari chezze ek baar check karlena kyuki ek bhi galti 0 makrs")
 
 		

@@ -276,11 +276,23 @@ def find_path(maze_array, start_coord, end_coord):
 		
 
 	######################################################
-	if(end_coord == (5,9)):
-		print(path)
+	shortest_path=[]
+	shortest_path.append(path[0])
+	i=0
+	while(i<(len(path)-2)):
+		if (shortest_path[len(shortest_path)-1][0]==path[i+1][0]):
+			while((shortest_path[len(shortest_path)-1][0]==path[i+1][0]) and (i<(len(path)-2))):
+				i=i+1
+			shortest_path.append(path[i])
+		if (shortest_path[len(shortest_path)-1][1]==path[i+1][1]):
+			while((shortest_path[len(shortest_path)-1][1]==path[i+1][1]) and (i<(len(path)-2))):
+				i=i+1
+			shortest_path.append(path[i])
+	shortest_path.append(path[len(path)-1])
+	print("shortest_path =",shortest_path)
 	
 	
-	return path
+	return shortest_path
 
 
 def read_start_end_coordinates(file_name, maze_name):
