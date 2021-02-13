@@ -246,7 +246,7 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 			j+=1
 			k+=1
 			
-			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(vision_sensor_handle)
+			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
 			warped_img = task_1b.applyPerspectiveTransform(transformed_image,j,tabel_no)
 
@@ -427,13 +427,14 @@ def main(rec_client_id):
 	return_code = task_2a.start_simulation(rec_client_id)
 	color = get_color()
 	if(color):
-		collection_box = ball_details[color][0].split('_')[1]
+		collection_box = ball_details[color][0]
+		send_color_and_collection_box_identified(color, collection_box)
 		set_path(color)
 	
 	traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
 	traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
 	time.sleep(10)
-	send_color_and_collection_box_identified(color, collection_box)
+	
 
 	##################################################
 
