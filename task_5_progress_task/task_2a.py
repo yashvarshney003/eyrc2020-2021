@@ -316,7 +316,7 @@ def stop_simulation(client_id):
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code = sim.simxStopSimulation(client_id,sim.simx_opmode_oneshot)
-	sim.simxGetPingTime(client_id)
+	#sim.simxGetPingTime(client_id)
 	
 										
 										
