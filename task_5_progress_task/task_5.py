@@ -157,6 +157,8 @@ servo_handle_x_t2 = -1
 servo_handle_y_t2 = -1
 servo_handle_x_t1 = -1
 servo_handle_y_t1 = -1
+handle_list = {}
+
 
 try:
 	with open('ball_details.json') as file:
@@ -230,8 +232,94 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
-def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
+def color_get(img_file_path):
+    if(img_file_path is None):
+        return
+
+    #Read the image
+    
+    if type(img_file_path) == type(str()):
+        img_file_path = cv2.imread(img_file_path)
+    else:
+        img_file_path= img_file_path
+    #cv2.imwrite("colorefromrailing.png",img_file_path)
+    
+    imageFrame = cv2.GaussianBlur(img_file_path,(5,5),cv2.BORDER_TRANSPARENT)
+    hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
+    
+    #To create a mask for red colour
+    red_lower = np.array([0, 50, 50]) 
+    red_upper = np.array([10, 255, 255]) 
+    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
+    kernal = np.ones((5, 5))
+    red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
+    gray_blur_red= cv2.Canny(red_gray,100,255)
+
+    #Create a mask for blue colour
+    blue_lower = np.array([94, 20, 0], np.uint8) 
+    blue_upper = np.array([140,255 ,255], np.uint8) 
+    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+    kernal = np.ones((5, 5))  
+    blue_mask = cv2.dilate(blue_mask, kernal)
+    blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
+    gray_blur_blue= cv2.Canny(blue_gray,100,255)
+    
+    #Create a mask for green colour
+    green_lower = np.array([25, 52, 72], np.uint8) 
+    green_upper = np.array([102, 255, 255], np.uint8) 
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+    kernal = np.ones((5, 5))
+    green_mask = cv2.dilate(green_mask, kernal)
+    green_gray=cv2.threshold(green_mask, 250,255, cv2.THRESH_BINARY)[1]
+    gray_blur_green = cv2.Canny(green_gray,100,255)
+    
+    #find contours on blue mask
+    cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #If blue contours found
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        for cnt in cnts:
+            M = cv2.moments(cnt)
+            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
+            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
+            if shape(approx) =='Circle':
+                return 'blue'
+        
+           
+    #Find red contours in the image
+    cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        for cnt in cnts:
+            M = cv2.moments(cnt)
+            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
+            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
+            if shape(approx) =='Circle':
+                return 'red'
+    cnts= cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    #print(f" length of cnts {cnts} ")
+    if type(cnts[-1]) !=type(None) :
+        if len(cnts) == 2:
+            cnts = cnts[0]
+        elif len(cnts) == 3:
+            cnts = cnts[1]
+        if(len(cnts)):
+        
+                return 'green'
+def traverse_ball(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
+	
 	global client_id
+	print(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path)
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
 	current_time = ''
 	while(len(current_time) == 0  ):
@@ -248,9 +336,9 @@ def traverse_ball(tabel_no,servohandle_x,servohandle_y,vision_sensor_handle,pixe
 			
 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
-			warped_img = task_1b.applyPerspectiveTransform(transformed_image,j,tabel_no)
+			warped_img = task_1b.applyPerspectiveTransform(transformed_image)
 
-			shapes = task_1a_part1.scan_image(warped_img,k)
+			shapes = task_1a_part1.scan_image(warped_img)
 
 			if(shapes):
 				warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
@@ -288,7 +376,7 @@ def send_data_to_draw_path(table,path):
 
 	
 def make_connection():
-	global client_id
+	global client_id,handle_list
 	global vision_sensor_5,vision_sensor_4,vision_sensor_3,vision_sensor_2,vision_sensor_1,servo_handle_x_t1,servo_handle_y_t1,servo_handle_x_t4,servo_handle_y_t4
 	return_code,servo_handle_x_t1   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t1_1",sim.simx_opmode_blocking)
 	return_code,servo_handle_y_t1   = sim.simxGetObjectHandle(client_id,"revolute_joint_ss_t1_2",sim.simx_opmode_blocking)
@@ -301,6 +389,11 @@ def make_connection():
 	#return_code,vision_sensor_3 = sim.simxGetObjectHandle(client_id,"vision_sensor_3",sim.simx_opmode_blocking)
 	return_code,vision_sensor_4 = sim.simxGetObjectHandle(client_id,"vision_sensor_4",sim.simx_opmode_blocking)
 	return_code,vision_sensor_5 = sim.simxGetObjectHandle(client_id,"vision_sensor_5",sim.simx_opmode_blocking)
+	handle_list = {'T4' : [servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4],
+					'T3' : [],
+					'T2' : [],
+					'T1' : [servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1]
+					}
 
 def set_path(color):
 	global t4_path,aux_path
@@ -371,7 +464,7 @@ def get_color():
 		return_code ,image_resolution,vision_sensor_image = sim.simxGetVisionSensorImage(client_id,vision_sensor_5,0,sim.simx_opmode_blocking)
 		if(len(vision_sensor_image)):
 			vision_sensor_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
-			color = task_1a_part1.color(vision_sensor_image)
+			color = color_get(vision_sensor_image)
 
 	return color
 
@@ -407,35 +500,43 @@ def main(rec_client_id):
 	##############	ADD YOUR CODE HERE	##############
 	global maze_map,encoded_maze_t1,encoded_maze_t2,encoded_maze_t3,encoded_maze_t4,t4_path,aux_path,servo_handle_x_t1,servo_handle_y_t1
 	global servo_handle_x_t4,servo_handle_y_t4,path_box_map,collection_box
-	global client_id
+	global client_id,ball_details
 	client_id = rec_client_id
 	img_t4 = cv2.imread("maze_t4.JPG")
-	warped_t4 = task_1b.applyPerspectiveTransform(img_t4,0,-1)
+	warped_t4 = task_1b.applyPerspectiveTransform(img_t4)
 	encoded_maze_t4 = task_1b.detectMaze(warped_t4) 
 	maze_map['T4'] = encoded_maze_t4
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t4,"t4")
 	
 	img_t1 = cv2.imread("maze_t1.JPG")
-	warped_t1 = task_1b.applyPerspectiveTransform(img_t1,0,-1)
+	warped_t1 = task_1b.applyPerspectiveTransform(img_t1)
 	encoded_maze_t1 = task_1b.detectMaze(warped_t1) 
 	maze_map['T1'] = encoded_maze_t1
 	
 	return_code = task_2b.send_data(rec_client_id,encoded_maze_t1,"t1")
 	complete_all_mapping_path('T1')
 	complete_all_mapping_path('T4')
+	#Similarly for T3 and T2
+
+
 	make_connection()
 	return_code = task_2a.start_simulation(rec_client_id)
-	color = get_color()
-	if(color):
-		collection_box = ball_details[color][0]
-		send_color_and_collection_box_identified(color, collection_box)
-		set_path(color)
+	while(len(ball_details['green'])!=0  ):
+		color = get_color()
+		if(color):
+			collection_box = ball_details[color][0]
+			table = ball_details[color][0].split('_')[0]
+			
+			send_color_and_collection_box_identified(color, collection_box)
+			set_path(color)
+		
+		traverse_ball(handle_list["T4"][0],handle_list["T4"][1],handle_list["T4"][2],t4_path)
+		traverse_ball(handle_list[table][0],handle_list[table][1],handle_list[table][2],aux_path)
+		print("complete ho gaya task")
+		print(len(list(ball_details.values())))
+	time.sleep(5)
+	task_2a.stop_simulation(rec_client_id)
 	
-	traverse_ball(4,servo_handle_x_t4,servo_handle_y_t4,vision_sensor_4,t4_path)
-	traverse_ball(1,servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1,aux_path)
-	time.sleep(10)
-	
-
 	##################################################
 
 

@@ -64,7 +64,7 @@ setpoint = [640,640]#[1063,345]#[640,640]
 
 # You can add your global variables here
 ##############################################################
-dt = 0.25
+dt = 0.07
 current_time =0
 prev_time = 0
 
@@ -200,7 +200,7 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 
 	
 	dt = current_time - prev_time
-	#print(f"time difference is{dt}")
+	print(f"time difference is{dt}")
 
 
 	if (dt >= sample_time): # code is running 	for a sample time

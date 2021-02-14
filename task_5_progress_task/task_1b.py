@@ -52,7 +52,7 @@ import os
 ##############################################################
 
 
-def applyPerspectiveTransform(input_img,number,table_no):
+def applyPerspectiveTransform(input_img):
 
 	"""
 	Purpose:
@@ -187,12 +187,9 @@ def applyPerspectiveTransform(input_img,number,table_no):
 			
 			x,y,w,h = cv.boundingRect(cnts[i])
 			#print(f"so value we het {x,y} ,  {x+w,y}, {x+w,y+h}  and {x,y+h}")
-			input_img2 = cv.rectangle(input_img2,(x,y),(x+w,y+h),(0,255,0),5)
+			#input_img2 = cv.rectangle(input_img2,(x,y),(x+w,y+h),(0,255,0),5)
 			
-			if(table_no ==4):
-				dir = os.getcwd()
-				
-				name  = dir + "\\contour1\\" + "table_no" +str(table_no)+"sent_num"+str(number)+str(k)+"kk.png"
+			
 				#cv.imwrite(name,input_img2)
 			if(x !=0  and  y!=0):
 				# if(j ==1):

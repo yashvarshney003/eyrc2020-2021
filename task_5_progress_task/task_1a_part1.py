@@ -162,7 +162,7 @@ def shape(approx):
         Outputs: None
         Purpose: This function masks the RGB colours and calls detect fucntion to
         detect shapes in the image and writes the required output in the shapes dictionary'''
-def scan_image(img_file_path,k):
+def scan_image(img_file_path):
     #print("task1_part1 called")
     global shapes
     shapes={}
@@ -199,9 +199,7 @@ def scan_image(img_file_path,k):
     colored_portion = cv2.bitwise_or(image, image, mask = mask)
     colored_portion = cv2.cvtColor(colored_portion,cv2.COLOR_RGB2GRAY)
     rer,colored_portion = cv2.threshold(colored_portion,50,255,cv2.THRESH_BINARY_INV)
-    dir = os.getcwd()
     
-    name  = dir + "\\Images\\coloredportion" +str(k) + ".png"
     
     #if(cv2.imwrite(name,colored_portion)):
        # print(" file made")

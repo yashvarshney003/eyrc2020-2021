@@ -144,7 +144,7 @@ def start_simulation(client_id):
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
-	sim.simxGetPingTime(client_id)
+	#sim.simxGetPingTime(client_id)
 
 	
 	
