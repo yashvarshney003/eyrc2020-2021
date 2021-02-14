@@ -232,6 +232,12 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 ## Please add proper comments to ensure that your code is   ##
 ## readable and easy to understand.                         ##
 ##############################################################
+'''	Function name: color_get
+	Inputs: Image from vision sensor
+	Outputs: Color of the ball detected in the image
+	Usage: Takes in the image from the vision sensors and returns the color of the ball detected in the image
+	Example call: color_get(image_from_vision_sensor)
+'''
 def color_get(img_file_path):
     if(img_file_path is None):
         return
@@ -281,15 +287,8 @@ def color_get(img_file_path):
             cnts = cnts[0]
         elif len(cnts) == 3:
             cnts = cnts[1]
-        for cnt in cnts:
-            M = cv2.moments(cnt)
-            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
-            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
-            peri = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
-            if shape(approx) =='Circle':
+	if (len(cnts)):
                 return 'blue'
-        
            
     #Find red contours in the image
     cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
@@ -298,28 +297,26 @@ def color_get(img_file_path):
             cnts = cnts[0]
         elif len(cnts) == 3:
             cnts = cnts[1]
-        for cnt in cnts:
-            M = cv2.moments(cnt)
-            cX = int((M["m10"] / M["m00"])) #X co-ordinate of the centroid of the shape
-            cY = int((M["m01"] / M["m00"])) #Y co-ordinate of the centroid of the shape
-            peri = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, 0.001 * peri, True)
-            if shape(approx) =='Circle':
+	if (len(cnts)):
                 return 'red'
-    cnts= cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-    #print(f" length of cnts {cnts} ")
+	# Find green contours in the image
+    cnts= cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if type(cnts[-1]) !=type(None) :
         if len(cnts) == 2:
             cnts = cnts[0]
         elif len(cnts) == 3:
             cnts = cnts[1]
         if(len(cnts)):
-        
                 return 'green'
+'''	Function name: traverse_ball
+	Usage: traverses the ball from one point to another
+	Inputs: servo handles(x and y), vision sensor to be read and pixel path which the ball has to follow
+	Outputs: None
+	Example Call : traverse_ball(servohandle_x_t4, servo_handle_y_t4, visionsensor_4, t4_path)
+'''
 def traverse_ball(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 	
-	global client_id
-	print(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path)
+	global client_idds
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
 	current_time = ''
 	while(len(current_time) == 0  ):
@@ -354,7 +351,12 @@ def traverse_ball(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 					task_3.control_logic(client_id,shapes['Circle'][1],shapes['Circle'][2],servohandle_x,servohandle_y)
 	return 1
 		
-
+''' 	Function name: send_data_to_draw_path
+	Usage: Draws path on the table in Coppleiasim scene
+	Inputs: table no and the box path to be drawn
+	Outputs: None
+	Example call: send_data_to_draw_path('T4', pixel_path_list)
+'''
 def send_data_to_draw_path(table,path):
 		global client_id
 		
@@ -374,7 +376,12 @@ def send_data_to_draw_path(table,path):
 							table_name, sim.sim_scripttype_customizationscript, 'drawPath', [], \
 							coppelia_sim_coord_path, [], inputBuffer, sim.simx_opmode_oneshot)
 
-	
+'''	Function name: make_connection 
+	Usage: Establishes connection with the Coppleiasim server and populates the global variable handle list with the updated values of servo handle and vision sensors
+	Inputs: None
+	Outputs: None
+	Example call: make_connection()
+'''
 def make_connection():
 	global client_id,handle_list
 	global vision_sensor_5,vision_sensor_4,vision_sensor_3,vision_sensor_2,vision_sensor_1,servo_handle_x_t1,servo_handle_y_t1,servo_handle_x_t4,servo_handle_y_t4
@@ -394,7 +401,13 @@ def make_connection():
 					'T2' : [],
 					'T1' : [servo_handle_x_t1,servo_handle_y_t1,vision_sensor_1]
 					}
-
+'''	Function name: set_path
+	Usage: sets variables used to make the ball reach to its destination collection box according to the color using ball_details json dictionary.
+	It calls send_data_to_draw_path to draw the path on the table.
+	Inputs: color of the detected ball : string
+	Outputs: None
+	Example call: set_path('green')
+'''
 def set_path(color):
 	global t4_path,aux_path
 	table, collection_box = ball_details[color][0].split('_')
@@ -406,7 +419,13 @@ def set_path(color):
 	send_data_to_draw_path(1,aux_path_drawn)
 	ball_details[color].pop(0)
 
-
+'''	Function name: complete_all_mapping_path
+	Usage: Sets all mapping path according to the values of entry and exit points of the table and the maze. It also manipulates the setpoints according to the 
+	required collection box collection box(line no 452-478) to make the ball fall in the collection box.
+	Inputs: Table number for which the paths have to be set : string
+	Outputs: None
+	Example Call: complete_all_mapping_path('T4')
+'''
 def complete_all_mapping_path (tablenum):
 	global map_start,map_end,maze_map,path_map,encoded_maze_t1,path_box_map
 	for i in range(3):
@@ -454,7 +473,11 @@ def complete_all_mapping_path (tablenum):
 			
 		path_map[tablenum].append(pixel_path)
 
-	
+'''	Function name: get_color 
+	Usage: It sends the vision sensor image to the color_get function repeatedly and waits until the called function returns a color.
+	Inputs: None
+	Outputs: color of the detected ball
+'''
 def get_color():
 	global vision_sensor_5,client_id
 	color = None
