@@ -75,7 +75,7 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.003,0.003]
+kp = [0.0035,0.0035]
 kd = [0.0055,0.0055]
 ki = [0,0]
 limiting = 2.0
