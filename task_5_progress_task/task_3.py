@@ -75,9 +75,9 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.0035,0.0035]
-kd = [0.0055,0.0055]
-ki = [0,0]
+kp = [0.0032,0.0032]
+kd = [0.0062,0.0062]
+ki = [0.00005,0.00005]
 limiting = 2.0
 x_limit = [-limiting,limiting] # min limit and maximum limit in degrees
 y_limit = [-limiting,limiting]
@@ -221,6 +221,14 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 			ierror[0] = 0
 
 		if (perror[1] <= -150 or perror[1] >= 150):
+			i_term[1] = 0
+			ierror[1] = 0
+		
+		if (perror[0] >= -5 and perror[0] <= 5):
+			i_term[0] = 0
+			ierror[0] = 0
+
+		if (perror[1] >= -5 and perror[1] <= 5):
 			i_term[1] = 0
 			ierror[1] = 0
 

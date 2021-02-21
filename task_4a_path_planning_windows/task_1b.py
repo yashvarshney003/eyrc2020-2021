@@ -6,12 +6,12 @@
 *        		===============================================
 *
 *  This script is to implement Task 1B of Nirikshak Bot (NB) Theme (eYRC 2020-21).
-*  
+*
 *  This software is made available on an "AS IS WHERE IS BASIS".
 *  Licensee/end user indemnifies and will keep e-Yantra indemnified from
-*  any and all claim(s) that emanate from the use of the Software or 
+*  any and all claim(s) that emanate from the use of the Software or
 *  breach of the terms of this agreement.
-*  
+*
 *  e-Yantra - An MHRD project under National Mission on Education using ICT (NMEICT)
 *
 *****************************************************************************************
@@ -22,7 +22,7 @@
 # Filename:			task_1b.py
 # Functions:		applyPerspectiveTransform, detectMaze, writeToCsv
 # 					[ Comma separated list of functions in this file ]
-# Global variables:	
+# Global variables:
 # 					[ List of global variables defined in this file ]
 
 
@@ -44,267 +44,257 @@ import csv
 ##############################################################
 
 
-
-
-
-
 ##############################################################
 
 
 def applyPerspectiveTransform(input_img):
+    """
+    Purpose:
+    ---
+    takes a maze test case image as input and applies a Perspective Transfrom on it to isolate the maze
 
-	"""
-	Purpose:
-	---
-	takes a maze test case image as input and applies a Perspective Transfrom on it to isolate the maze
+    Input Arguments:
+    ---
+    `input_img` :   [ numpy array ]
+            maze image in the form of a numpy array
 
-	Input Arguments:
-	---
-	`input_img` :   [ numpy array ]
-		maze image in the form of a numpy array
-	
-	Returns:
-	---
-	`warped_img` :  [ numpy array ]
-		resultant warped maze image after applying Perspective Transform
-	
-	Example call:
-	---
-	warped_img = applyPerspectiveTransform(input_img)
-	"""
+    Returns:
+    ---
+    `warped_img` :  [ numpy array ]
+            resultant warped maze image after applying Perspective Transform
 
-	warped_img = None
+    Example call:
+    ---
+    warped_img = applyPerspectiveTransform(input_img)
+    """
 
-	##############	ADD YOUR CODE HERE	##############
-	#Conversion into GrayScale
-	gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+    warped_img = None
 
-	#Applying Gaussian Blur 
-	gray = cv.GaussianBlur(gray, (5,5), 2)
+    ##############	ADD YOUR CODE HERE	##############
+    # Conversion into GrayScale
+    gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
 
-	#Applying Canny Edge Detection
-	edged = cv.Canny(gray, 50, 200)
+    # Applying Gaussian Blur
+    gray = cv.GaussianBlur(gray, (5, 5), 2)
 
+    # Applying Canny Edge Detection
+    edged = cv.Canny(gray, 50, 200)
 
-	#Finding Contours 
-	cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
-		
+    # Finding Contours
+    cnts = cv.findContours(
+        edged.copy(),
+        cv.RETR_LIST,
+        cv.CHAIN_APPROX_SIMPLE)[0]
 
+    # Sorting the Contours in decreasing order because Square containing the
+    # Maze is largest
+    cnts = sorted(cnts, key=cv.contourArea, reverse=True)
 
-	#Sorting the Contours in decreasing order because Square containing the Maze is largest
-	cnts = sorted(cnts, key = cv.contourArea, reverse = True)
+    # Looping through the Contours and approxing Contours
+    for c in cnts:
+        peri = cv.arcLength(c, True)
+        approx = cv.approxPolyDP(c, 0.05 * peri, True)
+        # 0.02
 
-	#Looping through the Contours and approxing Contours
-	for c in cnts:
-		peri = cv.arcLength(c, True)
-		approx = cv.approxPolyDP(c, 0.05 * peri, True)
-		#0.02
-		
-	# If length is 4 then it is ROI
-		if len(approx) == 4:
-			screenCnt = approx
-			break
+    # If length is 4 then it is ROI
+        if len(approx) == 4:
+            screenCnt = approx
+            break
 
-	# Reshaping Contours for further use
-	pts = screenCnt.reshape(4, 2)
+    # Reshaping Contours for further use
+    pts = screenCnt.reshape(4, 2)
 
-	#creating Array of Zero of Size(4,2)	
-	rect = np.zeros((4, 2), dtype = "float32")
+    # creating Array of Zero of Size(4,2)
+    rect = np.zeros((4, 2), dtype="float32")
 
-	#Ordering of points in Clockwise manner
+    # Ordering of points in Clockwise manner
 
-	s = pts.sum(axis = 1)
-	rect[0] = pts[np.argmin(s)]
-	rect[2] = pts[np.argmax(s)]
+    s = pts.sum(axis=1)
+    rect[0] = pts[np.argmin(s)]
+    rect[2] = pts[np.argmax(s)]
 
-	diff = np.diff(pts, axis = 1)
-	rect[1] = pts[np.argmin(diff)]
-	rect[3] = pts[np.argmax(diff)]
-	(tl, tr, br, bl) = rect
+    diff = np.diff(pts, axis=1)
+    rect[1] = pts[np.argmin(diff)]
+    rect[3] = pts[np.argmax(diff)]
+    (tl, tr, br, bl) = rect
 
+    # Finding Maximum width
 
-	#Finding Maximum width
+    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+    maxWidth = max(int(widthA), int(widthB))
 
-	widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-	widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-	maxWidth = max(int(widthA), int(widthB))
+    # Findinf Maximum height
 
+    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+    maxHeight = max(int(heightA), int(heightB))
 
+    # Destination Array of ROI
 
-	#Findinf Maximum height
+    dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1,
+                                                maxHeight - 1], [0, maxHeight - 1]], dtype="float32")
 
-	heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-	heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-	maxHeight = max(int(heightA), int(heightB))
+    # Applying perspective transform
+    M = cv.getPerspectiveTransform(rect, dst)
 
-	#Destination Array of ROI
-	
+    # Finally the warped image
+    warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
 
-	dst = np.array([[0, 0],[maxWidth - 1, 0],[maxWidth - 1, maxHeight - 1],[0, maxHeight - 1]], dtype = "float32")
+    ##################################################
 
-
-	#Applying perspective transform
-	M = cv.getPerspectiveTransform(rect, dst)
-
-	# Finally the warped image 
-	warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
-	
-	
-
-	##################################################
-
-	return warped_img
+    return warped_img
 
 
 def detectMaze(warped_img):
+    """
+    Purpose:
+    ---
+    takes the warped maze image as input and returns the maze encoded in form of a 2D array
 
-	"""
-	Purpose:
-	---
-	takes the warped maze image as input and returns the maze encoded in form of a 2D array
+    Input Arguments:
+    ---
+    `warped_img` :    [ numpy array ]
+            resultant warped maze image after applying Perspective Transform
 
-	Input Arguments:
-	---
-	`warped_img` :    [ numpy array ]
-		resultant warped maze image after applying Perspective Transform
-	
-	Returns:
-	---
-	`maze_array` :    [ nested list of lists ]
-		encoded maze in the form of a 2D array
+    Returns:
+    ---
+    `maze_array` :    [ nested list of lists ]
+            encoded maze in the form of a 2D array
 
-	Example call:
-	---
-	maze_array = detectMaze(warped_img)
-	"""
+    Example call:
+    ---
+    maze_array = detectMaze(warped_img)
+    """
 
-	maze_array = []
+    maze_array = []
 
-	##############	ADD YOUR CODE HERE	##############
+    ##############	ADD YOUR CODE HERE	##############
 
-	#Converting into grayscale
-	warped_img_gray = cv.cvtColor(warped_img, cv.COLOR_BGR2GRAY)
-	#Applying Gaussian Blur
-	warped_img_gray = cv.GaussianBlur(warped_img_gray,(5,5),0)
+    # Converting into grayscale
+    warped_img_gray = cv.cvtColor(warped_img, cv.COLOR_BGR2GRAY)
+    # Applying Gaussian Blur
+    warped_img_gray = cv.GaussianBlur(warped_img_gray, (5, 5), 0)
 
-	#Some part is washed out by perpective transform to make uniform border in all direction 
-	thresh = cv.copyMakeBorder(warped_img_gray,5,5,5,5, cv.BORDER_CONSTANT,value=[0,0,0]) 
+    # Some part is washed out by perpective transform to make uniform border
+    # in all direction
+    thresh = cv.copyMakeBorder(
+        warped_img_gray,
+        5,
+        5,
+        5,
+        5,
+        cv.BORDER_CONSTANT,
+        value=[
+            0,
+            0,
+            0])
 
-	#Converting into binary(Pixel value 0 and 255 only)
-	thresh = cv.threshold(thresh,135,255,cv.THRESH_BINARY)[1]
+    # Converting into binary(Pixel value 0 and 255 only)
+    thresh = cv.threshold(thresh, 135, 255, cv.THRESH_BINARY)[1]
 
-	# Resizing the image into (400,400) to make uniform
-	resized_image = cv.resize(thresh, (400, 400)) 
-	#Assumption that Each Block will be now (40,40)
+    # Resizing the image into (400,400) to make uniform
+    resized_image = cv.resize(thresh, (400, 400))
+    # Assumption that Each Block will be now (40,40)
 
-	jincrement = resized_image.shape[0]//10
-	iincrement = resized_image.shape[1]//10
-	
-	#Inverting the Image for ease of calculation
-	ret2,resized_image = cv.threshold(resized_image,100,255,cv.THRESH_BINARY_INV)
+    jincrement = resized_image.shape[0] // 10
+    iincrement = resized_image.shape[1] // 10
 
-	#Looping through the Maze block by block
-	
-	for i in range(0,resized_image.shape[0],iincrement):
-		
-		maze_array.append([])
-		if(i==0):
-			y = i
-			iiicrement = 44
-		else:
-			y = i-1
-			iiicrement = 43
-		for j in range(0,resized_image.shape[1],jincrement):
-				
-				if(j==0):
-					
-					img_temp = resized_image[y:y+iiicrement,j:j+44]
-				else:
-					img_temp = resized_image[y:y+iiicrement,j-5:j+44]
-					
-				value = 0
+    # Inverting the Image for ease of calculation
+    ret2, resized_image = cv.threshold(
+        resized_image, 100, 255, cv.THRESH_BINARY_INV)
 
-				#Finding the center of block Image
-				x_center = img_temp.shape[1]//2
-				y_center = img_temp.shape[0]//2
-				
-				
-				#Now from center moving in all direction if pixel value comes out as specied then there is Grid otherwise not.
-				dir = 0
-				while(y_center - dir >= 0):
-					if(img_temp[y_center-dir, x_center] == 255):
-						
-						value += 2
-						break
-					dir +=1
-					
-					
-				dir = 0
-				while(y_center + dir  < img_temp.shape[0]):
-					if(img_temp[y_center+dir,x_center] == 255):
-						value += 8
-						
-						break
-					dir+=1
-					
-					
-				dir = 0
-				while(x_center + dir <  img_temp.shape[1] ):
-					if(img_temp[y_center,x_center+dir] == 255  or img_temp[15,x_center+dir]):
-						value += 4
-						break
-					dir+=1
-					
-				dir =0
-				while(x_center-dir >= 0):
-					if(img_temp[y_center,x_center-dir] == 255):
-								value  +=1
-								break
-					dir +=1
-				
-				
+    # Looping through the Maze block by block
 
-				
+    for i in range(0, resized_image.shape[0], iincrement):
 
+        maze_array.append([])
+        if(i == 0):
+            y = i
+            iiicrement = 44
+        else:
+            y = i - 1
+            iiicrement = 43
+        for j in range(0, resized_image.shape[1], jincrement):
 
-				
+            if(j == 0):
 
+                img_temp = resized_image[y:y + iiicrement, j:j + 44]
+            else:
+                img_temp = resized_image[y:y + iiicrement, j - 5:j + 44]
 
-			#Final Encoded maze array
-				maze_array[i//40].append(value)
+            value = 0
+
+            # Finding the center of block Image
+            x_center = img_temp.shape[1] // 2
+            y_center = img_temp.shape[0] // 2
+
+            # Now from center moving in all direction if pixel value comes out
+            # as specied then there is Grid otherwise not.
+            dir = 0
+            while(y_center - dir >= 0):
+                if(img_temp[y_center - dir, x_center] == 255):
+
+                    value += 2
+                    break
+                dir += 1
+
+            dir = 0
+            while(y_center + dir < img_temp.shape[0]):
+                if(img_temp[y_center + dir, x_center] == 255):
+                    value += 8
+
+                    break
+                dir += 1
+
+            dir = 0
+            while(x_center + dir < img_temp.shape[1]):
+                if(img_temp[y_center, x_center + dir] == 255 or img_temp[15, x_center + dir]):
+                    value += 4
+                    break
+                dir += 1
+
+            dir = 0
+            while(x_center - dir >= 0):
+                if(img_temp[y_center, x_center - dir] == 255):
+                    value += 1
+                    break
+                dir += 1
+
+            # Final Encoded maze array
+            maze_array[i // 40].append(value)
 ##################################################
 
-	return maze_array
+    return maze_array
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
 def writeToCsv(csv_file_path, maze_array):
+    """
+    Purpose:
+    ---
+    takes the encoded maze array and csv file name as input and writes the encoded maze array to the csv file
 
-	"""
-	Purpose:
-	---
-	takes the encoded maze array and csv file name as input and writes the encoded maze array to the csv file
+    Input Arguments:
+    ---
+    `csv_file_path` :	[ str ]
+            file path with name for csv file to write
 
-	Input Arguments:
-	---
-	`csv_file_path` :	[ str ]
-		file path with name for csv file to write
-	
-	`maze_array` :		[ nested list of lists ]
-		encoded maze in the form of a 2D array
-	
-	Example call:
-	---
-	warped_img = writeToCsv('test_cases/maze00.csv', maze_array)
-	"""
+    `maze_array` :		[ nested list of lists ]
+            encoded maze in the form of a 2D array
 
-	with open(csv_file_path, 'w', newline='') as file:
-		writer = csv.writer(file)
-		writer.writerows(maze_array)
+    Example call:
+    ---
+    warped_img = writeToCsv('test_cases/maze00.csv', maze_array)
+    """
+
+    with open(csv_file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(maze_array)
 
 
 # NOTE:	YOU ARE NOT ALLOWED TO MAKE ANY CHANGE TO THIS FUNCTION
-# 
+#
 # Function Name:    main
 #        Inputs:    None
 #       Outputs:    None
@@ -318,100 +308,104 @@ def writeToCsv(csv_file_path, maze_array):
 
 if __name__ == "__main__":
 
-	# path directory of images in 'test_cases' folder
-	img_dir_path = 'test_cases/'
+    # path directory of images in 'test_cases' folder
+    img_dir_path = 'test_cases/'
 
-	# path to 'maze00.jpg' image file
-	file_num = 0
-	img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
+    # path to 'maze00.jpg' image file
+    file_num = 0
+    img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
 
-	print('\n============================================')
-	print('\nFor maze0' + str(file_num) + '.jpg')
+    print('\n============================================')
+    print('\nFor maze0' + str(file_num) + '.jpg')
 
-	# path for 'maze00.csv' output file
-	csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
-	
-	# read the 'maze00.jpg' image file
-	input_img = cv2.imread(img_file_path)
+    # path for 'maze00.csv' output file
+    csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 
-	# get the resultant warped maze image after applying Perspective Transform
-	warped_img = applyPerspectiveTransform(input_img)
+    # read the 'maze00.jpg' image file
+    input_img = cv2.imread(img_file_path)
 
-	if type(warped_img) is np.ndarray:
+    # get the resultant warped maze image after applying Perspective Transform
+    warped_img = applyPerspectiveTransform(input_img)
 
-		# get the encoded maze in the form of a 2D array
-		maze_array = detectMaze(warped_img)
+    if isinstance(warped_img, np.ndarray):
 
-		if (type(maze_array) is list) and (len(maze_array) == 10):
+        # get the encoded maze in the form of a 2D array
+        maze_array = detectMaze(warped_img)
 
-			print('\nEncoded Maze Array = %s' % (maze_array))
-			print('\n============================================')
-			
-			# writes the encoded maze array to the csv file
-			writeToCsv(csv_file_path, maze_array)
+        if (isinstance(maze_array, list)) and (len(maze_array) == 10):
 
-			cv2.imshow('warped_img_0' + str(file_num), warped_img)
-			cv2.waitKey(0)
-			cv2.destroyAllWindows()
-		
-		else:
+            print('\nEncoded Maze Array = %s' % (maze_array))
+            print('\n============================================')
 
-			print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
-			exit()
-	
-	else:
+            # writes the encoded maze array to the csv file
+            writeToCsv(csv_file_path, maze_array)
 
-		print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
-		exit()
-	
-	choice = input('\nDo you want to run your script on all maze images ? => "y" or "n": ')
+            cv2.imshow('warped_img_0' + str(file_num), warped_img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
-	if choice == 'y':
+        else:
 
-		for file_num in range(1, 10):
-			
-			# path to image file
-			img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
+            print(
+                '\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
+            exit()
 
-			print('\n============================================')
-			print('\nFor maze0' + str(file_num) + '.jpg')
+    else:
 
-			# path for csv output file
-			csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
-			
-			# read the image file
-			input_img = cv2.imread(img_file_path)
+        print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
+        exit()
 
-			# get the resultant warped maze image after applying Perspective Transform
-			warped_img = applyPerspectiveTransform(input_img)
+    choice = input(
+        '\nDo you want to run your script on all maze images ? => "y" or "n": ')
 
-			if type(warped_img) is np.ndarray:
+    if choice == 'y':
 
-				# get the encoded maze in the form of a 2D array
-				maze_array = detectMaze(warped_img)
+        for file_num in range(1, 10):
 
-				if (type(maze_array) is list) and (len(maze_array) == 10):
+            # path to image file
+            img_file_path = img_dir_path + 'maze0' + str(file_num) + '.jpg'
 
-					print('\nEncoded Maze Array = %s' % (maze_array))
-					print('\n============================================')
-					
-					# writes the encoded maze array to the csv file
-					writeToCsv(csv_file_path, maze_array)
+            print('\n============================================')
+            print('\nFor maze0' + str(file_num) + '.jpg')
 
-					cv2.imshow('warped_img_0' + str(file_num), warped_img)
-					cv2.waitKey(0)
-					cv2.destroyAllWindows()
-				
-				else:
+            # path for csv output file
+            csv_file_path = img_dir_path + 'maze0' + str(file_num) + '.csv'
 
-					print('\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
-					exit()
-			
-			else:
+            # read the image file
+            input_img = cv2.imread(img_file_path)
 
-				print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
-				exit()
+            # get the resultant warped maze image after applying Perspective
+            # Transform
+            warped_img = applyPerspectiveTransform(input_img)
 
-	else:
+            if isinstance(warped_img, np.ndarray):
 
-		print('')
+                # get the encoded maze in the form of a 2D array
+                maze_array = detectMaze(warped_img)
+
+                if (isinstance(maze_array, list)) and (len(maze_array) == 10):
+
+                    print('\nEncoded Maze Array = %s' % (maze_array))
+                    print('\n============================================')
+
+                    # writes the encoded maze array to the csv file
+                    writeToCsv(csv_file_path, maze_array)
+
+                    cv2.imshow('warped_img_0' + str(file_num), warped_img)
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
+
+                else:
+
+                    print(
+                        '\n[ERROR] maze_array returned by detectMaze function is not complete. Check the function in code.\n')
+                    exit()
+
+            else:
+
+                print('\n[ERROR] applyPerspectiveTransform function is not returning the warped maze image in expected format! Check the function in code.\n')
+                exit()
+
+    else:
+
+        print('')

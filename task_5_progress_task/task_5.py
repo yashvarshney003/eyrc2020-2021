@@ -20,7 +20,7 @@
 # Team ID:          2139
 # Author List:     Yash Varshney, Aman Tyagi
 # Filename:         task_5.py
-# Functions:        
+# Functions:       color_get,traverse_ball,send_data_to_draw_path, make_connection,set_path,complete_all_mapping_path,get_color  
 #                   [ Comma separated list of functions in this file ]
 # Global variables: 
 # 					[ List of global variables defined in this file ]
@@ -239,75 +239,72 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 	Example call: color_get(image_from_vision_sensor)
 '''
 def color_get(img_file_path):
-    if(img_file_path is None):
-        return
+	if(img_file_path is None):
+		return
 
     #Read the image
     
-    if type(img_file_path) == type(str()):
-        img_file_path = cv2.imread(img_file_path)
-    else:
-        img_file_path= img_file_path
+	if type(img_file_path) == type(str()):
+		img_file_path = cv2.imread(img_file_path)
+	else:
+		img_file_path= img_file_path
     #cv2.imwrite("colorefromrailing.png",img_file_path)
     
-    imageFrame = cv2.GaussianBlur(img_file_path,(5,5),cv2.BORDER_TRANSPARENT)
-    hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
+	imageFrame = cv2.GaussianBlur(img_file_path,(5,5),cv2.BORDER_TRANSPARENT)
+	hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV) 
     
     #To create a mask for red colour
-    red_lower = np.array([0, 50, 50]) 
-    red_upper = np.array([10, 255, 255]) 
-    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
-    kernal = np.ones((5, 5))
-    red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
-    gray_blur_red= cv2.Canny(red_gray,100,255)
+	red_lower = np.array([0, 50, 50]) 
+	red_upper = np.array([10, 255, 255]) 
+	red_mask = cv2.inRange(hsvFrame, red_lower, red_upper)
+	kernal = np.ones((5, 5))
+	red_gray=cv2.threshold(red_mask, 245,225, cv2.THRESH_BINARY)[1]
+	gray_blur_red= cv2.Canny(red_gray,100,255)
 
     #Create a mask for blue colour
-    blue_lower = np.array([94, 20, 0], np.uint8) 
-    blue_upper = np.array([140,255 ,255], np.uint8) 
-    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-    kernal = np.ones((5, 5))  
-    blue_mask = cv2.dilate(blue_mask, kernal)
-    blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
-    gray_blur_blue= cv2.Canny(blue_gray,100,255)
+	blue_lower = np.array([94, 20, 0], np.uint8) 
+	blue_upper = np.array([140,255 ,255], np.uint8) 
+	blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+	kernal = np.ones((5, 5))  
+	blue_mask = cv2.dilate(blue_mask, kernal)
+	blue_gray=cv2.threshold(blue_mask, 245,225, cv2.THRESH_TRUNC)[1]
+	gray_blur_blue= cv2.Canny(blue_gray,100,255)
     
     #Create a mask for green colour
-    green_lower = np.array([25, 52, 72], np.uint8) 
-    green_upper = np.array([102, 255, 255], np.uint8) 
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
-    kernal = np.ones((5, 5))
-    green_mask = cv2.dilate(green_mask, kernal)
-    green_gray=cv2.threshold(green_mask, 250,255, cv2.THRESH_BINARY)[1]
-    gray_blur_green = cv2.Canny(green_gray,100,255)
-    
-    #find contours on blue mask
-    cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    #If blue contours found
-    if type(cnts[-1]) !=type(None) :
-        if len(cnts) == 2:
-            cnts = cnts[0]
-        elif len(cnts) == 3:
-            cnts = cnts[1]
-	if (len(cnts)):
-                return 'blue'
-           
-    #Find red contours in the image
-    cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-    if type(cnts[-1]) !=type(None) :
-        if len(cnts) == 2:
-            cnts = cnts[0]
-        elif len(cnts) == 3:
-            cnts = cnts[1]
-	if (len(cnts)):
-                return 'red'
+	green_lower = np.array([25, 52, 72], np.uint8) 
+	green_upper = np.array([102, 255, 255], np.uint8) 
+	green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+	kernal = np.ones((5, 5))
+	green_mask = cv2.dilate(green_mask, kernal)
+	green_gray=cv2.threshold(green_mask, 250,255, cv2.THRESH_BINARY)[1]
+	gray_blur_green = cv2.Canny(green_gray,100,255)
+	#find contours on blue mask
+	cnts= cv2.findContours(gray_blur_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+	if type(cnts[-1]) !=type(None):
+			if len(cnts) == 2:
+				cnts = cnts[0]
+			elif len(cnts) == 3:
+				cnts = cnts[1]
+			if (len(cnts)):
+				return 'blue'
+				#Find red contours in the image
+	cnts= cv2.findContours(gray_blur_red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+	if type(cnts[-1]) !=type(None) :
+		if len(cnts) == 2:
+			cnts = cnts[0]
+		elif len(cnts) == 3:
+			cnts = cnts[1]
+			if (len(cnts)):
+				return 'red'
 	# Find green contours in the image
-    cnts= cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    if type(cnts[-1]) !=type(None) :
-        if len(cnts) == 2:
-            cnts = cnts[0]
-        elif len(cnts) == 3:
-            cnts = cnts[1]
-        if(len(cnts)):
-                return 'green'
+	cnts= cv2.findContours(gray_blur_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+	if type(cnts[-1]) !=type(None) :
+		if len(cnts) == 2:
+			cnts = cnts[0]
+		elif len(cnts) == 3:
+			cnts = cnts[1]
+		if(len(cnts)):
+			return 'green'
 '''	Function name: traverse_ball
 	Usage: traverses the ball from one point to another
 	Inputs: servo handles(x and y), vision sensor to be read and pixel path which the ball has to follow
@@ -316,7 +313,7 @@ def color_get(img_file_path):
 '''
 def traverse_ball(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 	
-	global client_idds
+	global client_id
 	rt_code, prev_time = sim.simxGetStringSignal(client_id,'time',sim.simx_opmode_streaming)
 	current_time = ''
 	while(len(current_time) == 0  ):
@@ -544,7 +541,10 @@ def main(rec_client_id):
 
 	make_connection()
 	return_code = task_2a.start_simulation(rec_client_id)
-	while(len(ball_details['green'])!=0  ):
+	i = 0
+	while(all([len(i)!=0 for i in list(ball_details.values())])):
+		print("here")
+		
 		color = get_color()
 		if(color):
 			collection_box = ball_details[color][0]
@@ -557,6 +557,7 @@ def main(rec_client_id):
 		traverse_ball(handle_list[table][0],handle_list[table][1],handle_list[table][2],aux_path)
 		print("complete ho gaya task")
 		print(len(list(ball_details.values())))
+		print(f"  i is {i} ")
 	time.sleep(5)
 	task_2a.stop_simulation(rec_client_id)
 	
