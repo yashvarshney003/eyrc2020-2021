@@ -483,12 +483,12 @@ def complete_all_mapping_path (tablenum):
 				print("Unexpected element in the end of the path in maze T2")
 
 		if (tablenum == 'T3'):
-			if (path[len(path)-1] == map_end[tablenum][0]):		#(0,4) decrease y pixel [tilt in +ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2), pixel_path[len(pixel_path)-1][1]])
+			if (path[len(path)-1] == map_end[tablenum][0]):		#(9,5) increase y pixel [tilt in -ve y]
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2), pixel_path[len(pixel_path)-1][1] ])
 			elif (path[len(path)-1] == map_end[tablenum][1]):	#(5,0) decrease x pixel [tilt in -ve x]
 				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1] - (x_increment//2)])
-			elif (path[len(path)-1] == map_end[tablenum][2]):	#(9,5) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2), pixel_path[len(pixel_path)-1][1] ])
+			elif (path[len(path)-1] == map_end[tablenum][2]):	#(0,4) decrease y pixel [tilt in +ve y]
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2), pixel_path[len(pixel_path)-1][1]])
 			else:
 				print("Unexpected element in the end of the path in maze T3")
 
@@ -603,6 +603,7 @@ def main(rec_client_id):
 		print("here")
 		
 		color = get_color()
+		
 		if(color):
 			collection_box = ball_details[color][0]
 			table = ball_details[color][0].split('_')[0]
