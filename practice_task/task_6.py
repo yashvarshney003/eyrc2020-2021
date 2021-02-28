@@ -237,7 +237,22 @@ def send_color_and_collection_box_identified(ball_color, collection_box_name):
 	Outputs: Color of the ball detected in the image
 	Usage: Takes in the image from the vision sensors and returns the color of the ball detected in the image
 	Example call: color_get(image_from_vision_sensor)
+
 '''
+def invert_model_properties(object_handle):
+    # NOTE: This function will be used to invert model properties such that the model which is not to be
+    # 		traversed in the current iteration can be partially disabled thereby saving the computational
+    #		resources.
+
+    global client_id
+    return_code, curr_model_prop = sim.simxGetModelProperty(client_id,object_handle,sim.simx_opmode_blocking)
+    if(curr_model_prop == 0):
+        # Overrides the required model props as NOT measureable, NOT dynamic, NOT collidable, NOT
+        # renderable, NOT detectable, NOT respondable and Invisible to other model's bounding boxes.
+        return_code = sim.simxSetModelProperty(client_id,object_handle,1135,sim.simx_opmode_blocking)
+    else:
+        return_code = sim.simxSetModelProperty(client_id,object_handle,0,sim.simx_opmode_blocking)
+		
 def color_get(img_file_path,i):
 	print("color get called")
 	if(img_file_path is None):
@@ -333,8 +348,7 @@ def traverse_ball(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 		i.reverse()
 		task_3.change_setpoint(i)
 		while(1):
-			j+=1
-			k+=1
+			
 			
 			vision_sensor_image, image_resolution, return_code = task_2a.get_vision_sensor_image(client_id,vision_sensor_handle)
 			transformed_image = task_2a.transform_vision_sensor_image(vision_sensor_image,image_resolution)
@@ -343,17 +357,35 @@ def traverse_ball(servohandle_x,servohandle_y,vision_sensor_handle,pixel_path):
 			shapes = task_1a_part1.scan_image(warped_img)
 
 			if(shapes):
-				warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
-				warped_img = cv2.circle(warped_img,(shapes['Circle'][1],shapes['Circle'][2]),5,(0,255,0),2)
-				warped_img = cv2.circle(warped_img,(i[0],i[1]),5,(255,0,0),2)
+				if(shapes.get('Circle')[2] >= 88):
+					warped_img = cv2.cvtColor(warped_img,cv2.COLOR_GRAY2RGB)
+					warped_img = cv2.circle(warped_img,(shapes['Circle'][1],shapes['Circle'][2]),5,(0,255,0),2)
+					warped_img = cv2.circle(warped_img,(i[0],i[1]),5,(255,0,0),2)
 				
 					
 				
-				if(abs(shapes['Circle'][1]-i[0]) <= 30  and abs(shapes['Circle'][2]-i[1]) <= 30):
-					break
-					
+					if(abs(shapes['Circle'][1]-i[0]) <= 30  and abs(shapes['Circle'][2]-i[1]) <= 25):
+						j+=1
+						break
+						
+					else:
+						task_3.control_logic(client_id,shapes['Circle'][1],shapes['Circle'][2],servohandle_x,servohandle_y)
 				else:
-					task_3.control_logic(client_id,shapes['Circle'][1],shapes['Circle'][2],servohandle_x,servohandle_y)
+					print(" called")
+					returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,0,sim.simx_opmode_oneshot) # for x
+					#print(returnCode)
+					#print(f" after trim  {angle_x} and  { angle_x} ")
+					
+					returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_y,0,sim.simx_opmode_oneshot) 
+			else:
+				print("called")
+				returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_x,0,sim.simx_opmode_oneshot) # for x
+					#print(returnCode)
+					#print(f" after trim  {angle_x} and  { angle_x} ")
+					
+				returnCode=sim.simxSetJointTargetPosition(client_id,servohandle_y,0,sim.simx_opmode_oneshot) 
+
+				
 	return 1
 		
 ''' 	Function name: send_data_to_draw_path
@@ -464,41 +496,41 @@ def complete_all_mapping_path (tablenum):
 			pixel_path[i].append(y_pixel)
 		if (tablenum == 'T1'):
 			if (path[len(path)-1] == map_end[tablenum][0]):		#(0,4) decrease y pixel [tilt in +ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2), pixel_path[len(pixel_path)-1][1]])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2 + 32), pixel_path[len(pixel_path)-1][1]])
 			elif (path[len(path)-1] == map_end[tablenum][1]):	#(4,9) increase x pixel [tilt in +ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] , pixel_path[len(pixel_path)-1][1] + (x_increment//2)])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] , pixel_path[len(pixel_path)-1][1] + (x_increment//2 + 32)])
 			elif (path[len(path)-1] == map_end[tablenum][2]):	#(9,5) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2), pixel_path[len(pixel_path)-1][1] ])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2 + 32), pixel_path[len(pixel_path)-1][1] ])
 			else:
 				print("Unexpected element in the end of the path in maze T1")
 
 		if (tablenum == 'T2'):
 			if (path[len(path)-1] == map_end[tablenum][0]):		#(4,9) increase x pixel [tilt in +ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1]+(x_increment//2)] )
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1]+(x_increment//2 + 32)] )
 			elif (path[len(path)-1] == map_end[tablenum][1]):	#(9,5) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2), pixel_path[len(pixel_path)-1][1] ])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2 + 32), pixel_path[len(pixel_path)-1][1] ])
 			elif (path[len(path)-1] == map_end[tablenum][2]):	#(5,0) decrease x pixel [tilt in -ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] , pixel_path[len(pixel_path)-1][1] - (x_increment//2)])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] , pixel_path[len(pixel_path)-1][1] - (x_increment//2 + 32)])
 			else:
 				print("Unexpected element in the end of the path in maze T2")
 
 		if (tablenum == 'T3'):
 			if (path[len(path)-1] == map_end[tablenum][0]):		#(9,5) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2), pixel_path[len(pixel_path)-1][1] ])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2 + 32), pixel_path[len(pixel_path)-1][1] ])
 			elif (path[len(path)-1] == map_end[tablenum][1]):	#(5,0) decrease x pixel [tilt in -ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1] - (x_increment//2)])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1] - (x_increment//2 + 32)])
 			elif (path[len(path)-1] == map_end[tablenum][2]):	#(0,4) decrease y pixel [tilt in +ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2), pixel_path[len(pixel_path)-1][1]])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]- (y_increment//2 + 32), pixel_path[len(pixel_path)-1][1]])
 			else:
 				print("Unexpected element in the end of the path in maze T3")
 
 		if (tablenum == 'T4'):
 			if (path[len(path)-1] == map_end[tablenum][0]):		#(5,9) increase x pixel [tilt in +ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1] + (x_increment//2)] )
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1] + (x_increment//2 + 32)] )
 			elif (path[len(path)-1] == map_end[tablenum][1]):	#(9,4) increase y pixel [tilt in -ve y]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2), pixel_path[len(pixel_path)-1][1]])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0] + (y_increment//2 + 32), pixel_path[len(pixel_path)-1][1]])
 			elif (path[len(path)-1] == map_end[tablenum][2]):	#(4,0) decrease x pixel [tilt in -ve x]
-				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1]- (x_increment//2)])
+				pixel_path.append( [ pixel_path[len(pixel_path)-1][0]  , pixel_path[len(pixel_path)-1][1]- (x_increment//2 + 32)])
 			else:
 				print("Unexpected element in the end of the path in maze T4")
 		path_map[tablenum].append(pixel_path)

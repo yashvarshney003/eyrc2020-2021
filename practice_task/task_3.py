@@ -75,9 +75,9 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.0032,0.0032]
-kd = [0.0062,0.0062]
-ki = [0.00005,0.00005]
+kp = [0.0032,0.0032]#[0.007,0.007]#
+kd =[0.0062,0.0062]# [0.015,0.015]#
+ki =[0.0000,0.0000]# [0.0003,0.0003]#
 limiting = 2.0
 x_limit = [-limiting,limiting] # min limit and maximum limit in degrees
 y_limit = [-limiting,limiting]
@@ -195,6 +195,7 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+
 	
 	sample_time = 0.25 		
 
@@ -203,7 +204,7 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 	print(f"time difference is{dt}")
 
 
-	if (dt >= sample_time): # code is running 	for a sample time
+	if (1): # code is running 	for a sample time
 		perror[0] = center_x-setpoint[0]
 		perror[1] = center_y- setpoint[1]
 
@@ -257,7 +258,7 @@ def control_logic(client_id,center_x,center_y,servohandle_x,servohandle_y):
 			print("Unexpected position of ball [center_x,center_y] :",center_x,center_x)
 
 		angle_x = angle_x + trim[0] #if any trim required
-		angle_y = angle_y + trim[1]
+		angle_y = angle_y + trim[1] - 1
 
 		#limiting maximum and minimum values of the output angle in degrees
 
