@@ -158,12 +158,15 @@ def shape(approx):
         return shape
     
 '''     Name: Process
-        Inputs: Input image
+        Inputs: 
+            img_file_path: [string]
+            Path to image of the vision sensor
         Outputs: None
         Purpose: This function masks the RGB colours and calls detect fucntion to
-        detect shapes in the image and writes the required output in the shapes dictionary'''
-def scan_image(img_file_path,k):
-    print("task1_part1 called")
+        detect shapes in the image and writes the required output in the shapes dictionary
+'''
+def scan_image(img_file_path):
+    #print("task1_part1 called")
     global shapes
     shapes={}
     if(img_file_path is None):
@@ -185,7 +188,7 @@ def scan_image(img_file_path,k):
     
     image = img_file_path.copy()
     
-    print(image.size)
+    #print(image.size)
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     # image = cv2.resize(image, (1280, 1280))
     # cv2.imshow('imagein', image)
@@ -198,13 +201,11 @@ def scan_image(img_file_path,k):
     #mask_inv= cv2.bitwise_not(mask)
     colored_portion = cv2.bitwise_or(image, image, mask = mask)
     colored_portion = cv2.cvtColor(colored_portion,cv2.COLOR_RGB2GRAY)
-    rer,colored_portion = cv2.threshold(colored_portion,50,255,cv2.THRESH_BINARY_INV)
-    dir = os.getcwd()
+    _,colored_portion = cv2.threshold(colored_portion,50,255,cv2.THRESH_BINARY_INV)
     
-    name  = dir + "\\Images\\coloredportion" +str(k) + ".png"
     
-    if(cv2.imwrite(name,colored_portion)):
-        print(" file made")
+    #if(cv2.imwrite(name,colored_portion)):
+       # print(" file made")
     cnts = cv2.findContours(colored_portion,cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 
     
@@ -214,7 +215,7 @@ def scan_image(img_file_path,k):
             cnts = cnts[1]
     
     j = 0 
-    print(f"  hers is {len(cnts)} ")
+    #print(f"  hers is {len(cnts)} ")
     if(len(cnts) > 0 ):
         for cnt in cnts:
             # img2 = colored_portion.copy()
@@ -254,7 +255,15 @@ def scan_image(img_file_path,k):
         return shapes
     else:
         return None
-
+'''     Name: color
+        Purpose:
+        Detects the color of the ball from the vision sensor
+        Inputs: 
+            img_file_path:[string]
+            Path to the image
+        Outputs:
+            returns the color of the detected ball
+'''
 def color(img_file_path):
     if(img_file_path is None):
         return
@@ -361,7 +370,7 @@ if __name__ == '__main__':
     
     # path to 'Sample1.png' image file
     file_num = 1
-    img_file_path = img_dir_path + 'sample.png' #+ str(file_num) + '.png'
+    img_file_path = img_dir_path + '' #+ str(file_num) + '.png'
     
 
     # print('\n============================================')

@@ -17,8 +17,9 @@
 *****************************************************************************************
 '''
 
-# Team ID:			[2139]
-# Author List:		[ Yash Varshney]
+# Team ID:			NB_2139
+# Author List:		Yash Varshney
+# Theme:            Nirikshak Bot (NB)
 # Filename:			task_2b.py
 # Functions:		init_remote_api_server, exit_remote_api_server, get_vision_sensor_image,
 # 					transform_vision_sensor_image, send_data
@@ -222,12 +223,16 @@ def send_data(client_id,maze_array,maze):
 	"""
 	Purpose:
 	---
-	Sends data to CoppeliaSim via Remote API.
+	Sends data to CoppeliaSim via Remote API to top_plate_respondable to draw path.
 
 	Input Arguments:
 	---
+	`client_id`  : <integer>
+					the client_id generated from start connection remote API
 	`maze_array` :    [ nested list of lists ]
 		encoded maze in the form of a 2D array returned by detectMaze() function
+	`maze'  : <string> "T4"
+				maze name to which maze_array to transfer
 	
 	Returns:
 	---
@@ -246,8 +251,9 @@ def send_data(client_id,maze_array,maze):
 
 	return_code = -1
 	maze_array1 = []
+	# plate : name of the top_plate_respondable to which maze array is to be transferred.
 	plate  = "top_plate_respondable_" + maze +"_1"
-	print(f"so maze build on {maze}")
+	
 
 	##############	ADD YOUR CODE HERE	##############
 	for i in range(len(maze_array)):
@@ -256,6 +262,7 @@ def send_data(client_id,maze_array,maze):
 			maze_array1.append(maze_array[i][j])
 
 	emptybuffer = bytearray()
+	# Sending data to coppeliasim via remote api server
 	return_code,ints,floats,strings,buffera = sim.simxCallScriptFunction(client_id,plate,sim.sim_scripttype_customizationscript,'receiveData',maze_array1,[],[],emptybuffer,sim.simx_opmode_blocking)
 	
 	##################################################

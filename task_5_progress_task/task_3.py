@@ -75,10 +75,10 @@ ierror = [0,0]
 prev_error = [0,0]
 
  #set accordingly
-kp = [0.0032,0.0032]
-kd = [0.0062,0.0062]
-ki = [0.00005,0.00005]
-limiting = 2.0
+kp = [0.0035,0.0035]#[0.0032,0.0032]
+kd = [0.0066,0.0066]#[0.0062,0.0062]
+ki = [0.00001,0.00001]#[0.00005,0.00005]
+limiting = 1.55	
 x_limit = [-limiting,limiting] # min limit and maximum limit in degrees
 y_limit = [-limiting,limiting]
 trim = [0,0]#[-0.1317,-0.1395] # if any required

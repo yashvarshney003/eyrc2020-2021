@@ -17,8 +17,9 @@
 *****************************************************************************************
 '''
 
-# Team ID:			[2139]
-# Author List:		[Yash Varshney]
+# Team ID:			2139
+# Theme:            Nirikshak Bot (NB)
+# Author List:		Yash Varshney
 # Filename:			task_1b.py
 # Functions:		applyPerspectiveTransform, detectMaze, writeToCsv
 # 					[ Comma separated list of functions in this file ]
@@ -52,12 +53,12 @@ import os
 ##############################################################
 
 
-def applyPerspectiveTransform(input_img,number,table_no):
+def applyPerspectiveTransform(input_img):
 
 	"""
 	Purpose:
 	---
-	takes a maze test case image as input and applies a Perspective Transfrom on it to isolate the maze
+	takes a maze image from folder or image of top_plate of maze from running coppeliasim scene and separate out maze from image
 
 	Input Arguments:
 	---
@@ -73,25 +74,26 @@ def applyPerspectiveTransform(input_img,number,table_no):
 	---
 	warped_img = applyPerspectiveTransform(input_img)
 	"""
-	tup = input_img.shape
-	if (tup[0] != 256):
-		print("here we called upper")
+	##############	ADD YOUR CODE HERE	##############
+	image_size = input_img.shape
+	if (image_size[0] != 256):
+		
 
 		warped_img = None
 
-		##############	ADD YOUR CODE HERE	##############
+		
 		#Conversion into GrayScale
-		gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
+		gray_image = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)
 
 		#Applying Gaussian Blur 
-		gray = cv.GaussianBlur(gray, (9,9), 2)
+		gauss_blur_image = cv.GaussianBlur(gray_image, (9,9), 2)
 
 		#Applying Canny Edge Detection
-		edged = cv.Canny(gray, 50, 200)
+		canny_edged_image = cv.Canny(gauss_blur_image, 50, 200)
 
 
 		#Finding Contours 
-		cnts = cv.findContours(edged.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+		cnts = cv.findContours(canny_edged_image.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
 			
 
 
@@ -159,83 +161,64 @@ def applyPerspectiveTransform(input_img,number,table_no):
 
 		return warped_img
 	else:
-		#print("here we called ")
+		
 		warped_img = None
 
-	##############	ADD YOUR CODE HERE	##############
+	
 		
-    
-		input_img  =  cv.cvtColor(input_img,cv.COLOR_BGR2GRAY)
-		ret,thresh2 = cv.threshold(input_img,50,255,cv.THRESH_BINARY)
-		#print(thresh2.shape)
-		cv.imwrite("input.png",thresh2)
-		cnts = cv.findContours(thresh2,cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
-		left_upper = [10000,10000]
-		right_upper = [0,0]
-		right_lower = [0,0]
-		left_lower =[0,0]
-		j = 1
-		k = 1
+		# Converting image into grayscale
+		gray_image =  cv.cvtColor(input_img,cv.COLOR_BGR2GRAY)
+		# Applying thresholding to find contours
+		_,thresh = cv.threshold(gray_image,50,255,cv.THRESH_BINARY)
+		# finding contours
+		cnts = cv.findContours(thresh,cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)[0]
+
+		# Coordinates of maze
+		left_upper_coord = [10000,10000]
+		right_upper_coord = [0,0]
+		right_lower_coord = [0,0]
+		left_lower_coord =[0,0]
+		# Choosing some high range of distance which is not possible and to compare with x and y coordinates
 		left_upper_dist = 10000000
 		left_lower_dist = 10000000
 		right_upper_dist = 1000000
 		right_lower_dist = 1000000
+		# Traversing through the contours in top_plate image from coppeliasim image to all coordinated of maze image from top_plate image 
 		for i in range(len(cnts)):
-			k+=1
-			input_img2=thresh2
-			input_img2 = cv.cvtColor(input_img2,cv.COLOR_GRAY2RGB)
-			
+			#x and y cordinates and with width and height of bounding rectangular box
 			x,y,w,h = cv.boundingRect(cnts[i])
-			print(f"so value we het {x,y} ,  {x+w,y}, {x+w,y+h}  and {x,y+h}")
-			input_img2 = cv.rectangle(input_img2,(x,y),(x+w,y+h),(0,255,0),5)
-			
-			if(table_no ==4):
-				dir = os.getcwd()
-				
-				name  = dir + "\\contour1\\" + "table_no" +str(table_no)+"sent_num"+str(number)+str(k)+"kk.png"
-				cv.imwrite(name,input_img2)
+			# If x = 0 and y = 0 i,e contours detected is top plate image  
 			if(x !=0  and  y!=0):
-				# if(j ==1):
-				# 	j = 2
-				# 	left_upper = [x,y]
-				# 	right_upper = [x+w,y]
-				# 	right_lower = [x+w,y+h]
-				# 	left_lower =[x,y+h]
-				# 	final_list = [left_upper,right_upper,right_lower,left_lower]
-				# 	print(f" final_list{final_list}")
-				# else:
 				
-
+				
+					# find coordinates which are closer to all corners 
 					if(left_upper_dist > round(np.sqrt((x-0)**2 + (y-0)**2))):
-						print("left upper changed")
-						print(round(np.sqrt((x-0)**2 + (y-0)**2)))
+						
 						left_upper_dist = round(np.sqrt((x-0)**2 + (y-0)**2))
 						
-						left_upper[0] = x
-						left_upper[1] = y
+						left_upper_coord[0] = x
+						left_upper_coord[1] = y
 					if(right_upper_dist > round(np.sqrt(((x+w)-256)**2 + (y-0)**2))):
-						print("right upper changed")
-						print(round(np.sqrt(((x+w)-256)**2 + (y-0)**2)))
+						
 						right_upper_dist = np.sqrt(((x+w)-256)**2 + (y-0)**2)
-						right_upper[0] = x+w 
-						right_upper[1] = y
+						right_upper_coord[0] = x+w 
+						right_upper_coord[1] = y
 					if(right_lower_dist > round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2))):
-						print("right lower changed")
-						print(round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2)))
+						
 						right_lower_dist = round(np.sqrt(((x+w)-256)**2 + ((y+h)-256)**2))
 						
-						right_lower[0] = x+w 
+						right_lower_coord[0] = x+w 
 
-						right_lower[1] = y+h 
+						right_lower_coord[1] = y+h 
 					if(left_lower_dist > round(np.sqrt((x-0)**2 + ((y+h)-256)**2))):
 						left_lower_dist = round(np.sqrt((x-0)**2 + ((y+h)-256)**2))
 						
-						print("left lower changed")
-						print(round(np.sqrt((x-0)**2 + ((y+h)-256)**2)))
-						left_lower[0] = x
-						left_lower[1] = y+h
-					final_list = [left_upper,right_upper,right_lower,left_lower]
-					print(f" final_list{final_list}")
+						
+						left_lower_coord[0] = x
+						left_lower_coord[1] = y+h
+					# final_list : it holds the 
+					final_list = [left_upper_coord,right_upper_coord,right_lower_coord,left_lower_coord]
+					
 
 		
 		screenCnt = np.array(final_list)
@@ -276,8 +259,10 @@ def applyPerspectiveTransform(input_img,number,table_no):
 		M = cv.getPerspectiveTransform(rect, dst)
 
 			# Finally the warped image 
-		warped_img = cv.warpPerspective(input_img, M, (maxWidth, maxHeight))
-		#cv.imwrite("warped.png",warped_img)
+		warped_img = cv.warpPerspective(gray_image, M, (maxWidth, maxHeight))
+		
+		return warped_img
+		
 					
 					
 			
@@ -295,7 +280,7 @@ def applyPerspectiveTransform(input_img,number,table_no):
 
 		##################################################
 
-		return warped_img
+		
 
 
 def detectMaze(warped_img):
@@ -332,13 +317,13 @@ def detectMaze(warped_img):
 	#Some part is washed out by perpective transform to make uniform border in all direction 
 	thresh = cv.copyMakeBorder(warped_img_gray,5,5,5,5, cv.BORDER_CONSTANT,value=[0,0,0]) 
 
-	#Converting into binary(Pixel value 0 and 255 only)
+	#Converting into binary(Pixel value 135 and 255 only)
 	thresh = cv.threshold(thresh,135,255,cv.THRESH_BINARY)[1]
 
 	# Resizing the image into (400,400) to make uniform
 	resized_image = cv.resize(thresh, (400, 400)) 
 	#Assumption that Each Block will be now (40,40)
-
+	# 
 	jincrement = resized_image.shape[0]//10
 	iincrement = resized_image.shape[1]//10
 	

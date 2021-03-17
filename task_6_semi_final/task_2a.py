@@ -17,8 +17,9 @@
 *****************************************************************************************
 '''
 
-# Team ID:          [2139]
-# Author List:      [ Yash Varshney,Aman Tyagi]
+# Team ID:          2139
+# Author List:      Yash Varshney,Aman Tyagi
+# Theme:            Nirikshak Bot (NB)
 # Filename:         task_2a.py
 # Functions:        init_remote_api_server, start_simulation, get_vision_sensor_image, transform_vision_sensor_image,
 # 					stop_simulation, exit_remote_api_server
@@ -55,7 +56,7 @@ except Exception:
 # Global variable "client_id" for storing ID of starting the CoppeliaSim Remote connection
 # NOTE: DO NOT change the value of this "client_id" variable here
 client_id = -1
-iteration = 1
+
 
 
 ################# ADD UTILITY FUNCTIONS HERE #################
@@ -110,7 +111,7 @@ def init_remote_api_server():
 	return client_id
 
 
-def start_simulation():
+def start_simulation(client_id):
 
 	"""
 	Purpose:
@@ -118,12 +119,11 @@ def start_simulation():
 	This function should first start the simulation if the connection to server
 	i.e. CoppeliaSim was successful and then wait for last command sent to arrive
 	at CoppeliaSim server end.
-	NOTE: In this Task, do not call the exit_remote_api_server function in case of failed connection to the server.
-	The test_task_2a executable script will handle that condition.
+	
 	
 	Input Arguments:
 	---
-	None
+	client_id : Connection id with Coppeliasim server
 	
 	Returns:
 	---
@@ -132,19 +132,18 @@ def start_simulation():
 	
 	Example call:
 	---
-	return_code = start_simulation()
+	return_code = start_simulation(client_id)
 	
-	NOTE: This function will be automatically called by test_task_2a executable at the start of simulation.
 	"""
 
-	global client_id
+	
 
 	return_code = 0
 
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code = sim.simxStartSimulation(client_id,sim.simx_opmode_oneshot)
-	sim.simxGetPingTime(client_id)
+	
 
 	
 	
@@ -155,7 +154,7 @@ def start_simulation():
 	return return_code
 
 
-def get_vision_sensor_image(vision_sensor_handle):
+def get_vision_sensor_image(client_id,vision_sensor_handle):
 	
 	"""
 	Purpose:
@@ -164,7 +163,8 @@ def get_vision_sensor_image(vision_sensor_handle):
 	After that it should get the Vision Sensor's image array from the CoppeliaSim scene.
 	Input Arguments:
 	---
-	None
+	Client_id : Connection id with Coppeliasim server
+	vision_sensor_handle: vision_sensor_handle of camera capturing the top plate image from scene
 	
 	Returns:
 	---
@@ -177,24 +177,24 @@ def get_vision_sensor_image(vision_sensor_handle):
 	
 	Example call:
 	---
-	vision_sensor_image, image_resolution, return_code = get_vision_sensor_image()
+	vision_sensor_image, image_resolution, return_code = get_vision_sensor_image(client_id,vision_sensor_handle)
 	NOTE: This function will be automatically called by test_task_2a executable at regular intervals.
 	"""
 
-	global client_id
 	
-
+	
+	##############	ADD YOUR CODE HERE	##############
 	vision_sensor_image = []
 	image_resolution = []
 	return_code = 0
 	
 
-	##############	ADD YOUR CODE HERE	##############
 	
 	
+	# Obtaining image from vision sensor image
 	return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_blocking)
-	#print(f"length {len(vision_sensor_image)} and  {return_code}")
 	
+    # looping through while loop till get image from camera
 	while(len(vision_sensor_image) < 2):
 		return_code ,image_resolution,vision_sensor_image =sim.simxGetVisionSensorImage(client_id,vision_sensor_handle,1,sim.simx_opmode_buffer)
 	 
@@ -223,11 +223,12 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	Purpose:
 	---
 	This function should:
-	1. First convert the vision_sensor_image list to a NumPy array with data-type as uint8.
-	2. Since the image returned from Vision Sensor is in the form of a 1-D (one dimensional) array,
+	1. First it check the size of vision_sensor_image and then accordingly convert image into 3-D NumPy array
+	2. Then convert the vision_sensor_image list to a NumPy array with data-type as uint8.
+	3. Since the image returned from Vision Sensor is in the form of a 1-D (one dimensional) array,
 	the new NumPy array should then be resized to a 3-D (three dimensional) NumPy array.
-	3. Change the color of the new image array from BGR to RGB.
-	4. Flip the resultant image array about the X-axis.
+	4. Change the color of the new image array from BGR to RGB.
+	5. Flip the resultant image array about the X-axis.
 	The resultant image NumPy array should be returned.
 	
 	Input Arguments:
@@ -264,6 +265,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 		
 		transformed_image = cv2.flip(transformed_image, 0)
 	else:
+		
 		vision_sensor_image  = np.array(vision_sensor_image,dtype= np.uint8)
 
 		
@@ -284,7 +286,7 @@ def transform_vision_sensor_image(vision_sensor_image, image_resolution):
 	return transformed_image
 
 
-def stop_simulation():
+def stop_simulation(client_id):
 
 	"""
 	Purpose:
@@ -309,14 +311,14 @@ def stop_simulation():
 	NOTE: This function will be automatically called by test_task_2a executable at the end of simulation.
 	"""
 
-	global client_id
+	
 
 	return_code = 0
 
 	##############	ADD YOUR CODE HERE	##############
 	
 	return_code = sim.simxStopSimulation(client_id,sim.simx_opmode_oneshot)
-	sim.simxGetPingTime(client_id)
+	#sim.simxGetPingTime(client_id)
 	
 										
 										
